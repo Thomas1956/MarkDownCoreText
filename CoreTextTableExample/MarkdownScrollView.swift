@@ -156,46 +156,57 @@ fileprivate enum CoreTextBlockFactory {
     static func renderers(from attr: AttributedString, textSize: CGFloat) -> [BlockRenderer] {
         // 1) Alle BlockContent‑Elemente (liefert dein bestehender Code)
         let blocks = MarkdownScrollView.allBlockContents(attrText: attr, textSize: textSize)
-
+        
+        blocks.forEach { block in
+            print(block.debugString)
+        }
+        
         // 2) Gruppen nach (kind, identity) zusammenfassen → je 1 Renderer
         var renderers: [BlockRenderer] = []
-        var currentKind: PresentationIntent.Kind? = nil
+        var currentBlock: MarkdownScrollView.BlockContent? = nil
         var currentID:   Int? = nil
         var builder      = NSMutableAttributedString()
         var currentTableBlock: MarkdownScrollView.BlockContent.TableBlock? = nil
 
-        func flushBuilder(block: MarkdownScrollView.BlockContent? = nil) {
-            guard let kind = currentKind else { return }
+        func flushBuilder() {
+            guard let block = currentBlock?.block else { return }
+            
             let ns = builder.mutableCopy() as! NSAttributedString
-            switch kind {
-            case .blockQuote:
+            
+            if block.hasBlockQuote {
                 renderers.append(BlockquoteRenderer(attributed: ns))
-            case .codeBlock:
+            }
+            else if block.hasCodeBlock {
                 renderers.append(CodeBlockRenderer(attributed: ns))
-            case .thematicBreak:
+            }
+            else if block.hasThematicBreak {
                 renderers.append(HorizontalRuleRenderer())
-            case .paragraph:
+            }
+            else if block.hasTable {
                 // Tabelle oder normaler Absatz?
                 if let table = currentTableBlock, table.lastColumn > 0 {
                     renderers.append(TableRenderer(block: table, text: ns))
                 } else {
                     renderers.append(ParagraphRenderer(attributed: ns))
                 }
-            case .header(let level):
-                renderers.append(HeadingRenderer(level: level, attributed: ns))
-            default:
+            }
+            else if block.hasHeader {
+                renderers.append(HeadingRenderer(level: block.headerLevel ?? 1, attributed: ns))
+            }
+            else {
                 renderers.append(ParagraphRenderer(attributed: ns))
             }
+            
             builder = NSMutableAttributedString()
             currentTableBlock = nil
         }
 
         for block in blocks {
-            // Wechsel‑Bedingung: Kind oder Identity ändert sich
-            if /*block.kind != currentKind ||*/ block.identity != currentID {
+            // Wechsel‑Bedingung: Identity ändert sich
+            if block.identity != currentID {
                 flushBuilder()
-                currentKind = block.kind
-                currentID   = block.identity
+                currentID = block.identity
+                currentBlock = block
             }
             // Text‑Slice zum Builder hinzufügen
             let s = AttributedString(attr[block.range])
@@ -349,8 +360,8 @@ final class HorizontalRuleRenderer: BlockRenderer {
         let y = CGFloat(8)
         context.move(to: CGPoint(x: 8, y: y))
         context.addLine(to: CGPoint(x: self.frame.width - 8, y: y))
-        context.setLineWidth(3)
-        context.setStrokeColor(UIColor.purple.cgColor)
+        context.setLineWidth(2)
+        context.setStrokeColor(UIColor.label.cgColor)
         context.strokePath()
     }
 }

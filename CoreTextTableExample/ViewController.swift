@@ -26,9 +26,16 @@ class ViewController: UIViewController {
 //        view.addSubview(tableView)
         
         let scrollView = MarkdownScrollView(frame: view.bounds)
-        scrollView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        scrollView.markdown(string: text1)
         view.addSubview(scrollView)
+
+//        scrollView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 10).isActive = true
+        scrollView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
+        scrollView.topAnchor.constraint(equalTo: view.topAnchor, constant: 10).isActive = true
+        scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10).isActive = true
+        
+        scrollView.markdown(string: text1)
     }
 
     let text1 =
