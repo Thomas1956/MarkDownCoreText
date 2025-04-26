@@ -19,6 +19,7 @@ extension MarkdownScrollView {
     /// Struktur für die Vorauswertung der PresentationIntentAttribute
     
     struct BlockContent {
+        var attrText: NSAttributedString?
         var block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value?
         var range: Range<AttributedString.Index>
         
@@ -65,13 +66,18 @@ extension MarkdownScrollView {
         ///-----------------------------------------------------------------------------------
         /// Initialisierung
         ///
-        init(runsBlock: AttributedString.Runs.Element, range: Range<AttributedString.Index>) {
-            self.init(block: runsBlock.presentationIntent, range: range)
-        }
-        
-        init(block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value?,
+        init(attrText: NSAttributedString?,
+             runsBlock: AttributedString.Runs.Element,
              range: Range<AttributedString.Index>)
         {
+            self.init(attrText: attrText, block: runsBlock.presentationIntent, range: range)
+        }
+        
+        init(attrText: NSAttributedString?,
+             block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value?,
+             range: Range<AttributedString.Index>)
+        {
+            self.attrText = attrText
             self.block = block
             self.range = range
             
@@ -130,7 +136,8 @@ extension MarkdownScrollView {
         /// Blöcke ermitteln
         var allBlocks = attrText.runs.compactMap( { block in
             let range = block.range
-            return BlockContent(runsBlock: block, range: range)
+            let text = NSAttributedString( AttributedString(attrText[range]))
+            return BlockContent(attrText: text, runsBlock: block, range: range)
         } )
         prepareBlocks(allBlocks: &allBlocks, attrText: attrText, textSize: textSize)
         return allBlocks
@@ -149,9 +156,9 @@ extension MarkdownScrollView {
             }),
                   !intents.isEmpty
             else { continue }
-  
-            let bb = BlockContent(block: intentBlock, range: intentRange)
-            allBlocks.append(bb)
+            
+            let text = NSAttributedString( AttributedString(attrText[intentRange]))
+            allBlocks.append( BlockContent(attrText: text, block: intentBlock, range: intentRange) )
         }
         prepareBlocks(allBlocks: &allBlocks, attrText: attrText, textSize: textSize)
         return allBlocks

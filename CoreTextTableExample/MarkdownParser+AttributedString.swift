@@ -68,7 +68,8 @@ public extension AttributedString {
                 print("<\(text)>")
                 
             case .presentationIntent:
-                let content = MarkdownScrollView.BlockContent(runsBlock: block, range: block.range)
+                let text = NSAttributedString( AttributedString(self[block.range]))
+                let content = MarkdownScrollView.BlockContent(attrText: text, runsBlock: block, range: block.range)
 //                if let cblock = content.block, let paragraphStyle
 //                {
 //                    let listString = (!cblock.hasList ? "" :

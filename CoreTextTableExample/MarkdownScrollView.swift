@@ -21,7 +21,7 @@ protocol BlockRenderer: AnyObject {
     /// Zeichen­rechteck relativ zum Content‑View (UIKit‑Koordinaten, (0,0) = oben links)
     var frame: CGRect { get set }
     /// Höhe berechnen, wenn eine bestimmte Breite vorgegeben ist
-    func measure(width: CGFloat) -> CGFloat
+    func measure(y: CGFloat, width: CGFloat) -> CGFloat
     /// Inhalt in den bereits nach (0,0) verschobenen CGContext zeichnen.
     /// Erwartet, dass das Koordinatensystem **bereits** für Core Text geflippt wurde
     func draw(in context: CGContext)
@@ -61,7 +61,7 @@ class MarkdownScrollView: UIScrollView {
             rawAttr = try AttributedString(markdown: string, including: \.commonAttr)
         } catch {
             let fallback = NSAttributedString(string: "Markdown‑Konvertierung fehlgeschlagen: \(error.localizedDescription)")
-            contentView.renderers = [ParagraphRenderer(attributed: fallback)]
+            contentView.renderers = [ParagraphRenderer(leftIndent: 0, attributed: fallback)]
             setNeedsLayout(); return
         }
 
@@ -106,8 +106,8 @@ private final class MarkdownContentView: UIView {
     func layout(width: CGFloat) -> CGFloat {
         var y: CGFloat = 0
         for renderer in renderers {
-            let h = renderer.measure(width: width)
-            renderer.frame = CGRect(x: 0, y: y, width: width, height: h)
+            let h = renderer.measure(y: y, width: width)
+//            renderer.frame = CGRect(x: 0, y: y, width: width, height: h)
             y += h
         }
         return y
@@ -150,10 +150,12 @@ private final class MarkdownContentView: UIView {
 // MARK: - ---------------------------------------------------------
 // MARK: Block‑Factory  (AttributedString → Renderer‑Liste)
 // --------------------------------------------------------------
+
 fileprivate enum CoreTextBlockFactory {
 
     /// Haupt‑Einstieg: komplette AttributedString in BlockRenderer aufspalten
     static func renderers(from attr: AttributedString, textSize: CGFloat) -> [BlockRenderer] {
+        
         // 1) Alle BlockContent‑Elemente (liefert dein bestehender Code)
         let blocks = MarkdownScrollView.allBlockContents(attrText: attr, textSize: textSize)
         
@@ -163,66 +165,55 @@ fileprivate enum CoreTextBlockFactory {
         
         // 2) Gruppen nach (kind, identity) zusammenfassen → je 1 Renderer
         var renderers: [BlockRenderer] = []
-        var currentBlock: MarkdownScrollView.BlockContent? = nil
-        var currentID:   Int? = nil
-        var builder      = NSMutableAttributedString()
         var currentTableBlock: MarkdownScrollView.BlockContent.TableBlock? = nil
 
-        func flushBuilder() {
-            guard let block = currentBlock?.block else { return }
+        func makeRenderer(block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value,
+                          attrText: NSAttributedString) {
             
-            let ns = builder.mutableCopy() as! NSAttributedString
-            
+            var leftIndent = 0.0
             if block.hasBlockQuote {
-                renderers.append(BlockquoteRenderer(attributed: ns))
+                renderers.append(BlockquoteRenderer(attributed: attrText))
+                leftIndent = 10.0
             }
-            else if block.hasCodeBlock {
-                renderers.append(CodeBlockRenderer(attributed: ns))
+            if block.hasCodeBlock {
+                renderers.append(CodeBlockRenderer(attributed: attrText))
             }
-            else if block.hasThematicBreak {
+            if block.hasThematicBreak {
                 renderers.append(HorizontalRuleRenderer())
             }
-            else if block.hasTable {
+            if block.hasTable {
                 // Tabelle oder normaler Absatz?
                 if let table = currentTableBlock, table.lastColumn > 0 {
-                    renderers.append(TableRenderer(block: table, text: ns))
+                    renderers.append(TableRenderer(block: table, text: attrText))
                 } else {
-                    renderers.append(ParagraphRenderer(attributed: ns))
+                    renderers.append(ParagraphRenderer(leftIndent: leftIndent, attributed: attrText))
                 }
             }
-            else if block.hasHeader {
-                renderers.append(HeadingRenderer(level: block.headerLevel ?? 1, attributed: ns))
+            if block.hasHeader {
+                renderers.append(HeadingRenderer(level: block.headerLevel ?? 1, attributed: attrText))
             }
-            else {
-                renderers.append(ParagraphRenderer(attributed: ns))
+            if block.hasParagraph {
+                renderers.append(ParagraphRenderer(leftIndent: leftIndent, attributed: attrText))
             }
-            
-            builder = NSMutableAttributedString()
             currentTableBlock = nil
         }
 
-        for block in blocks {
-            // Wechsel‑Bedingung: Identity ändert sich
-            if block.identity != currentID {
-                flushBuilder()
-                currentID = block.identity
-                currentBlock = block
-            }
-            // Text‑Slice zum Builder hinzufügen
-            let s = AttributedString(attr[block.range])
-            let slice = NSAttributedString(s)
-            builder.append(slice)
-            // Tabelle → letztes TableBlock merken (wird beim Flush ausgewertet)
-            if block.tableBlock.lastColumn > 0 {
-                currentTableBlock = block.tableBlock
-            }
+        for intentBlock in blocks {
+            guard let block = intentBlock.block else { continue }
+            
+            let s = AttributedString(attr[intentBlock.range])
+            let attrText = NSAttributedString(s)
+            
+            makeRenderer(block: block, attrText: attrText)
+ 
+//            if block.tableBlock.lastColumn > 0 {
+//                currentTableBlock = block.tableBlock
+//            }
         }
-        flushBuilder() // letzter Block
         return renderers
     }
 }
-
-
+ 
 // MARK: - ---------------------------------------------------------
 // MARK: Konkrete Renderer (Paragraph, Heading, Tabelle, …)
 // --------------------------------------------------------------
@@ -230,13 +221,20 @@ fileprivate enum CoreTextBlockFactory {
 // -------- Paragraph ---------------------------------------------------
 final class ParagraphRenderer: BlockRenderer {
     var frame: CGRect = .zero
+    var leftIndent: CGFloat = 0
     private let text: NSAttributedString
-    init(attributed: NSAttributedString) { self.text = attributed }
-    func measure(width: CGFloat) -> CGFloat {
+    init(leftIndent: CGFloat, attributed: NSAttributedString) {
+        self.text = attributed
+        self.leftIndent = leftIndent
+    }
+    
+    func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
         let constraint = CGSize(width: width, height: .greatestFiniteMagnitude)
         let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
-        return ceil(size.height) + 8
+        let h = ceil(size.height) + 8
+        self.frame = CGRect(x: self.leftIndent, y: y, width: width, height: h)
+        return h
     }
     func draw(in context: CGContext) {
         let path = CGMutablePath()
@@ -257,11 +255,13 @@ final class HeadingRenderer: BlockRenderer {
         mut.addAttribute(.font, value: UIFont.boldSystemFont(ofSize: size), range: NSRange(location: 0, length: mut.length))
         self.text = mut
     }
-    func measure(width: CGFloat) -> CGFloat {
+    func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
         let constraint = CGSize(width: width, height: .greatestFiniteMagnitude)
         let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
-        return ceil(size.height) + 12
+        let h = ceil(size.height) + 12
+        self.frame = CGRect(x: 0, y: y, width: width, height: h)
+        return h
     }
     func draw(in context: CGContext) {
         let path = CGMutablePath()
@@ -277,25 +277,34 @@ final class BlockquoteRenderer: BlockRenderer {
     var frame: CGRect = .zero
     private let text: NSAttributedString
     init(attributed: NSAttributedString) { self.text = attributed }
-    func measure(width: CGFloat) -> CGFloat {
+    func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         let innerWidth = width - 6  // Platz für Quote‑Linie
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
         let constraint = CGSize(width: innerWidth, height: .greatestFiniteMagnitude)
         let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
-        return ceil(size.height) + 8
+        let h = ceil(size.height) + 10
+        self.frame = CGRect(x: 0, y: y, width: width, height: h)
+        return 0
     }
     func draw(in context: CGContext) {
         // Quote‑Linie links
+        context.setFillColor(UIColor.systemGray6.cgColor)
+        context.fill(CGRect(x: 0, y: 0, width: frame.width, height: frame.height))
+        
         context.setFillColor(UIColor.label.withAlphaComponent(0.3).cgColor)
         context.fill(CGRect(x: 0, y: 0, width: 4, height: frame.height))
+
+        
         // Text innen
-        let path = CGMutablePath()
-        path.addRect(CGRect(x: 8, y: 0, width: frame.width - 8, height: frame.height))
-        let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
-        let ctFrame = CTFramesetterCreateFrame(fs, CFRange(location: 0, length: text.length), path, nil)
-        CTFrameDraw(ctFrame, context)
+//        let path = CGMutablePath()
+//        path.addRect(CGRect(x: 8, y: 0, width: frame.width - 8, height: frame.height))
+//        let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
+//        let ctFrame = CTFramesetterCreateFrame(fs, CFRange(location: 0, length: text.length), path, nil)
+//        CTFrameDraw(ctFrame, context)
     }
 }
+
+
 
 // -------- CodeBlock ---------------------------------------------------
 final class CodeBlockRenderer: BlockRenderer {
@@ -306,12 +315,14 @@ final class CodeBlockRenderer: BlockRenderer {
         mut.addAttribute(.font, value: UIFont.monospacedSystemFont(ofSize: 13, weight: .regular), range: NSRange(location: 0, length: mut.length))
         self.text = mut
     }
-    func measure(width: CGFloat) -> CGFloat {
+    func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         let innerWidth = width - 16
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
         let constraint = CGSize(width: innerWidth, height: .greatestFiniteMagnitude)
         let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
-        return ceil(size.height) + 16
+        let h = ceil(size.height) + 16
+        self.frame = CGRect(x: 0, y: y, width: width, height: h)
+        return h
     }
     func draw(in context: CGContext) {
         // Hintergrund
@@ -336,10 +347,12 @@ final class TableRenderer: BlockRenderer {
     init(block: MarkdownScrollView.BlockContent.TableBlock, text: NSAttributedString) {
         self.block = block; self.cellText = text
     }
-    func measure(width: CGFloat) -> CGFloat {
+    func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         // Prototyp: Gesamtbreite = width, Höhe = Anzahl Zeilen × 24
         let rowHeight: CGFloat = 24
-        return rowHeight * CGFloat(block.lastRow + 1) + 8
+        let h = rowHeight * CGFloat(block.lastRow + 1) + 8
+        self.frame = CGRect(x: 0, y: y, width: width, height: h)
+        return h
     }
     func draw(in context: CGContext) {
         // Placeholder: zeichne einfach Texte – echte Tabellen‑Logik wäre hier
@@ -354,7 +367,11 @@ final class HorizontalRuleRenderer: BlockRenderer {
     var attrString = AttributedString()
     var frame: CGRect = .zero
     init() {}
-    func measure(width: CGFloat) -> CGFloat { return 3 + 16 /*rule+padding*/ }
+    func measure(y: CGFloat, width: CGFloat) -> CGFloat {
+        let h = 3.0 + 16 /*rule+padding*/
+        self.frame = CGRect(x: 0, y: y, width: width, height: h)
+        return h
+    }
     
     func draw(in context: CGContext) {
         let y = CGFloat(8)
