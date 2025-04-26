@@ -18,6 +18,8 @@ import PDFKit
 /// Dadurch dürfen wir ihre Properties ändern, auch wenn die Referenz `let` ist.
 
 protocol BlockRenderer: AnyObject {
+    /// Inhalt des Blockes
+    var blockContent: MarkdownScrollView.BlockContent { get set }
     /// Zeichen­rechteck relativ zum Content‑View (UIKit‑Koordinaten, (0,0) = oben links)
     var frame: CGRect { get set }
     /// Höhe berechnen, wenn eine bestimmte Breite vorgegeben ist
@@ -25,6 +27,20 @@ protocol BlockRenderer: AnyObject {
     /// Inhalt in den bereits nach (0,0) verschobenen CGContext zeichnen.
     /// Erwartet, dass das Koordinatensystem **bereits** für Core Text geflippt wurde
     func draw(in context: CGContext)
+}
+
+extension BlockRenderer {
+    
+    func drawBlockQuote(in context: CGContext, rect: CGRect) {
+        // Quote‑Linie links
+        context.setFillColor(UIColor.systemGray6.cgColor)
+        context.fill(rect)
+        
+        context.setFillColor(UIColor.label.withAlphaComponent(0.3).cgColor)
+        var balken = rect
+        balken.size.width = 4
+        context.fill(balken)
+    }
 }
 
 
@@ -54,26 +70,44 @@ class MarkdownScrollView: UIScrollView {
 
     /// Main entry: parse Markdown string, build renderers, trigger layout
     func markdown(string: String, size: CGFloat = 17, weight: UIFont.Weight = .regular, textColor: UIColor = .gray) {
-        
+ 
         self.textSize = size
         let rawAttr: AttributedString
         do {
             rawAttr = try AttributedString(markdown: string, including: \.commonAttr)
         } catch {
-            let fallback = NSAttributedString(string: "Markdown‑Konvertierung fehlgeschlagen: \(error.localizedDescription)")
-            contentView.renderers = [ParagraphRenderer(leftIndent: 0, attributed: fallback)]
+            var fallback = AttributedString("Markdown‑Konvertierung fehlgeschlagen: \(error.localizedDescription)")
+            fallback.foregroundColor = .systemRed
+            fallback.font = .systemFont(ofSize: 20, weight: .bold)
+              
+            let blockContent = BlockContent(attrText: fallback)
+            contentView.renderers = [ParagraphRenderer(blockContent: blockContent)]
             setNeedsLayout(); return
         }
-
+        
+        ///-----------------------------------------------------------------------------------
+        /// Setzen der Defaultwerte für den Font und die Textfarbe (`.uikit` beachten!)
         var attr = rawAttr
         attr.font = .systemFont(ofSize: size, weight: weight)
         attr.uiKit.foregroundColor = textColor
+         
+        /// Die User-Atribute in die Formatierungsinformation ändern.
+        attr.userAttributes(size: size, weight: weight)
+        
+        /// Am Ende des gesamten Textes einen Absatz ergänzen. Dadurch wird beispielsweise ein Block Quote mit einem
+        /// Abstand am Ende angezeigt.
+        attr += AttributedString(String.paragraphSeparator)
 
         //------------------------------------------------------------------------------------
         // MARK: - Inline-Presentation bearbeiten
 
         attr = inlinePresentation(text: attr, size: size, weight: weight)
         
+        ///-----------------------------------------------------------------------------------
+        /// Debuggen der Blöcke im AttributedString
+        ///
+        attr.debugInfo(.blocks, "Vorher")
+
         // ----------------------------------------------------------
         // PARSING:  AttributedString  →  [BlockRenderer]
         // ----------------------------------------------------------
@@ -89,6 +123,8 @@ class MarkdownScrollView: UIScrollView {
         let totalHeight = contentView.layout(width: width)
         contentView.frame = CGRect(x: 0, y: 0, width: width, height: totalHeight)
         contentSize = CGSize(width: width, height: totalHeight)
+        
+        contentView.setNeedsDisplay()
     }
 
     // MARK: PDF‑Export
@@ -167,44 +203,37 @@ fileprivate enum CoreTextBlockFactory {
         var renderers: [BlockRenderer] = []
         var currentTableBlock: MarkdownScrollView.BlockContent.TableBlock? = nil
 
-        func makeRenderer(block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value,
-                          attrText: NSAttributedString) {
+        func makeRenderer(intentBlock: MarkdownScrollView.BlockContent) {
+            guard let block = intentBlock.block else { return }
             
-            var leftIndent = 0.0
-            if block.hasBlockQuote {
-                renderers.append(BlockquoteRenderer(attributed: attrText))
-                leftIndent = 10.0
-            }
+//            if block.hasBlockQuote {
+//                renderers.append(BlockquoteRenderer(blockContent: intentBlock))
+//            }
             if block.hasCodeBlock {
-                renderers.append(CodeBlockRenderer(attributed: attrText))
+                renderers.append(CodeBlockRenderer(blockContent: intentBlock))
             }
             if block.hasThematicBreak {
-                renderers.append(HorizontalRuleRenderer())
+                renderers.append(HorizontalRuleRenderer(blockContent: intentBlock))
             }
             if block.hasTable {
                 // Tabelle oder normaler Absatz?
                 if let table = currentTableBlock, table.lastColumn > 0 {
-                    renderers.append(TableRenderer(block: table, text: attrText))
+                    renderers.append(TableRenderer(blockContent: intentBlock))
                 } else {
-                    renderers.append(ParagraphRenderer(leftIndent: leftIndent, attributed: attrText))
+                    renderers.append(ParagraphRenderer(blockContent: intentBlock))
                 }
             }
             if block.hasHeader {
-                renderers.append(HeadingRenderer(level: block.headerLevel ?? 1, attributed: attrText))
+                renderers.append(HeadingRenderer(blockContent: intentBlock))
             }
             if block.hasParagraph {
-                renderers.append(ParagraphRenderer(leftIndent: leftIndent, attributed: attrText))
+                renderers.append(ParagraphRenderer(blockContent: intentBlock))
             }
             currentTableBlock = nil
         }
 
-        for intentBlock in blocks {
-            guard let block = intentBlock.block else { continue }
-            
-            let s = AttributedString(attr[intentBlock.range])
-            let attrText = NSAttributedString(s)
-            
-            makeRenderer(block: block, attrText: attrText)
+        for block in blocks {
+            makeRenderer(intentBlock: block)
  
 //            if block.tableBlock.lastColumn > 0 {
 //                currentTableBlock = block.tableBlock
@@ -220,25 +249,38 @@ fileprivate enum CoreTextBlockFactory {
 
 // -------- Paragraph ---------------------------------------------------
 final class ParagraphRenderer: BlockRenderer {
+    var blockContent: MarkdownScrollView.BlockContent
     var frame: CGRect = .zero
-    var leftIndent: CGFloat = 0
+    
     private let text: NSAttributedString
-    init(leftIndent: CGFloat, attributed: NSAttributedString) {
-        self.text = attributed
-        self.leftIndent = leftIndent
+    private var leftIndent: CGFloat = 0
+    
+    init(blockContent: MarkdownScrollView.BlockContent) {
+        self.blockContent = blockContent
+        self.text = blockContent.attrText
     }
     
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
+        guard let block = blockContent.block else { return 0 }
+        self.leftIndent = block.hasBlockQuote ?  15 : 0
+        
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
-        let constraint = CGSize(width: width, height: .greatestFiniteMagnitude)
+        let constraint = CGSize(width: width - self.leftIndent, height: .greatestFiniteMagnitude)
         let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
         let h = ceil(size.height) + 8
-        self.frame = CGRect(x: self.leftIndent, y: y, width: width, height: h)
+        self.frame = CGRect(x: 0, y: y, width: width, height: h)
         return h
     }
     func draw(in context: CGContext) {
+        guard let block = blockContent.block else { return }
+        
+        if block.hasBlockQuote {
+            let rect = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
+            drawBlockQuote(in: context, rect: rect)
+        }
+
         let path = CGMutablePath()
-        path.addRect(CGRect(origin: .zero, size: frame.size))
+        path.addRect(CGRect(x: self.leftIndent, y: 0, width: frame.width - leftIndent, height: frame.height))
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
         let ctFrame = CTFramesetterCreateFrame(fs, CFRange(location: 0, length: text.length), path, nil)
         CTFrameDraw(ctFrame, context)
@@ -247,25 +289,43 @@ final class ParagraphRenderer: BlockRenderer {
 
 // -------- Heading -----------------------------------------------------
 final class HeadingRenderer: BlockRenderer {
+    var blockContent: MarkdownScrollView.BlockContent
     var frame: CGRect = .zero
-    private let text: NSAttributedString
-    init(level: Int, attributed: NSAttributedString) {
-        let size = max(22 - CGFloat(level) * 2, 14)
-        let mut = NSMutableAttributedString(attributedString: attributed)
-        mut.addAttribute(.font, value: UIFont.boldSystemFont(ofSize: size), range: NSRange(location: 0, length: mut.length))
-        self.text = mut
+    
+    private var text: NSAttributedString
+    private var leftIndent: CGFloat = 0
+
+    init(blockContent: MarkdownScrollView.BlockContent) {
+        self.blockContent = blockContent
+        self.text = blockContent.attrText
+        
+        guard let block = blockContent.block else { return }
+        var attrText = AttributedString(blockContent.attrText)
+        attrText.font = block.headerFont
+        self.text = NSAttributedString(attrText)
     }
+    
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
+        guard let block = blockContent.block else { return 0 }
+        self.leftIndent = block.hasBlockQuote ?  15 : 0
+
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
-        let constraint = CGSize(width: width, height: .greatestFiniteMagnitude)
+        let constraint = CGSize(width: width - self.leftIndent, height: .greatestFiniteMagnitude)
         let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
         let h = ceil(size.height) + 12
         self.frame = CGRect(x: 0, y: y, width: width, height: h)
         return h
     }
     func draw(in context: CGContext) {
+        guard let block = blockContent.block else { return }
+        
+        if block.hasBlockQuote {
+            let rect = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
+            drawBlockQuote(in: context, rect: rect)
+        }
+
         let path = CGMutablePath()
-        path.addRect(CGRect(origin: .zero, size: frame.size))
+        path.addRect(CGRect(x: self.leftIndent, y: 0, width: frame.width - leftIndent, height: frame.height))
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
         let ctFrame = CTFramesetterCreateFrame(fs, CFRange(location: 0, length: text.length), path, nil)
         CTFrameDraw(ctFrame, context)
@@ -274,9 +334,15 @@ final class HeadingRenderer: BlockRenderer {
 
 // -------- Blockquote --------------------------------------------------
 final class BlockquoteRenderer: BlockRenderer {
+    var blockContent: MarkdownScrollView.BlockContent
     var frame: CGRect = .zero
     private let text: NSAttributedString
-    init(attributed: NSAttributedString) { self.text = attributed }
+
+    init(blockContent: MarkdownScrollView.BlockContent) {
+        self.blockContent = blockContent
+        self.text = blockContent.attrText
+    }
+        
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         let innerWidth = width - 6  // Platz für Quote‑Linie
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
@@ -308,10 +374,15 @@ final class BlockquoteRenderer: BlockRenderer {
 
 // -------- CodeBlock ---------------------------------------------------
 final class CodeBlockRenderer: BlockRenderer {
+    var blockContent: MarkdownScrollView.BlockContent
     var frame: CGRect = .zero
     private let text: NSAttributedString
-    init(attributed: NSAttributedString) {
-        let mut = NSMutableAttributedString(attributedString: attributed)
+
+    init(blockContent: MarkdownScrollView.BlockContent) {
+        self.blockContent = blockContent
+//        self.text = blockContent.attrText
+
+        let mut = NSMutableAttributedString(attributedString: blockContent.attrText)
         mut.addAttribute(.font, value: UIFont.monospacedSystemFont(ofSize: 13, weight: .regular), range: NSRange(location: 0, length: mut.length))
         self.text = mut
     }
@@ -340,12 +411,18 @@ final class CodeBlockRenderer: BlockRenderer {
 // -------- Table -------------------------------------------------------
 /// Noch sehr einfach: fixed‑width Spalten, automatische Zeilenhöhe pro Zelle
 final class TableRenderer: BlockRenderer {
+    var blockContent: MarkdownScrollView.BlockContent
     var frame: CGRect = .zero
+    private let text: NSAttributedString
     private let block: MarkdownScrollView.BlockContent.TableBlock
     private let cellText: NSAttributedString
 
-    init(block: MarkdownScrollView.BlockContent.TableBlock, text: NSAttributedString) {
-        self.block = block; self.cellText = text
+    init(blockContent: MarkdownScrollView.BlockContent) {
+        self.blockContent = blockContent
+        self.text = blockContent.attrText
+
+        self.block = blockContent.tableBlock
+        self.cellText = text
     }
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         // Prototyp: Gesamtbreite = width, Höhe = Anzahl Zeilen × 24
@@ -364,9 +441,14 @@ final class TableRenderer: BlockRenderer {
 }
 
 final class HorizontalRuleRenderer: BlockRenderer {
-    var attrString = AttributedString()
+    var blockContent: MarkdownScrollView.BlockContent
     var frame: CGRect = .zero
-    init() {}
+    private let text: NSAttributedString
+   
+    init(blockContent: MarkdownScrollView.BlockContent) {
+        self.blockContent = blockContent
+        self.text = blockContent.attrText
+    }
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         let h = 3.0 + 16 /*rule+padding*/
         self.frame = CGRect(x: 0, y: y, width: width, height: h)

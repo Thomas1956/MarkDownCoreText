@@ -19,7 +19,7 @@ extension MarkdownScrollView {
     /// Struktur für die Vorauswertung der PresentationIntentAttribute
     
     struct BlockContent {
-        var attrText: NSAttributedString?
+        var attrText = NSAttributedString()
         var block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value?
         var range: Range<AttributedString.Index>
         
@@ -66,14 +66,20 @@ extension MarkdownScrollView {
         ///-----------------------------------------------------------------------------------
         /// Initialisierung
         ///
-        init(attrText: NSAttributedString?,
+        init(attrText: AttributedString) {
+            self.init(attrText: NSAttributedString(attrText),
+                      block: PresentationIntent(.paragraph, identity: 1),
+                      range: attrText.startIndex..<attrText.endIndex)
+        }
+        
+        init(attrText: NSAttributedString,
              runsBlock: AttributedString.Runs.Element,
              range: Range<AttributedString.Index>)
         {
             self.init(attrText: attrText, block: runsBlock.presentationIntent, range: range)
         }
         
-        init(attrText: NSAttributedString?,
+        init(attrText: NSAttributedString,
              block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value?,
              range: Range<AttributedString.Index>)
         {
