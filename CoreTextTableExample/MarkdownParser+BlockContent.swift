@@ -125,14 +125,42 @@ extension MarkdownScrollView {
     ///---------------------------------------------------------------------------------------
     /// Alle Block Content eines AttributedString ermittlen und aufbereiten (Indent der Listen)
     ///
-    static func allBlockContents(attrText: AttributedString, textSize: CGFloat) -> [BlockContent] {
- 
+    static func allBlockContents_1(attrText: AttributedString, textSize: CGFloat) -> [BlockContent] {
+        
         /// Blöcke ermitteln
         var allBlocks = attrText.runs.compactMap( { block in
             let range = block.range
             return BlockContent(runsBlock: block, range: range)
         } )
+        prepareBlocks(allBlocks: &allBlocks, attrText: attrText, textSize: textSize)
+        return allBlocks
+    }
+    
+    static func allBlockContents(attrText: AttributedString, textSize: CGFloat) -> [BlockContent] {
         
+        var allBlocks : [BlockContent] = []
+        for (intentBlock, intentRange) in attrText.runs[\.presentationIntent] {
+            guard let intents = intentBlock?.components.compactMap( { intent in
+                if case .header(_)     = intent.kind { return intent }
+                if case .paragraph     = intent.kind { return intent }
+                if case .codeBlock(_)  = intent.kind { return intent }
+                if case .thematicBreak = intent.kind { return intent }
+                return nil
+            }),
+                  !intents.isEmpty
+            else { continue }
+  
+            let bb = BlockContent(block: intentBlock, range: intentRange)
+            allBlocks.append(bb)
+        }
+        prepareBlocks(allBlocks: &allBlocks, attrText: attrText, textSize: textSize)
+        return allBlocks
+    }
+
+    
+    private static func prepareBlocks(allBlocks: inout [BlockContent],
+                                      attrText: AttributedString, textSize: CGFloat)
+    {
         ///-----------------------------------------------------------------------------------
         /// 1 .  D U R C H L A U F  :   Berechnen der Arrays für die Tabellen und Listen
         ///
@@ -257,7 +285,7 @@ extension MarkdownScrollView {
                     blockQuoteIndent = blockIndent
                 }
                 else {
-                    dictBlockIndent[blockIdentity] = firstLineHeadIndent 
+                    dictBlockIndent[blockIdentity] = firstLineHeadIndent
                     blockQuoteIndent = firstLineHeadIndent
                 }
             }
@@ -357,7 +385,7 @@ extension MarkdownScrollView {
 //            }
 //        }
 
-        return allBlocks
+//        return allBlocks
     }
 }
 
