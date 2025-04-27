@@ -51,7 +51,7 @@ class ViewController: UIViewController {
     > Blockquote loorem ipsum dolor sit amet, **consectetur** adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut ~***aliquip***~ ex ea ^[commodo consequat](size:20, weight: 'bold', color: 'orange'). Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
         0 1 2 3 4 5 6 7 8 9 
     
-    > - Erstens
+    > - Erstens Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore 
     > - Zweitens
     
     0 1 2 3 4
@@ -72,8 +72,8 @@ class ViewController: UIViewController {
 
     ![AppIcon](AppIcon1024:50)
     
-    1. List item 1
-    1. List item 2
+    1. List item 1 aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+    3. List item 2
     1. List item 3
 
     ### Tabelle
