@@ -147,7 +147,7 @@ class MarkdownScrollView: UIScrollView {
         ///-----------------------------------------------------------------------------------
         /// Debuggen der Blöcke im AttributedString
         ///
-        attr.debugInfo(.blocks, "Vorher")
+//        attr.debugInfo(.blocks, "Vorher")
 
         // ----------------------------------------------------------
         // PARSING:  AttributedString  →  [BlockRenderer]
@@ -235,7 +235,6 @@ fileprivate enum CoreTextBlockFactory {
         
         // 1) Alle BlockContent‑Elemente (liefert dein bestehender Code)
         let blocks = MarkdownScrollView.allBlockContents(attrText: attr, textSize: textSize)
-        
         blocks.forEach { block in
             print(block.debugString)
         }
@@ -285,6 +284,22 @@ fileprivate enum CoreTextBlockFactory {
 // MARK: Konkrete Renderer (Paragraph, Heading, Tabelle, …)
 // --------------------------------------------------------------
 
+/// Baut ein CTParagraphStyleSetting, ohne dass wir ständig Unsafe-Blöcke
+/// ineinander schachteln müssen.
+@inline(__always)
+func makeSetting<T>(_ spec: CTParagraphStyleSpecifier,
+                    _ value: inout T) -> CTParagraphStyleSetting
+{
+    return withUnsafePointer(to: &value) {
+        CTParagraphStyleSetting(
+            spec:      spec,
+            valueSize: MemoryLayout<T>.size,
+            value:     $0)
+    }
+}
+
+// TODO: CTParagraphStyleSetting muss noch verallgemeinert werden.
+
 // -------- Paragraph ---------------------------------------------------
 final class ParagraphRenderer: BlockRenderer {
     var blockContent: MarkdownScrollView.BlockContent
@@ -313,6 +328,50 @@ final class ParagraphRenderer: BlockRenderer {
             let rect = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             drawBlockQuote(in: context, rect: rect)
         }
+        
+        if block.hasList {
+            let w = 3 * blockContent.widthDefault
+            
+            // 1) Einen Tab-Stop anlegen
+            let tabs: [CTTextTab] =
+                        [CTTextTabCreate(.right, blockContent.headIndent - w, nil),
+                        CTTextTabCreate(.left,  blockContent.headIndent, nil ) ]
+
+            // 2) Variablen, die bis zum CTParagraphStyle-Call leben
+            
+            // ---- Werte, die garantiert bis zur Style-Erzeugung leben -------------
+            var tabArray           : CFArray = tabs as CFArray
+            var defInterval        : CGFloat = 100
+            var paragraphSpacing   : CGFloat = 10.0
+            var lineHeightMultiple : CGFloat = 1.1
+            
+            var headIndent: CGFloat = blockContent.headIndent
+            var firstLineHeadIndent: CGFloat = blockContent.firstLineHeadIndent
+            
+            print("HeadIndent \(headIndent) \(firstLineHeadIndent), w: \(w)")
+                   
+            // ---- Settings-Array ---------------------------------------------------
+            var settings: [CTParagraphStyleSetting] = [
+                makeSetting(.tabStops,            &tabArray),
+                makeSetting(.defaultTabInterval,  &defInterval),
+                makeSetting(.headIndent,          &headIndent),
+                makeSetting(.firstLineHeadIndent, &firstLineHeadIndent),
+                makeSetting(.paragraphSpacing,    &paragraphSpacing),
+                makeSetting(.lineHeightMultiple,  &lineHeightMultiple),
+            ]
+            
+            // ---- Paragraph-Style erzeugen und weiterverwenden ---------------------
+            let ctStyle = CTParagraphStyleCreate(&settings, settings.count)
+
+            let nsAttr = NSMutableAttributedString(attributedString: blockContent.attrText)
+            nsAttr.addAttribute(
+                kCTParagraphStyleAttributeName as NSAttributedString.Key,
+                value: ctStyle,
+                range: NSRange(location: 0, length: nsAttr.length)
+            )
+            blockContent.attrText = nsAttr
+        }
+
         drawContent(in: context)
     }
 }
@@ -353,7 +412,6 @@ final class HeadingRenderer: BlockRenderer {
         drawContent(in: context)
     }
 }
-
 
 // -------- CodeBlock ---------------------------------------------------
 
