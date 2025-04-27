@@ -26,7 +26,7 @@ extension MarkdownScrollView {
         var kind     : PresentationIntent.Kind = .paragraph
         var identity : Int = 0
         
-        var listBulletPoint     : String
+        var listBulletPointStr  : String
         var widthDefault        : CGFloat
         var headIndent          : CGFloat
         var firstLineHeadIndent : CGFloat
@@ -93,8 +93,8 @@ extension MarkdownScrollView {
             }
             
             /// Anführungszeichen vordefinieren
-            self.listBulletPoint = ""
-            self.widthDefault    = 0
+            self.listBulletPointStr = ""
+            self.widthDefault       = 0
             
             /// Einzüge für die Listen und die Block Quote
             self.firstLineHeadIndent = 0
@@ -116,7 +116,7 @@ extension MarkdownScrollView {
         /// Debug-Anzeige
         ///
         var debugString: String {
-            let bulletPoint = listBulletPoint.dropLast().padding(to: 3)
+            let bulletPoint = listBulletPointStr.dropLast().padding(to: 3)
             
             var listString = "??????"
             if let block = self.block {
@@ -125,7 +125,7 @@ extension MarkdownScrollView {
                                      String(format: "%2d ",    block.listIdentity) +
                                      String(format: "%2d ",    block.listHierarchie ?? 0) + "List" +
                                      String(format: "%2d -> ", block.listOrdinal) +
-                                     String(format: "%2.1f  ", firstLineHeadIndent) +
+                                     String(format: "%2.1f  ", headIndent) +
                                      bulletPoint
                 ).padding(to: 24)
             }
@@ -278,6 +278,13 @@ extension MarkdownScrollView {
                 headIndent = dictIndent
             } else {
                 listBulletPoint = "\t" + listBulletPoint + "\t" /// Aufzählungszeichen mit TAB ergänzen
+                
+                let bullet = NSMutableAttributedString(         /// Bullet-Point dem Attributed String voranstellen
+                    string:     listBulletPoint,
+                    attributes: blockContent.attrText.attributes(at: 0, effectiveRange: nil))
+                
+                bullet.append(blockContent.attrText)            /// Original-Text anhängen
+                allBlocks[index].attrText = bullet              /// und zurückspeichern
                 dictHeadIndent[blockContent.key] = headIndent   /// Einzug dieses Absatzes merken
             }
             
@@ -309,7 +316,7 @@ extension MarkdownScrollView {
             allBlocks[index].firstLineHeadIndent = firstLineHeadIndent
             allBlocks[index].headIndent          = headIndent
             allBlocks[index].blockQuoteIndent    = blockQuoteIndent
-            allBlocks[index].listBulletPoint     = listBulletPoint
+            allBlocks[index].listBulletPointStr  = listBulletPoint
             
             ///-------------------------------------------------------------------------------
             /// D E B U G G I N G
