@@ -23,7 +23,7 @@ public struct Markdown {
 
     /// Konstanten für die Liste (Anführungszeichen der Liste in der Hierarchie)
     static var listBulletPoint         :[String] = [.listBullet_1, .listBullet_2, .listBullet_3]
-    static var listLeftIndent          : CGFloat = 10           /// Linker Rand der untersten Hierarchie
+    static var listLeftIndent          : CGFloat = 0            /// Linker Rand der untersten Hierarchie
 
     /// Konstanten für den vertikalen Trennstrich (Ruler)
     static var rulerRightIndent        : CGFloat = 0            /// rechter Rand der Trennlinie
