@@ -28,7 +28,6 @@ class ViewController: UIViewController {
         let scrollView = MarkdownScrollView(frame: view.bounds)
         view.addSubview(scrollView)
 
-//        scrollView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 10).isActive = true
         scrollView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
@@ -40,7 +39,7 @@ class ViewController: UIViewController {
 
     let text1 =
     """
-    # Beispiel Blockquote
+    > # Beispiel Blockquote
     
     Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
     Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
