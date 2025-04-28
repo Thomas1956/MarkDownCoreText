@@ -26,14 +26,14 @@ public struct Markdown {
     static var listLeftIndent          : CGFloat = 0            /// Linker Rand der untersten Hierarchie
 
     /// Konstanten für den vertikalen Trennstrich (Ruler)
-    static var rulerRightIndent        : CGFloat = 0            /// rechter Rand der Trennlinie
+    static var rulerRightIndent        : CGFloat = 5            /// rechter Rand der Trennlinie
     static var rulerHeight             : CGFloat = 20           /// Höhe des Hintergrundes der Trennlinie
     static var rulerLineHeight         : CGFloat = 4            /// Strichdicke der Trennlinie
     static var rulerColorHighLight     : Bool    = true         /// Die Farbe der Trennlinie wird etwas heller
                                                                 /// als die Textfarbe dargestellt
     /// Konstanten für den Hintergrund des Block Quote
-    static var blockquoteContentIndent : CGFloat = 20           /// Abstand des Inhaltes vom Rand des Block Quote
-    static var blockquoteHorzIndent    : CGFloat = 5            /// Ränder Hintergrund links und rechts
+    static var blockquoteContentIndent : CGFloat = 30           /// Abstand des Inhaltes vom Rand des Block Quote
+    static var blockquoteHorzIndent    : CGFloat = 0            /// Ränder Hintergrund links und rechts
     static var blockquoteVertOffset    : CGFloat = 5            /// Verschiebung des  Hintergrunds nach unten
     static var blockquoteColor         : UIColor = .systemGray6 /// Farbe für den Hintergrund
     

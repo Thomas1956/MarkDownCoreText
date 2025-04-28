@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "ParagraphRenderer.init(blockContent:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in MarkdownScrollView.markdown(string:size:weight:textColor:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "ParagraphRenderer.init(blockContent:):MarkdownParser+BlockRenderer.swift">
+      </ContextState>
+      <ContextState
+         contextName = "BlockRenderer.contentRect.getter:MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "flushBuilder #1 (block:) in static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "BlockRenderer.drawContent(in:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "ParagraphRenderer.draw(in:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "HorizontalRuleRenderer.draw(in:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "HeadingRenderer.init(level:attributed:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "MarkdownScrollView.markdown(string:size:weight:textColor:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "MarkdownContentView.layout(width:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "flushBuilder #1 (blockContent:) in static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in BlockRenderer.preprocess(_:):MarkdownParser+BlockRenderer.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "value">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>

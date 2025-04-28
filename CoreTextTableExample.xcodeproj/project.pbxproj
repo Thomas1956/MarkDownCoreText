@@ -14,7 +14,6 @@
 		E928C3A32DBA315E006D071D /* Exceptions for "CoreTextTableExample" folder in "CoreTextTableExample" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				BlockRenderer.swift,
 				Info.plist,
 			);
 			target = E928C3902DBA315C006D071D /* CoreTextTableExample */;

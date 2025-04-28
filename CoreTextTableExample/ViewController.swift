@@ -9,6 +9,9 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    var textSize:CGFloat = 20
+    var textColor = UIColor.label
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -34,7 +37,7 @@ class ViewController: UIViewController {
         scrollView.topAnchor.constraint(equalTo: view.topAnchor, constant: 10).isActive = true
         scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10).isActive = true
         
-        scrollView.markdown(string: text1)
+        scrollView.markdown(string: text1, size: textSize, textColor: textColor )
     }
 
     let text1 =
@@ -58,8 +61,9 @@ class ViewController: UIViewController {
     Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
     _______________
     
-    # Headline 1 ![Circle](person.circle:50)
-    ## ![Circle](person.circle:35) Headline 2 
+    Headline 1 ![Circle](person.circle:50)
+    
+    ![Circle](person.circle:35) Headline 2 
 
     Here is an [Example Link](https://example.com).
 
