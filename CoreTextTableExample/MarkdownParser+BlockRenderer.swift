@@ -25,11 +25,11 @@ extension NSAttributedString.Key {
 // MARK: - Payload-Klasse, damit wir Größe + Bild parat haben
 
 final class ImageAttachment {
-    let image: CGImage
+    let image: UIImage
     let size : CGSize
     let font : CTFont
 
-    init(image: CGImage, size: CGSize, font: CTFont) {
+    init(image: UIImage, size: CGSize, font: CTFont) {
         self.image = image
         self.size  = size
         self.font  = font
@@ -184,7 +184,14 @@ extension BlockRenderer {
                                width: width,
                                height: asc + desc)
                 
-                context.draw(attach.image, in: r)
+                context.saveGState()
+                context.translateBy(x: 0, y: r.origin.y * 2 + r.height)
+                context.scaleBy(x: 1, y: -1)
+
+                /// UIImage im nun wieder uprighten Sub-Kontext zeichnen
+                attach.image.draw(in: r)
+
+                context.restoreGState()
             }
         }
     }
@@ -210,8 +217,7 @@ extension BlockRenderer {
             guard let imagename = components.first,
                   let image = UIImage(named: imagename) ??
                               UIImage(systemName: imagename, withConfiguration: config)?
-                                                            .withRenderingMode(.alwaysOriginal),
-                  let cgImage = image.cgImage
+                                                            .withRenderingMode(.alwaysOriginal)
             else { return }
    
             /// Den Font entweder aus dem Header, aus dem Paragraph ermitteln oder Standardfont
@@ -233,7 +239,7 @@ extension BlockRenderer {
             }
 
             /// Attachment und Run-Delegate
-            let attachment = ImageAttachment(image: cgImage, size: size, font: font)
+            let attachment = ImageAttachment(image: image, size: size, font: font)
             let delegate   = makeRunDelegate(for: attachment)
 
             /// Platzhalter-String
@@ -244,62 +250,6 @@ extension BlockRenderer {
             mutable.replaceCharacters(in: nsRange, with: ph)
         }
         return mutable
-    }
-    
-    /// "person.circle:35" → ("person.circle", 35)
-//    private func parse(_ token: String) -> (String, Double)? {
-//        let parts = token.split(separator: ":")
-//        guard let name = parts.first else { return nil }
-//        let size = parts.count > 1 ? Double(parts[1]) ?? 24 : 24
-//        return (String(name), size)
-//    }
-//
-    /// SFSymbol laden oder eigenes Bild holen
-//    private func makeImage(name: String, pointSize: Double) -> CGImage? {
-//        // b) Bild bauen  (SF-Symbol als Beispiel)
-//        
-//        let config = UIImage.SymbolConfiguration(pointSize: pointSize)
-//                        .applying(UIImage.SymbolConfiguration.preferringMulticolor())
-//        // 2. UIImage im Original-Rendering (mehrfarbig)
-//        
-//        let uiImage = UIImage(named: name) ?? UIImage(systemName: name, withConfiguration: config)?
-//                              .withRenderingMode(.alwaysOriginal)
-//        return uiImage?.cgImage
-//    }
-        
-    //----------------------------------------------------------------------------------------
-    // MARK: - Einfügen eines Images
-
-    func imageURL(_ block:   AttributeScopes.FoundationAttributes.ImageURLAttribute.Value,
-                  attrText:  AttributedString,
-                  range:     Range<AttributedString.Index>,
-                  textSize:  CGFloat)
-    -> NSAttributedString?
-    {
-        
-        /// Die ImageURL kann mit den Parametern für Höhe und Breite ergänzt sein (getrennt mit `:`)
-        let components = block.absoluteString.components(separatedBy: ":")
-        guard let imagename = components.first,
-              let image = UIImage(named: imagename) ?? UIImage(systemName: imagename),
-              let cgImage = image.cgImage
-        else { return nil }
-        
-        // Delegate + Referenz auf Payload anlegen
-        let attach = ImageAttachment(image: cgImage, size: CGSize(width: 30, height: 30), font: UIFont.systemFont(ofSize: 32))
-        let delegate = CTRunDelegateCreate(&runDelegateCallbacks,
-                                           Unmanaged.passRetained(attach).toOpaque())!
-
-        let placeholder = NSMutableAttributedString(string: "\u{FFFC}")   // 1 Zeichen
-        placeholder.addAttribute( .runDelegate,
-                                  value: delegate,
-                                  range: NSRange(location: 0, length: 1))
-
-        // Zusätzlich ein eigener Key, damit wir die Grafik später wiederfinden
-        placeholder.addAttribute( .myImageAttachment,
-                                  value: attach,
-                                  range: NSRange(location: 0, length: 1))
-        
-        return placeholder
     }
 }
 
@@ -410,9 +360,9 @@ final class HeadingRenderer: BlockRenderer {
         mutable.addAttributes([.font: block.headerFont])
         self.blockContent.attrText = mutable 
 
-        let mutable1 = NSMutableAttributedString(attributedString: self.blockContent.attrText)
-        mutable1.addAttributes([.foregroundColor: UIColor.systemBlue])
-        self.blockContent.attrText = mutable1
+//        let mutable1 = NSMutableAttributedString(attributedString: self.blockContent.attrText)
+//        mutable1.addAttributes([.foregroundColor: UIColor.systemBlue])
+//        self.blockContent.attrText = mutable1
         
         self.blockContent.attrText = preprocess(self.blockContent.attrText)
     }
