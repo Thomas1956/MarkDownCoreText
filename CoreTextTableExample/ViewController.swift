@@ -48,7 +48,7 @@ class ViewController: UIViewController {
     Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
     _______________
     
-    # Headline 1 ![Circle](person.circle:50)
+    # Headline 1-![Circle](HappyBee:70)
     
     ## ![Circle](person.circle:35) Headline 2 
 
@@ -56,12 +56,12 @@ class ViewController: UIViewController {
 
     --------
     
-    ^[Lorem ipsum **bold** dolor sit _italic_ amet, ![Trash](trash:22) consectetur **adipisicing** elit.](size:22, color: 'orange')
+    ^[Lorem ipsum **bold** dolor sit _italic_ amet, -![Trash](trash)- consectetur **adipisicing** elit.](size:22, color: 'orange')
 
     - List item 1 lorem ipsum dolor sit amet lorem ipsum dolor
     - List item 2 ![Circle](circle)
 
-    ![AppIcon](AppIcon1024:50)
+    ![AppIcon](AppIcon1024:80)
     
     1. List item 1 aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
     3. List item 2

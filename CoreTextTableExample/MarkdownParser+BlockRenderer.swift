@@ -209,37 +209,44 @@ extension BlockRenderer {
             guard let token = (value as? AnyObject)?.description
             else { return }
 
-            let config = UIImage.SymbolConfiguration(pointSize: pointSize)
+            /// Den Font entweder aus dem Header, aus dem Paragraph ermitteln oder Standardfont
+            /// Aus dem Font xHeight für die Berechnung der Mitte eines `-` ermitteln
+            let font = mutable.attribute(.font, at: nsRange.location) ?? UIFont.systemFont(ofSize: pointSize)
+
+            /// Image Konfiguration ermitteln
+            let config = UIImage.SymbolConfiguration(font: font)
                                 .applying(UIImage.SymbolConfiguration.preferringMulticolor())
 
-            /// Die ImageURL kann mit den Parametern für Höhe und Breite ergänzt sein (getrennt mit `:`)
+          /// Die ImageURL kann mit den Parametern für Höhe und Breite ergänzt sein (getrennt mit `:`)
             let components = token.components(separatedBy: ":")
             guard let imagename = components.first,
                   let image = UIImage(named: imagename) ??
                               UIImage(systemName: imagename, withConfiguration: config)?
                                                             .withRenderingMode(.alwaysOriginal)
             else { return }
-   
-            /// Den Font entweder aus dem Header, aus dem Paragraph ermitteln oder Standardfont
-            /// Aus dem Font xHeight für die Berechnung der Mitte eines `-` ermitteln
-            let font = mutable.attribute(.font, at: nsRange.location) ?? UIFont.systemFont(ofSize: pointSize)
-            var size = CGSize(width: 24, height: 24)
             
-            /// Wenn es eine Breite und/oder eine Höhe gibt, diese ermitteln zum Beispiel `100x50`
+            ///-----------------------------------------------------------------------------------
+            /// Größe des Images und das Seitenverhältnis ermitteln
+            var width  = image.size.width
+            var height = image.size.height
+            let aspect = width / height
+
+            /// Wenn es eine Breite und/oder eine Höhe gibt, diese ermitteln zum Beispiel `100x50`. Wenn es nur einen Wert
+            /// gibt, wird dieser als Höhe verwendet und die Breite berechnet.
             if components.count > 1 {
                 let imagesize = components[1].split(separator: "x")
                 
-                if let width  = (imagesize.first as? NSString)?.doubleValue,
-                   let height = (imagesize.last  as? NSString)?.doubleValue {
-                    /// Normalerweise liegt die Unterkante des Images auf der Baseline des Textes. Um das Image
-                    /// auf die Mitte des Textes auszurichten, muss man die Y-Position verschieben.
+                width  = (imagesize.first as? NSString)?.doubleValue ?? width
+                height = (imagesize.last  as? NSString)?.doubleValue ?? height
                 
-                   size = CGSize(width: width, height: height)
+                /// Wenn nur ein Wert eingetragen ist, dann diesen als Höhe verwenden und die Breite berechnen
+                if imagesize.count < 2 {
+                    width = height * aspect
                 }
             }
 
             /// Attachment und Run-Delegate
-            let attachment = ImageAttachment(image: image, size: size, font: font)
+            let attachment = ImageAttachment(image: image, size: .init(width: width, height: height), font: font)
             let delegate   = makeRunDelegate(for: attachment)
 
             /// Platzhalter-String
