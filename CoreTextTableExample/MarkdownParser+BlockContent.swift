@@ -129,8 +129,11 @@ extension MarkdownScrollView {
                                      bulletPoint
                 ).padding(to: 24)
             }
-            return String(format: " %2d  ", identity) + "\(kind)".padding(to: 15) +
-            listString + "\t\(String(describing: block))"
+            listString = String(format: " %2d  ", identity) + "\(kind)".padding(to: 15) + listString
+            if let block = self.block {
+                listString += "\t\(String(describing: block))"
+            }
+            return listString
         }
     }
     
