@@ -14,20 +14,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-//        let sampleTable = Table(
-//            headers: ["Name", "Description", "Notes"],
-//            rows: [
-//                ["Item 1", "This is a longer description that will wrap into multiple lines.", "Lorem ipsum dolor sit amet."],
-//                ["Item 2", "Short desc.", "Another note here that also might wrap depending on width."]
-//            ]
-//        )
-
-//        let tableView = CoreTextTableView(frame: view.bounds)
-//        tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-//        tableView.table = sampleTable
-//        view.addSubview(tableView)
-        
+         
         let scrollView = MarkdownScrollView(frame: view.bounds)
         view.addSubview(scrollView)
 
