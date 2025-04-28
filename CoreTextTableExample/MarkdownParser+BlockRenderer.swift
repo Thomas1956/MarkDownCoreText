@@ -16,6 +16,9 @@ extension NSAttributedString.Key {
     
     /// Bridge-Name für Swift-Attribut \.imageURL
     static let imageURL = NSAttributedString.Key("NSImageURL")
+    
+    /// Alias für kCTRunDelegateAttributeName
+    static let runDelegate = NSAttributedString.Key(kCTRunDelegateAttributeName as String)
 }
 
 // -------------------------------------------------------------------------------------------
@@ -24,29 +27,48 @@ extension NSAttributedString.Key {
 final class ImageAttachment {
     let image: CGImage
     let size : CGSize
-    init(image: CGImage, size: CGSize) {
+    let font : CTFont
+
+    init(image: CGImage, size: CGSize, font: CTFont) {
         self.image = image
         self.size  = size
+        self.font  = font
     }
 }
 
 // MARK: - 1) Callbacks nur EINMAL anlegen
-private var runDelegateCallbacks = CTRunDelegateCallbacks(
-    version: kCTRunDelegateVersion1,             // Pflichtfeld
-    dealloc: { ptr in
-        Unmanaged<ImageAttachment>.fromOpaque(ptr).release()
-    },
-    getAscent: { ptr in
-        let a = Unmanaged<ImageAttachment>.fromOpaque(ptr).takeUnretainedValue()
-        return a.size.height          // legt Oberkante fest
-    },
-    getDescent: { _ in 0 },           // kein „Unterlängen-Überhang“
-    
-    getWidth: { ptr in
-        let a = Unmanaged<ImageAttachment>.fromOpaque(ptr).takeUnretainedValue()
-        return a.size.width           // Platz nach rechts
-    }
-)
+private var runDelegateCallbacks: CTRunDelegateCallbacks = {
+    var cb = CTRunDelegateCallbacks(
+        version: kCTRunDelegateVersion1,
+        dealloc: { ptr in
+            Unmanaged<ImageAttachment>.fromOpaque(ptr).release()
+        },
+        getAscent: { ptr in
+            let att = Unmanaged<ImageAttachment>
+                         .fromOpaque(ptr)
+                         .takeUnretainedValue()
+            // x-Height des Fonts
+            let xh = CTFontGetXHeight(att.font)
+            // Bildoberkante = Bildhalbhöhe + x-Height/Halb
+            return att.size.height/2 + xh * 0.55 - 0.2
+        },
+        getDescent: { ptr in
+            let att = Unmanaged<ImageAttachment>
+                         .fromOpaque(ptr)
+                         .takeUnretainedValue()
+            let xh = CTFontGetXHeight(att.font)
+            let ascent = att.size.height/2 + xh * 0.55 - 0.2
+            return att.size.height - ascent
+        },
+        getWidth: { ptr in
+            let att = Unmanaged<ImageAttachment>
+                         .fromOpaque(ptr)
+                         .takeUnretainedValue()
+            return att.size.width
+        }
+    )
+    return cb
+}()
 
 @inline(__always)
 private func makeRunDelegate(for attachment: ImageAttachment) -> CTRunDelegate {
@@ -172,60 +194,78 @@ extension BlockRenderer {
         // 1) bridgen – Attribute bleiben erhalten
         let mutable = NSMutableAttributedString(attributedString: src)
 
-        // 2) Reverse-Enumeration über _Foundation_-Attribute „imageURL“
-        let full = NSRange(location: 0, length: mutable.length)
-        
-        mutable.enumerateAttribute(.imageURL, in: full, options: [.reverse]) { value, nsRange, vv in
- 
-            let token = (value as? AnyObject)?.description
-            // nur Abschnitte mit gesetztem Attribut verarbeiten
-             guard let token
-             else { return }
 
-             // ── Token parsen ─────────────────────────────────
-             let parts = token.split(separator: ":")
-             guard
-                 let name = parts.first,
-                 let pt   = Double(parts.last ?? "24"),
-                 let cg   = makeImage(name: String(name), pointSize: pt)
-             else { return }
+        mutable.enumerateAttribute(.imageURL, in: mutable.rangeAll, options: [.reverse]) { value, nsRange, _ in
+            let pointSize = CGFloat(20)
+            
+            /// Der `value` ist ein seltsamer objC Datentyp, der nur so in einen String gebracht werden kann.
+            guard let token = (value as? AnyObject)?.description
+            else { return }
 
- 
-            // a) Attachment + Run-Delegate
-            let attach = ImageAttachment(
-                image: cg,
-                size : .init(width: pt, height: pt))
+            let config = UIImage.SymbolConfiguration(pointSize: pointSize)
+                                .applying(UIImage.SymbolConfiguration.preferringMulticolor())
 
-            let del = makeRunDelegate(for: attach)               // siehe vorige Antwort
+            /// Die ImageURL kann mit den Parametern für Höhe und Breite ergänzt sein (getrennt mit `:`)
+            let components = token.components(separatedBy: ":")
+            guard let imagename = components.first,
+                  let image = UIImage(named: imagename) ??
+                              UIImage(systemName: imagename, withConfiguration: config)?
+                                                            .withRenderingMode(.alwaysOriginal),
+                  let cgImage = image.cgImage
+            else { return }
+   
+            /// Den Font entweder aus dem Header, aus dem Paragraph ermitteln oder Standardfont
+            /// Aus dem Font xHeight für die Berechnung der Mitte eines `-` ermitteln
+            let font = mutable.attribute(.font, at: nsRange.location) ?? UIFont.systemFont(ofSize: pointSize)
+            var size = CGSize(width: 24, height: 24)
+            
+            /// Wenn es eine Breite und/oder eine Höhe gibt, diese ermitteln zum Beispiel `100x50`
+            if components.count > 1 {
+                let imagesize = components[1].split(separator: "x")
+                
+                if let width  = (imagesize.first as? NSString)?.doubleValue,
+                   let height = (imagesize.last  as? NSString)?.doubleValue {
+                    /// Normalerweise liegt die Unterkante des Images auf der Baseline des Textes. Um das Image
+                    /// auf die Mitte des Textes auszurichten, muss man die Y-Position verschieben.
+                
+                   size = CGSize(width: width, height: height)
+                }
+            }
 
-            // b) Platzhalter-String
-            let ph = NSAttributedString(
-                string: "\u{FFFC}",
-                attributes: [
-                    NSAttributedString.Key(kCTRunDelegateAttributeName as String): del,
-                    .myImageAttachment : attach
-                ])
+            /// Attachment und Run-Delegate
+            let attachment = ImageAttachment(image: cgImage, size: size, font: font)
+            let delegate   = makeRunDelegate(for: attachment)
 
-            // c) Token → Platzhalter ersetzen
+            /// Platzhalter-String
+            let ph = NSAttributedString(string: "\u{FFFC}",
+                                        attributes: [ .runDelegate       : delegate,
+                                                      .myImageAttachment : attachment ])
+            /// Token mit Platzhalter ersetzen
             mutable.replaceCharacters(in: nsRange, with: ph)
         }
         return mutable
     }
     
     /// "person.circle:35" → ("person.circle", 35)
-    private func parse(_ token: String) -> (String, Double)? {
-        let parts = token.split(separator: ":")
-        guard let name = parts.first else { return nil }
-        let size = parts.count > 1 ? Double(parts[1]) ?? 24 : 24
-        return (String(name), size)
-    }
-
+//    private func parse(_ token: String) -> (String, Double)? {
+//        let parts = token.split(separator: ":")
+//        guard let name = parts.first else { return nil }
+//        let size = parts.count > 1 ? Double(parts[1]) ?? 24 : 24
+//        return (String(name), size)
+//    }
+//
     /// SFSymbol laden oder eigenes Bild holen
-    private func makeImage(name: String, pointSize: Double) -> CGImage? {
-        // b) Bild bauen  (SF-Symbol als Beispiel)
-        let config = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .regular)
-        return (UIImage(named: name) ?? UIImage(systemName: name, withConfiguration: config))?.cgImage
-    }
+//    private func makeImage(name: String, pointSize: Double) -> CGImage? {
+//        // b) Bild bauen  (SF-Symbol als Beispiel)
+//        
+//        let config = UIImage.SymbolConfiguration(pointSize: pointSize)
+//                        .applying(UIImage.SymbolConfiguration.preferringMulticolor())
+//        // 2. UIImage im Original-Rendering (mehrfarbig)
+//        
+//        let uiImage = UIImage(named: name) ?? UIImage(systemName: name, withConfiguration: config)?
+//                              .withRenderingMode(.alwaysOriginal)
+//        return uiImage?.cgImage
+//    }
         
     //----------------------------------------------------------------------------------------
     // MARK: - Einfügen eines Images
@@ -245,12 +285,12 @@ extension BlockRenderer {
         else { return nil }
         
         // Delegate + Referenz auf Payload anlegen
-        let attach = ImageAttachment(image: cgImage, size: CGSize(width: 30, height: 30))
+        let attach = ImageAttachment(image: cgImage, size: CGSize(width: 30, height: 30), font: UIFont.systemFont(ofSize: 32))
         let delegate = CTRunDelegateCreate(&runDelegateCallbacks,
                                            Unmanaged.passRetained(attach).toOpaque())!
 
         let placeholder = NSMutableAttributedString(string: "\u{FFFC}")   // 1 Zeichen
-        placeholder.addAttribute( kCTRunDelegateAttributeName as NSAttributedString.Key,
+        placeholder.addAttribute( .runDelegate,
                                   value: delegate,
                                   range: NSRange(location: 0, length: 1))
 
@@ -347,11 +387,7 @@ final class ParagraphRenderer: BlockRenderer {
             let ctStyle = CTParagraphStyleCreate(&settings, settings.count)
 
             let nsAttr = NSMutableAttributedString(attributedString: blockContent.attrText)
-            nsAttr.addAttribute(
-                kCTParagraphStyleAttributeName as NSAttributedString.Key,
-                value: ctStyle,
-                range: NSRange(location: 0, length: nsAttr.length)
-            )
+            nsAttr.addAttributes([.paragraphStyle : ctStyle])
             blockContent.attrText = nsAttr
         }
 
@@ -367,12 +403,18 @@ final class HeadingRenderer: BlockRenderer {
 
     init(blockContent: MarkdownScrollView.BlockContent) {
         self.blockContent = blockContent
-        self.blockContent.attrText = preprocess(blockContent.attrText)
 
         guard let block = blockContent.block else { return }
-        var attrText = AttributedString(blockContent.attrText)
-        attrText.font = block.headerFont
-        self.blockContent.attrText = NSAttributedString(attrText)
+        
+        let mutable = NSMutableAttributedString(attributedString: self.blockContent.attrText)
+        mutable.addAttributes([.font: block.headerFont])
+        self.blockContent.attrText = mutable 
+
+        let mutable1 = NSMutableAttributedString(attributedString: self.blockContent.attrText)
+        mutable1.addAttributes([.foregroundColor: UIColor.systemBlue])
+        self.blockContent.attrText = mutable1
+        
+        self.blockContent.attrText = preprocess(self.blockContent.attrText)
     }
     
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {

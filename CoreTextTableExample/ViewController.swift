@@ -61,9 +61,9 @@ class ViewController: UIViewController {
     Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
     _______________
     
-    Headline 1 ![Circle](person.circle:50)
+    # Headline 1 ![Circle](person.circle:50)
     
-    ![Circle](person.circle:35) Headline 2 
+    ## ![Circle](person.circle:35) Headline 2 
 
     Here is an [Example Link](https://example.com).
 
