@@ -422,6 +422,18 @@ extension MarkdownScrollView {
         for (index, blockContent) in allBlocks.enumerated() {
             guard let block = blockContent.block else { continue }
             
+            var attrText = NSMutableAttributedString(attributedString: blockContent.attrText)
+            var tabulators             : [CTTextTab] = []
+            var firstLineHeadIndent    : CGFloat     = block.hasBlockQuote ? Markdown.blockquoteContentIndent : 0
+            var headIndent             : CGFloat     = block.hasBlockQuote ? Markdown.blockquoteContentIndent : 0
+            var tailIndent             : CGFloat     = -20
+            var paragraphSpacing       : CGFloat     = 0
+            var paragraphSpacingBefore : CGFloat     = 0
+            
+  
+            ///-------------------------------------------------------------------------------
+            /// Blockerkennung, um Abstände nach Bedarf einzustellen
+            ///
             let prevIndex = max(index - 1, 0)
             let nextIndex = min(index + 1, allBlocks.count - 1)
             
@@ -452,9 +464,7 @@ extension MarkdownScrollView {
             ///-------------------------------------------------------------------------------
             /// Header erkennen und den Font des Headers ergänzen
             if block.hasHeader {
-                let mutable = NSMutableAttributedString(attributedString: blockContent.attrText)
-                mutable.addAttributes([.font: block.headerFont])
-                allBlocks[index].attrText = mutable             /// Zurückspeichern
+                attrText.addAttributes([.font: block.headerFont])
             }
             
             /// List erkennen und die Bullets voranstellen
@@ -464,9 +474,33 @@ extension MarkdownScrollView {
                     attributes: blockContent.attrText.attributes(at: 0, effectiveRange: nil))
                 
                 bullet.append(blockContent.attrText)            /// Original-Text anhängen
-                allBlocks[index].attrText = bullet              /// und zurückspeichern
+                attrText = bullet
+                ///---------------------------------------------------------------------------
+                
+                let w = 3 * blockContent.widthDefault
+                
+                /// Einzüge und Tab-Stops festlegen
+                headIndent          = headIndent          + blockContent.headIndent
+                firstLineHeadIndent = firstLineHeadIndent + blockContent.firstLineHeadIndent
+                tabulators          = [CTTextTabCreate(.right, headIndent - w, nil),
+                                       CTTextTabCreate(.left,  headIndent, nil ) ]
             }
+            
+            /// Style einfügen
+            attrText.addCTParagraphStyle([
+                .lineHeightMultiple:     1.1,
+                .defaultTabInterval:     100,
+                .tabStops:               tabulators,
+                .headIndent:             headIndent,
+                .firstLineHeadIndent:    firstLineHeadIndent,
+                .tailIndent:             tailIndent,
+                .paragraphSpacing:       paragraphSpacing,
+                .paragraphSpacingBefore: paragraphSpacingBefore,
+            ])
+            
+            allBlocks[index].attrText = attrText
         }
+        
     }
 }
 

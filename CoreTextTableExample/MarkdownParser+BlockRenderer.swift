@@ -107,7 +107,7 @@ extension BlockRenderer {
         /// Hintergrund füllen
         var rect = rect
         rect.origin.x   += Markdown.blockquoteHorzIndent
-        rect.size.width -= 2 * Markdown.blockquoteHorzIndent
+        rect.size.width -= Markdown.blockquoteHorzIndent * 2
         context.setFillColor(Markdown.blockquoteColor.cgColor)
         context.fill(rect)
         
@@ -144,8 +144,8 @@ extension BlockRenderer {
                    height: frame.height - insets.top     - insets.bottom)
         }
         
-        //        context.setFillColor(UIColor.systemYellow.highlight.highlight.cgColor)
-        //        context.fill(contentRect)
+//                context.setFillColor(UIColor.systemYellow.highlight.highlight.cgColor)
+//                context.fill(contentRect)
         
         let text = blockContent.attrText
         let path = CGMutablePath()
@@ -295,12 +295,12 @@ final class ParagraphRenderer: BlockRenderer {
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         guard let block = blockContent.block else { return 0 }
 
-        self.insets.leading  = block.hasBlockQuote ?  Markdown.blockquoteContentIndent : 0
-        self.insets.top      = block.hasBlockQuote ?  Markdown.blockquoteVertOffset : 0
-        self.insets.trailing = block.hasBlockQuote ?  0 : 0
-
-        self.insets.top    += blockContent.isFirstBlockQuote ? 10 : 0.0
-        self.insets.bottom  = blockContent.isLastBlockQuote  ? 10 : 0.0
+//        self.insets.leading  = block.hasBlockQuote ?  Markdown.blockquoteContentIndent : 0
+//        self.insets.top      = block.hasBlockQuote ?  Markdown.blockquoteVertOffset : 0
+//        self.insets.trailing = block.hasBlockQuote ?  0 : 0
+//
+//        self.insets.top    += blockContent.isFirstBlockQuote ? 10 : 0.0
+//        self.insets.bottom  = blockContent.isLastBlockQuote  ? 10 : 0.0
 
         let height = self.contentHeight(width) + 8 + self.insets.top + self.insets.bottom
         self.frame = CGRect(x: 0, y: y, width: width, height: height)
@@ -311,50 +311,13 @@ final class ParagraphRenderer: BlockRenderer {
         guard let block = blockContent.block else { return }
         
         if block.hasBlockQuote {
-            let top    = blockContent.isFirstBlockQuote ? 10 : 0.0
-            let bottom = blockContent.isLastBlockQuote  ? 10 : 0.0
+            let top    = blockContent.isFirstBlockQuote ? 0 : 0.0
+            let bottom = blockContent.isLastBlockQuote  ? 0 : 0.0
             
             let rect = CGRect(x: 0, y: bottom, width: frame.width, height: frame.height - top - bottom)
             drawBlockQuote(in: context, rect: rect)
         }
-        
-        if block.hasList {
-            let w = 3 * blockContent.widthDefault
-            
-            // 1) Einen Tab-Stop anlegen
-            let tabs: [CTTextTab] =
-                        [CTTextTabCreate(.right, blockContent.headIndent - w, nil),
-                        CTTextTabCreate(.left,  blockContent.headIndent, nil ) ]
-
-            // 2) Variablen, die bis zum CTParagraphStyle-Call leben
-            
-            // ---- Werte, die garantiert bis zur Style-Erzeugung leben -------------
-            var tabArray           : CFArray = tabs as CFArray
-            var defInterval        : CGFloat = 100
-            var paragraphSpacing   : CGFloat = 10.0
-            var lineHeightMultiple : CGFloat = 1.1
-            
-            var headIndent: CGFloat = blockContent.headIndent
-            var firstLineHeadIndent: CGFloat = blockContent.firstLineHeadIndent
-                    
-            // ---- Settings-Array ---------------------------------------------------
-            var settings: [CTParagraphStyleSetting] = [
-                makeSetting(.tabStops,            &tabArray),
-                makeSetting(.defaultTabInterval,  &defInterval),
-                makeSetting(.headIndent,          &headIndent),
-                makeSetting(.firstLineHeadIndent, &firstLineHeadIndent),
-                makeSetting(.paragraphSpacing,    &paragraphSpacing),
-                makeSetting(.lineHeightMultiple,  &lineHeightMultiple),
-            ]
-            
-            // ---- Paragraph-Style erzeugen und weiterverwenden ---------------------
-            let ctStyle = CTParagraphStyleCreate(&settings, settings.count)
-
-            let nsAttr = NSMutableAttributedString(attributedString: blockContent.attrText)
-            nsAttr.addAttributes([.paragraphStyle : ctStyle])
-            blockContent.attrText = nsAttr
-        }
-
+ 
         drawContent(in: context)
     }
 }

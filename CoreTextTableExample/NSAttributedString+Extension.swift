@@ -8,6 +8,82 @@
 
 import UIKit
 
+import CoreText
+import Foundation
+
+// Bequeme Hülle für immutable Strings
+extension NSAttributedString {
+    func applyingCTParagraphStyle(
+        _ styles: [CTParagraphStyleSpecifier: Any],
+        range: NSRange? = nil
+    ) -> NSAttributedString {
+        let mut = NSMutableAttributedString(attributedString: self)
+        mut.addCTParagraphStyle(styles, range: range)
+        return mut
+    }
+}
+
+// MARK: - NSMutableAttributedString helper
+extension NSMutableAttributedString {
+    
+    func addCTParagraphStyle(
+        _ styles: [CTParagraphStyleSpecifier: Any],
+        range: NSRange? = nil
+    ) {
+        
+        var floats = [CGFloat]()
+        var arrays = [CFArray]()
+        
+        floats.reserveCapacity(styles.count)   //  ◀︎ Pointer bleibt gültig
+        arrays.reserveCapacity(styles.count)
+        
+        var settings = [CTParagraphStyleSetting]()
+        settings.reserveCapacity(styles.count)
+        
+        func addFloat(_ spec: CTParagraphStyleSpecifier, _ v: CGFloat) {
+            floats.append(v)
+            withUnsafePointer(to: &floats[floats.count - 1]) { p in
+                settings.append(.init(spec: spec,
+                                      valueSize: MemoryLayout<CGFloat>.size,
+                                      value: p))
+            }
+        }
+        func addArray(_ spec: CTParagraphStyleSpecifier, _ v: CFArray) {
+            arrays.append(v)
+            withUnsafePointer(to: &arrays[arrays.count - 1]) { p in
+                settings.append(.init(spec: spec,
+                                      valueSize: MemoryLayout<CFArray>.size,
+                                      value: p))
+            }
+        }
+        
+        // ---- Werte einsortieren ------------------------------------------
+        for (spec, raw) in styles {
+            switch raw {
+            case let n as CGFloat:  addFloat(spec, n)
+            case let n as Double:   addFloat(spec, CGFloat(n))
+            case let n as Float:    addFloat(spec, CGFloat(n))
+            case let n as Int:      addFloat(spec, CGFloat(n))
+            case let n as NSNumber: addFloat(spec, CGFloat(truncating: n))
+                
+            case let arr as CFArray:   addArray(spec, arr)
+            case let arr as NSArray:   addArray(spec, arr as CFArray)
+            case let arr as [Any]:     addArray(spec, arr as CFArray)
+                
+            default: continue          // unsupported type
+            }
+        }
+        
+        // ---- Paragraph-Style bauen & anwenden ----------------------------
+        let style = CTParagraphStyleCreate(settings, settings.count)
+        let key   = NSAttributedString.Key(kCTParagraphStyleAttributeName as String)
+        addAttribute(key,
+                     value: style,
+                     range: range ?? NSRange(location: 0, length: length))
+    }
+}
+    
+
 // MARK: – NSAttributedString: nicht-mutierende Helfer
 extension NSAttributedString {
     /// Rückgabe eines neuen AttributedString, in dem self + other verkettet sind
