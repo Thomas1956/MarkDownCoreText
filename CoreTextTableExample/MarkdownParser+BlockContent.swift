@@ -426,29 +426,29 @@ extension MarkdownScrollView {
             var tabulators             : [CTTextTab] = []
             var firstLineHeadIndent    : CGFloat     = block.hasBlockQuote ? Markdown.blockquoteContentIndent : 0
             var headIndent             : CGFloat     = block.hasBlockQuote ? Markdown.blockquoteContentIndent : 0
-            var tailIndent             : CGFloat     = -20
-            var paragraphSpacing       : CGFloat     = 0
+            let tailIndent             : CGFloat     = -20
+            var paragraphSpacing       : CGFloat     = 5
             var paragraphSpacingBefore : CGFloat     = 0
             
-  
             ///-------------------------------------------------------------------------------
             /// Blockerkennung, um Abstände nach Bedarf einzustellen
             ///
-            let prevIndex = max(index - 1, 0)
-            let nextIndex = min(index + 1, allBlocks.count - 1)
-            
-            let prevBlockQuote = allBlocks[prevIndex].block?.hasBlockQuote ?? false
-            let nextBlockQuote = allBlocks[nextIndex].block?.hasBlockQuote ?? false
+            let prevBlockQuote = index > 0                   && allBlocks[index-1].block?.hasBlockQuote ?? false
+            let nextBlockQuote = index < allBlocks.count - 1 && allBlocks[index+1].block?.hasBlockQuote ?? false
             let currBlockQuote = block.hasBlockQuote
             
             /// Start eines BlockQuote
-            if  currBlockQuote && !prevBlockQuote && index > 0 {
+            if  currBlockQuote && !prevBlockQuote {
                 allBlocks[index].isFirstBlockQuote = true
+                paragraphSpacingBefore = 20
+                attrText.addAttributes([.foregroundColor: UIColor.systemPurple], range: NSRange(location: 0, length: 1))
             }
             
             /// Ende eines BlockQuote
             if currBlockQuote && !nextBlockQuote {
                 allBlocks[index].isLastBlockQuote = true
+                paragraphSpacing = 20
+                attrText.addAttributes([.foregroundColor: UIColor.systemTeal], range: NSRange(location: 1, length: 1))
             }
             
             /// Absatz nach einer BlockQuote
@@ -486,9 +486,16 @@ extension MarkdownScrollView {
                                        CTTextTabCreate(.left,  headIndent, nil ) ]
             }
             
+            /// Code-Block
+            if block.hasCodeBlock {
+                paragraphSpacingBefore = 0
+                paragraphSpacing = 5
+            }
+            
             /// Style einfügen
             attrText.addCTParagraphStyle([
-                .lineHeightMultiple:     1.1,
+                .lineHeightMultiple:     1.0,
+                .lineSpacingAdjustment:  0,
                 .defaultTabInterval:     100,
                 .tabStops:               tabulators,
                 .headIndent:             headIndent,
@@ -500,7 +507,6 @@ extension MarkdownScrollView {
             
             allBlocks[index].attrText = attrText
         }
-        
     }
 }
 

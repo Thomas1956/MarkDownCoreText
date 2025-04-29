@@ -16,15 +16,14 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-         
         scrollView = MarkdownScrollView(frame: view.bounds)
         view.addSubview(scrollView)
 
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 10).isActive = true
         scrollView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
-        scrollView.topAnchor.constraint(equalTo: view.topAnchor, constant: 10).isActive = true
-        scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10).isActive = true
+        scrollView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0).isActive = true
+        scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0).isActive = true
         
         scrollView.markdown(string: text1, size: textSize, textColor: textColor )
         
@@ -71,6 +70,8 @@ class ViewController: UIViewController {
     
     > - Erstens Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore 
     > - Zweitens
+    
+    > Ende
     
     0 1 2 3 4
     Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
@@ -140,6 +141,9 @@ class ViewController: UIViewController {
     - 1986^[.]() Jahreszahl
     - List item 2 sdd
 
+    > Letzter
+    
+    > Allerletzter
     """
 
 

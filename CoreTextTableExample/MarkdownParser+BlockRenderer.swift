@@ -90,8 +90,6 @@ protocol BlockRenderer: AnyObject {
     var blockContent: MarkdownScrollView.BlockContent { get set }
     /// Zeichen­rechteck relativ zum Content‑View (UIKit‑Koordinaten, (0,0) = oben links)
     var frame: CGRect { get set }
-    /// Ränder des Inhaltes
-    var insets: NSDirectionalEdgeInsets { get set }
     /// Höhe berechnen, wenn eine bestimmte Breite vorgegeben ist
     func measure(y: CGFloat, width: CGFloat) -> CGFloat
     /// Inhalt in den bereits nach (0,0) verschobenen CGContext zeichnen.
@@ -103,11 +101,14 @@ extension BlockRenderer {
     
     /// Zeichnen des Hintergrundes von BlockQuote. Das Rechteck ist der gesamte Frame des Renderers.
     func drawBlockQuote(in context: CGContext, rect: CGRect) {
-         
+        
+        let (before, after) = blockContent.attrText.paragraphSpacings(at: 0)
+
         /// Hintergrund füllen
         var rect = rect
-        rect.origin.x   += Markdown.blockquoteHorzIndent
-        rect.size.width -= Markdown.blockquoteHorzIndent * 2
+        rect.origin.x    += Markdown.blockquoteHorzIndent
+        rect.origin.y    += blockContent.isLastBlockQuote ? after/2 : 0
+        rect.size.width  -= Markdown.blockquoteHorzIndent * 2
         context.setFillColor(Markdown.blockquoteColor.cgColor)
         context.fill(rect)
         
@@ -124,7 +125,7 @@ extension BlockRenderer {
         
         /// Size zum Berechnen der Höhe des Inhaltes unter Berücksichtigung der Insets
         func widthConstraint(_ width: CGFloat) -> CGSize {
-            CGSize(width: width - self.insets.leading - self.insets.trailing, height: .greatestFiniteMagnitude)
+            CGSize(width: width, height: .greatestFiniteMagnitude)
         }
 
         let text = blockContent.attrText
@@ -139,9 +140,9 @@ extension BlockRenderer {
         
         /// Rechteck für das Zeichnen des Inhaltes
         var contentRect: CGRect {
-            CGRect(x: self.insets.leading, y: insets.bottom,
-                   width:  frame.width  - insets.leading - insets.trailing,
-                   height: frame.height - insets.top     - insets.bottom)
+            CGRect(x: 0, y:  (blockContent.isFirstBlockQuote ? -10 : 0),
+                   width:  frame.width,
+                   height: frame.height)
         }
         
 //                context.setFillColor(UIColor.systemYellow.highlight.highlight.cgColor)
@@ -284,7 +285,6 @@ func makeSetting<T>(_ spec: CTParagraphStyleSpecifier,
 // -------- Paragraph ---------------------------------------------------
 final class ParagraphRenderer: BlockRenderer {
     var blockContent: MarkdownScrollView.BlockContent
-    var insets: NSDirectionalEdgeInsets = .zero
     var frame: CGRect = .zero
     
     init(blockContent: MarkdownScrollView.BlockContent) {
@@ -293,16 +293,10 @@ final class ParagraphRenderer: BlockRenderer {
     }
     
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
-        guard let block = blockContent.block else { return 0 }
+        let (before, after) = blockContent.attrText.paragraphSpacings(at: 0)
+        print("before: \(before), after: \(after)")
 
-//        self.insets.leading  = block.hasBlockQuote ?  Markdown.blockquoteContentIndent : 0
-//        self.insets.top      = block.hasBlockQuote ?  Markdown.blockquoteVertOffset : 0
-//        self.insets.trailing = block.hasBlockQuote ?  0 : 0
-//
-//        self.insets.top    += blockContent.isFirstBlockQuote ? 10 : 0.0
-//        self.insets.bottom  = blockContent.isLastBlockQuote  ? 10 : 0.0
-
-        let height = self.contentHeight(width) + 8 + self.insets.top + self.insets.bottom
+        let height = self.contentHeight(width) + after + before
         self.frame = CGRect(x: 0, y: y, width: width, height: height)
         return height
     }
@@ -311,10 +305,7 @@ final class ParagraphRenderer: BlockRenderer {
         guard let block = blockContent.block else { return }
         
         if block.hasBlockQuote {
-            let top    = blockContent.isFirstBlockQuote ? 0 : 0.0
-            let bottom = blockContent.isLastBlockQuote  ? 0 : 0.0
-            
-            let rect = CGRect(x: 0, y: bottom, width: frame.width, height: frame.height - top - bottom)
+            let rect = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             drawBlockQuote(in: context, rect: rect)
         }
  

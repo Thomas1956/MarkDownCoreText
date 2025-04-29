@@ -11,6 +11,62 @@ import UIKit
 import CoreText
 import Foundation
 
+extension NSAttributedString {
+
+    /// Liefert `(before, after)` – also paragraphSpacingBefore und paragraphSpacing.
+    /// Falls keines gesetzt ist, gibt's `(0, 0)`.
+    func paragraphSpacings(at idx: Int) -> (before: CGFloat, after: CGFloat) {
+
+        // 1) UIKit / AppKit
+        if let nsStyle = attribute(.paragraphStyle, at: idx, effectiveRange: nil) as? NSParagraphStyle {
+            return (nsStyle.paragraphSpacingBefore, nsStyle.paragraphSpacing)
+        }
+
+        // 2) Core-Text (ohne „always succeeds“-Warnung)
+        let ctKey = NSAttributedString.Key(kCTParagraphStyleAttributeName as String)
+
+        if let any = attribute(ctKey, at: idx, effectiveRange: nil),
+           CFGetTypeID(any as CFTypeRef) == CTParagraphStyleGetTypeID()
+        {
+            // ---------------------------------------------------------------------
+            // 1) Attribut holen (Any!) und in CFTypeRef casten
+            // ---------------------------------------------------------------------
+            let ctKey = NSAttributedString.Key(kCTParagraphStyleAttributeName as String)
+            
+            if let raw = attribute(ctKey, at: idx, effectiveRange: nil) {
+                
+                let cf = raw as CFTypeRef            //  ← gleicher Speicher­typ wie CTParagraphStyle
+                
+                // -----------------------------------------------------------------
+                // 2) Typ-ID vergleichen
+                // -----------------------------------------------------------------
+                guard CFGetTypeID(cf) == CTParagraphStyleGetTypeID() else {
+                    return (0, 0)                    // irgend­ein anderes Core-Text-Objekt
+                }
+                
+                // -----------------------------------------------------------------
+                // 3) Sicher in CTParagraphStyle bit-casten
+                // -----------------------------------------------------------------
+                let ctStyle = unsafeBitCast(cf, to: CTParagraphStyle.self)
+                
+                var before: CGFloat = 0
+                var after : CGFloat = 0
+                CTParagraphStyleGetValueForSpecifier(
+                    ctStyle, .paragraphSpacingBefore,
+                    MemoryLayout<CGFloat>.size, &before)
+                CTParagraphStyleGetValueForSpecifier(
+                    ctStyle, .paragraphSpacing,
+                    MemoryLayout<CGFloat>.size, &after)
+                
+                return (before, after)
+            }
+        }
+        // 3) kein Absatz-Spacing gesetzt
+        return (0, 0)
+    }
+}
+
+
 // Bequeme Hülle für immutable Strings
 extension NSAttributedString {
     func applyingCTParagraphStyle(
