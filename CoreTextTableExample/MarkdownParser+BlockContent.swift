@@ -14,7 +14,7 @@ import Foundation
 // MARK: Extension Markdown Parser
 
 extension MarkdownScrollView {
-    
+
     ///---------------------------------------------------------------------------------------
     /// Struktur für die Vorauswertung der PresentationIntentAttribute
     
@@ -33,6 +33,9 @@ extension MarkdownScrollView {
         var blockQuoteIndent    : CGFloat
         var tableBlock          : TableBlock
         
+        var isFirstBlockQuote   : Bool
+        var isLastBlockQuote    : Bool
+
         /// Spaltenspezifisch
         struct TableColumn {
             var lineText     : String = ""
@@ -102,6 +105,9 @@ extension MarkdownScrollView {
             self.blockQuoteIndent    = 5
             
             self.tableBlock = TableBlock()
+            
+            self.isFirstBlockQuote  = false
+            self.isLastBlockQuote   = false
         }
         
         /// Index für das Dictionary der Listeneinträge
@@ -131,7 +137,7 @@ extension MarkdownScrollView {
             }
             listString = String(format: " %2d  ", identity) + "\(kind)".padding(to: 15) + listString
             if let block = self.block {
-                listString += "\t\(String(describing: block))"
+                listString += "\t \(isFirstBlockQuote ? 1 : 0) \(isLastBlockQuote ? 1 : 0) \(String(describing: block))"
             }
             return listString
         }
@@ -185,7 +191,7 @@ extension MarkdownScrollView {
         var dictBlockIndent = [Int: CGFloat]()          /// Dictionary der Einzüge für den Block Indent
         var dictTableBlock  = [Int: BlockContent.TableBlock]()
         var prevKey         = ""                        /// Key des vorherigen Blocks
-
+        
         for (index, blockContent) in allBlocks.enumerated() {
             let block = blockContent.block
             
@@ -260,7 +266,7 @@ extension MarkdownScrollView {
         ///
         for (index, blockContent) in allBlocks.enumerated() {
             guard let block = blockContent.block, let id = block.listHierarchie else { continue }
-
+            
             /// Der Einzug des Listenelements ist die Summe der Indents in der Hierarchie
             var headIndent          = arrIndent[0...id].reduce(0, +)
             var firstLineHeadIndent = arrIndent[0..<id].reduce(0, +)
@@ -281,13 +287,13 @@ extension MarkdownScrollView {
                 headIndent = dictIndent
             } else {
                 listBulletPoint = "\t" + listBulletPoint + "\t" /// Aufzählungszeichen mit TAB ergänzen
-                
-                let bullet = NSMutableAttributedString(         /// Bullet-Point dem Attributed String voranstellen
-                    string:     listBulletPoint,
-                    attributes: blockContent.attrText.attributes(at: 0, effectiveRange: nil))
-                
-                bullet.append(blockContent.attrText)            /// Original-Text anhängen
-                allBlocks[index].attrText = bullet              /// und zurückspeichern
+//                
+//                let bullet = NSMutableAttributedString(         /// Bullet-Point dem Attributed String voranstellen
+//                    string:     listBulletPoint,
+//                    attributes: blockContent.attrText.attributes(at: 0, effectiveRange: nil))
+//                
+//                bullet.append(blockContent.attrText)            /// Original-Text anhängen
+//                allBlocks[index].attrText = bullet              /// und zurückspeichern
                 dictHeadIndent[blockContent.key] = headIndent   /// Einzug dieses Absatzes merken
             }
             
@@ -331,10 +337,10 @@ extension MarkdownScrollView {
                 return "\(val)"
             }()
             /// Text    -    Key    -    Block Quote Hierarchie    -     Identity    -     KIND    -    List Identity    -    List Hierarchie    -     List Ordinal   -->   FirstLineHeadIndent    -    Bullet Point
-//            print("\(debugText) \t \(blockContent.key.padding(to:10)) \(hierarchie) \(allBlocks[index].debugString.padding(to: 70)) )")
+            //            print("\(debugText) \t \(blockContent.key.padding(to:10)) \(hierarchie) \(allBlocks[index].debugString.padding(to: 70)) )")
         }
         
-
+        
         ///-----------------------------------------------------------------------------------
         /// T A B E L L E
         ///
@@ -350,7 +356,7 @@ extension MarkdownScrollView {
             
             var tabStops: [NSTextTab] = []
             let fontBoxes = UIFont.monospacedSystemFont(ofSize: textSize, weight: Markdown.tableWeightBox)
-
+            
             ///-------------------------------------------------------------------------------
             /// Berechnung der Breiten der Tabelle, der Linien und der Tabulatoren
             ///
@@ -402,13 +408,61 @@ extension MarkdownScrollView {
             }
         }
         
-//        for table in dictTableBlock {
-//            for column in table.value.columns {
-//                print(table.key, table.value.lastRow, table.value.lastColumn, "|", column.alignment.rawValue, column.lineWidth)
-//            }
-//        }
+        //        for table in dictTableBlock {
+        //            for column in table.value.columns {
+        //                print(table.key, table.value.lastRow, table.value.lastColumn, "|", column.alignment.rawValue, column.lineWidth)
+        //            }
+        //        }
+        
+        //        return allBlocks
+        
+        ///-----------------------------------------------------------------------------------
+        /// 3  .  D U R C H L A U F   D E R    L I S T E
+        ///
+        var prevBQ = false
+        
+        for (index, blockContent) in allBlocks.enumerated() {
+            guard let block = blockContent.block else { continue }
+            
+            var prevIndex = max(index - 1, 0)
+            var nextIndex = min(index + 1, allBlocks.count - 1)
+            
+            var prevBlockQuote = allBlocks[prevIndex].block?.hasBlockQuote ?? false
+            var nextBlockQuote = allBlocks[nextIndex].block?.hasBlockQuote ?? false
+            
+            let curBQ = block.hasBlockQuote
+            
+            // BlockQuote Start / End
+            if  curBQ && !prevBQ && index > 0 {
+                allBlocks[index].isFirstBlockQuote = true
+            }
+            if !curBQ &&  prevBQ {
+                allBlocks[index-1].isLastBlockQuote = true
+            }
 
-//        return allBlocks
+            prevBQ = curBQ
+            
+            /// Header erkennen und den Font des Headers ergänzen
+            if block.hasHeader {
+                let mutable = NSMutableAttributedString(attributedString: blockContent.attrText)
+                mutable.addAttributes([.font: block.headerFont])
+                allBlocks[index].attrText = mutable             /// Zurückspeichern
+            }
+            
+            /// List erkennen und die Bullets voranstellen
+            if block.hasList {
+                let bullet = NSMutableAttributedString(         /// Bullet-Point dem Attributed String voranstellen
+                    string:     blockContent.listBulletPointStr,
+                    attributes: blockContent.attrText.attributes(at: 0, effectiveRange: nil))
+                
+                bullet.append(blockContent.attrText)            /// Original-Text anhängen
+                allBlocks[index].attrText = bullet              /// und zurückspeichern
+            }
+        }
+        
+        if prevBQ {
+            allBlocks[allBlocks.count - 1].isLastBlockQuote = true
+        }
     }
 }
 

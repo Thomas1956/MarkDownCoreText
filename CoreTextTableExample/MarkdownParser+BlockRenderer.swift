@@ -139,7 +139,7 @@ extension BlockRenderer {
         
         /// Rechteck für das Zeichnen des Inhaltes
         var contentRect: CGRect {
-            CGRect(x: self.insets.leading, y: 0,
+            CGRect(x: self.insets.leading, y: insets.bottom,
                    width:  frame.width  - insets.leading - insets.trailing,
                    height: frame.height - insets.top     - insets.bottom)
         }
@@ -294,9 +294,13 @@ final class ParagraphRenderer: BlockRenderer {
     
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         guard let block = blockContent.block else { return 0 }
+
         self.insets.leading  = block.hasBlockQuote ?  Markdown.blockquoteContentIndent : 0
         self.insets.top      = block.hasBlockQuote ?  Markdown.blockquoteVertOffset : 0
         self.insets.trailing = block.hasBlockQuote ?  0 : 0
+
+        self.insets.top    += blockContent.isFirstBlockQuote ? 10 : 0.0
+        self.insets.bottom  = blockContent.isLastBlockQuote  ? 10 : 0.0
 
         let height = self.contentHeight(width) + 8 + self.insets.top + self.insets.bottom
         self.frame = CGRect(x: 0, y: y, width: width, height: height)
@@ -307,7 +311,10 @@ final class ParagraphRenderer: BlockRenderer {
         guard let block = blockContent.block else { return }
         
         if block.hasBlockQuote {
-            let rect = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
+            let top    = blockContent.isFirstBlockQuote ? 10 : 0.0
+            let bottom = blockContent.isLastBlockQuote  ? 10 : 0.0
+            
+            let rect = CGRect(x: 0, y: bottom, width: frame.width, height: frame.height - top - bottom)
             drawBlockQuote(in: context, rect: rect)
         }
         
@@ -360,17 +367,6 @@ final class HeadingRenderer: BlockRenderer {
 
     init(blockContent: MarkdownScrollView.BlockContent) {
         self.blockContent = blockContent
-
-        guard let block = blockContent.block else { return }
-        
-        let mutable = NSMutableAttributedString(attributedString: self.blockContent.attrText)
-        mutable.addAttributes([.font: block.headerFont])
-        self.blockContent.attrText = mutable 
-
-//        let mutable1 = NSMutableAttributedString(attributedString: self.blockContent.attrText)
-//        mutable1.addAttributes([.foregroundColor: UIColor.systemBlue])
-//        self.blockContent.attrText = mutable1
-        
         self.blockContent.attrText = preprocess(self.blockContent.attrText)
     }
     

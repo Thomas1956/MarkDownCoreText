@@ -9,13 +9,15 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    var scrollView : MarkdownScrollView!
+
     var textSize:CGFloat = 20
     var textColor = UIColor.label
 
     override func viewDidLoad() {
         super.viewDidLoad()
          
-        let scrollView = MarkdownScrollView(frame: view.bounds)
+        scrollView = MarkdownScrollView(frame: view.bounds)
         view.addSubview(scrollView)
 
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -25,7 +27,33 @@ class ViewController: UIViewController {
         scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10).isActive = true
         
         scrollView.markdown(string: text1, size: textSize, textColor: textColor )
+        
+        prepareContent()
     }
+    
+     func prepareContent() {
+         guard let data = scrollView.exportPDF() else { return }
+
+        //------------------------------------------------------------------------------------
+        /// PDF-Ausgabe - als Seitengröße wird A4 eingestellt
+        
+        let paperRect = CGRect(x: 0, y: 0, width: 595.2, height: 841.8)
+         
+        /// PDF-Renderer
+         
+        /// PDF-URL für temporäres Verzeichnis
+        let tempUrl = NSURL(fileURLWithPath: NSTemporaryDirectory())
+        let urlPDF  = tempUrl.appendingPathComponent("Markdown")!.appendingPathExtension("pdf")
+        
+        do {
+            try data.write(to: urlPDF)                      // PDF-Datei schreiben
+        }
+        catch {
+            print(error.localizedDescription)
+        }            
+     }
+    
+
 
     let text1 =
     """
@@ -89,8 +117,6 @@ class ViewController: UIViewController {
     10 MAT INPUT V
     20 LET N = NUM
     30 IF N = 0 ^[THEN](style: 'marked') 99
-    
-    
     40 FOR I = 1 TO N
     45 LET S = S + V(I)
     50 NEXT I

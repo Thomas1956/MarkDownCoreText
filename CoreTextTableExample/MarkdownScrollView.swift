@@ -216,7 +216,8 @@ fileprivate enum CoreTextBlockFactory {
                 }
             }
             if block.hasHeader {
-                renderers.append(HeadingRenderer(blockContent: intentBlock))
+                renderers.append(ParagraphRenderer(blockContent: intentBlock))
+//                renderers.append(HeadingRenderer(blockContent: intentBlock))
             }
             if block.hasParagraph {
                 renderers.append(ParagraphRenderer(blockContent: intentBlock))
