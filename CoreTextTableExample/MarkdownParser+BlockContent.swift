@@ -419,29 +419,37 @@ extension MarkdownScrollView {
         ///-----------------------------------------------------------------------------------
         /// 3  .  D U R C H L A U F   D E R    L I S T E
         ///
-        var prevBQ = false
-        
         for (index, blockContent) in allBlocks.enumerated() {
             guard let block = blockContent.block else { continue }
             
-            var prevIndex = max(index - 1, 0)
-            var nextIndex = min(index + 1, allBlocks.count - 1)
+            let prevIndex = max(index - 1, 0)
+            let nextIndex = min(index + 1, allBlocks.count - 1)
             
-            var prevBlockQuote = allBlocks[prevIndex].block?.hasBlockQuote ?? false
-            var nextBlockQuote = allBlocks[nextIndex].block?.hasBlockQuote ?? false
+            let prevBlockQuote = allBlocks[prevIndex].block?.hasBlockQuote ?? false
+            let nextBlockQuote = allBlocks[nextIndex].block?.hasBlockQuote ?? false
+            let currBlockQuote = block.hasBlockQuote
             
-            let curBQ = block.hasBlockQuote
-            
-            // BlockQuote Start / End
-            if  curBQ && !prevBQ && index > 0 {
+            /// Start eines BlockQuote
+            if  currBlockQuote && !prevBlockQuote && index > 0 {
                 allBlocks[index].isFirstBlockQuote = true
             }
-            if !curBQ &&  prevBQ {
-                allBlocks[index-1].isLastBlockQuote = true
+            
+            /// Ende eines BlockQuote
+            if currBlockQuote && !nextBlockQuote {
+                allBlocks[index].isLastBlockQuote = true
+            }
+            
+            /// Absatz nach einer BlockQuote
+            if !currBlockQuote && prevBlockQuote {
+                
+            }
+            
+            /// Absatz vor einer BlockQuote
+            if !currBlockQuote && nextBlockQuote {
+                
             }
 
-            prevBQ = curBQ
-            
+            ///-------------------------------------------------------------------------------
             /// Header erkennen und den Font des Headers ergänzen
             if block.hasHeader {
                 let mutable = NSMutableAttributedString(attributedString: blockContent.attrText)
@@ -458,10 +466,6 @@ extension MarkdownScrollView {
                 bullet.append(blockContent.attrText)            /// Original-Text anhängen
                 allBlocks[index].attrText = bullet              /// und zurückspeichern
             }
-        }
-        
-        if prevBQ {
-            allBlocks[allBlocks.count - 1].isLastBlockQuote = true
         }
     }
 }
