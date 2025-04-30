@@ -7,6 +7,28 @@
 
 import UIKit
 
+//--------------------------------------------------------------------------------------------
+// MARK: - Alle Fonts um einen Faktor verkleinern/vergrößern
+
+extension AttributedString {
+
+    /// Gibt eine Kopie zurück, in der **alle** Fonts mit `factor`
+    /// (z. B. 0.8 = –20 %) skaliert sind.
+    func scalingFonts(by factor: CGFloat) -> AttributedString {
+        guard factor != 1 else { return self }
+
+        var out = self                      // kopierbare Variante
+        for run in out.runs {               // über alle Attribute-Runs
+            if let f = run.uiKit.font {     // UIKit / AppKit-Font erwischt?
+                let scaled = UIFont(descriptor: f.fontDescriptor,
+                                     size: max(1, f.pointSize * factor))
+                out[run.range].uiKit.font = scaled
+            }
+        }
+        return out
+    }
+}
+
 
 //--------------------------------------------------------------------------------------------
 // MARK: - Debug Support für AttributedString

@@ -7,53 +7,62 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UIDocumentPickerDelegate {
 
-    var scrollView : MarkdownScrollView!
+    @IBOutlet weak var scrollView: MarkdownScrollView!
 
-    var textSize:CGFloat = 20
+    var textSize:CGFloat = 12
     var textColor = UIColor.label
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        scrollView = MarkdownScrollView(frame: view.bounds)
-        view.addSubview(scrollView)
-
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 10).isActive = true
-        scrollView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
-        scrollView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0).isActive = true
-        scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0).isActive = true
-        
+ 
         scrollView.markdown(string: text1, size: textSize, textColor: textColor )
-        
-        prepareContent()
     }
     
-     func prepareContent() {
-         guard let data = scrollView.exportPDF() else { return }
+    ///---------------------------------------------------------------------------------------
+    /// PDF-Export
+    ///
+    private var tmpPDF: URL?            // <– merken, um später zu löschen
 
-        //------------------------------------------------------------------------------------
-        /// PDF-Ausgabe - als Seitengröße wird A4 eingestellt
-        
-        let paperRect = CGRect(x: 0, y: 0, width: 595.2, height: 841.8)
-         
-        /// PDF-Renderer
-         
-        /// PDF-URL für temporäres Verzeichnis
-        let tempUrl = NSURL(fileURLWithPath: NSTemporaryDirectory())
-        let urlPDF  = tempUrl.appendingPathComponent("Markdown")!.appendingPathExtension("pdf")
-        
-        do {
-            try data.write(to: urlPDF)                      // PDF-Datei schreiben
+    @IBAction func actionExport(_ sender: Any) {
+
+        // 1) PDF erzeugen → tmpURL zurückgeben
+        scrollView.exportPDF { [unowned self] in
+            let tmp = FileManager.default
+                .temporaryDirectory
+                .appendingPathComponent("Markdown")
+                .appendingPathExtension("pdf")
+            self.tmpPDF = tmp            // merken
+            return tmp
         }
-        catch {
-            print(error.localizedDescription)
-        }            
-     }
+        guard let url = tmpPDF else { return }
+
+        // 2) Document-Picker (Export-Modus) anzeigen
+        let picker = UIDocumentPickerViewController(forExporting: [url], asCopy: true)
+        picker.delegate = self
+        picker.modalPresentationStyle = .formSheet
+        present(picker, animated: true)
+    }
+
+    ///---------------------------------------------------------------------------------------
+    // MARK: UIDocumentPickerDelegate
     
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        if let u = tmpPDF { try? FileManager.default.removeItem(at: u) }
+        tmpPDF = nil
+    }
 
+    func documentPicker(_ controller: UIDocumentPickerViewController,
+                        didPickDocumentsAt urls: [URL]) {
+        // Datei wurde kopiert → Temp entfernen
+        if let u = tmpPDF { try? FileManager.default.removeItem(at: u) }
+        tmpPDF = nil
+    }
+    
+    ///---------------------------------------------------------------------------------------
 
+    
     let text1 =
     """
     > # Beispiel Blockquote
@@ -147,5 +156,118 @@ class ViewController: UIViewController {
     """
 
 
+    let text2 =
+        """
+        # CommonCollection – Struktur und Nutzung
+
+        ## Einführung
+        Das `CommonCollection`-Framework ermöglicht eine dynamische Gestaltung von `UICollectionView`-Elementen durch parametrierbare Datenstrukturen. Im Zentrum stehen `ContentData`, `ContentDataLayout` und `BasicType`, die für die flexible Konfiguration der UI-Elemente verwendet werden.
+
+        ## 1. `ContentData` – Inhalt einer Zelle
+        `ContentData` beschreibt den Inhalt einer Zelle in der `UICollectionView`.
+
+        ### **Struktur**
+        ```swift
+        public struct ContentData {
+            var viewType: ContentViewType
+            var accessType: ContentRWType
+            var value: AnyHashable?
+            var key: String
+            var title: String?
+            var parameter: ContentEditType?
+        }
+        ```
+
+        ### **Funktion**
+        - `viewType`: Gibt an, welcher Inhaltstyp (z. B. `.image`, `.label`, `.text`) angezeigt wird.
+        - `accessType`: Legt fest, ob die Daten **nur gelesen** (`ro`), **bearbeitet** (`rw`) oder **als FirstResponder gesetzt** (`rwf`) werden können.
+        - `value`: Enthält die eigentlichen Daten.
+        - `key`: Identifier für das Content-Element.
+        - `title`: Optionaler Titel für die Anzeige.
+        - `parameter`: Zusätzliche Parameter, z. B. Alignment oder Formatierungen.
+
+        ### **Beispiel**
+        ```swift
+        let contentImage = ContentData(viewType: .image, rwo, "Icon-Person".data(using: .utf8), "image", parameter: .alignmentNone)
+        ```
+
+        ## 2. `ContentDataLayout` – Positionierung des Inhalts
+        `ContentDataLayout` erweitert `ContentData` um Layout-Informationen für die Darstellung.
+
+        ### **Struktur**
+        ```swift
+        public struct ContentDataLayout {
+            var content: ContentData
+            var height: CGFloat?
+            var width: CGFloat?
+            var widthUsage: WidthUsage?
+            var layoutMargins: NSDirectionalEdgeInsets
+            var presentation: ContentPresentation?
+        }
+        ```
+
+        ### **Funktion**
+        - `content`: Referenz auf ein `ContentData`-Objekt.
+        - `height`, `width`: Setzt die Dimensionen des Inhalts.
+        - `widthUsage`: Bestimmt die Breitenzuweisung (z. B. `.content`).
+        - `layoutMargins`: Steuert Abstände.
+        - `presentation`: Gibt an, wie der Inhalt visuell dargestellt wird (`.plain`, `.line`, `.title`).
+
+        ### **Beispiel**
+        ```swift
+        let layoutImage = ContentDataLayout(contentImage, presentation: .plain, width: 110, widthUsage: .content, height: 110)
+        ```
+
+        ### **Diagramm zur Struktur von `ContentDataLayout` und `BasicType`**
+        Das folgende Diagramm zeigt die Beziehung zwischen `BasicType.basic` und `ContentDataLayout`:
+
+        ![Struktur von ContentDataLayout und BasicType](diagram_contentdatalayout_basic.png)
+
+        ## 3. `BasicType` – Erstellung des Layouts
+        `BasicType` ist ein `enum`, das verschiedene Zellenstrukturen für die `UICollectionView` definiert.
+
+        ### **Cases von `BasicType`**
+        ```swift
+        public enum BasicType {
+            case basic([ContentDataLayout])
+            case header(String?)
+            case standard(String?, String?, textstyle: UIFont.TextStyle?)
+            case infoText(AnyHashable?, UIFont.TextStyle?, lines: Int?, image: UIImage?)
+            case lineSpace(CGFloat?, String)
+            case plusButton
+            case sidebarHeader(String)
+            case sidebarStandard(ContentData)
+            case linkSelect(ContentRWType, object: AnyHashable, key: String?, placeholder: String?, imagename: String?, color: UIColor?)
+            case linkDetail(String, imagename: String?)
+            case linkPrint(String)
+        }
+        ```
+
+        ### **Funktion**
+        - `basic`: Eine **Gruppe von `ContentDataLayout`-Objekten**, die zusammen eine Zelle bilden.
+        - `header`: Ein **einfacher Header mit Titel**.
+        - `standard`: **Zweizeilige Standardzelle** mit optionalem Titel, Untertitel und Schriftstil.
+        - `infoText`: Zeigt einen **mehrzeiligen Infotext** mit optionalem Bild.
+        - `lineSpace`: Fügt **Abstände** zwischen den Zellen ein.
+        - `sidebarHeader`, `sidebarStandard`: Definieren spezielle **Sidebar-Zellen**.
+        - `linkSelect`, `linkDetail`, `linkPrint`: **Interaktive Zellen** mit Auswahl- oder Druckfunktion.
+
+        ### **Hierarchische Struktur von `ContentDataLayout`**
+        Das folgende Diagramm zeigt, wie `ContentDataLayout` verschachtelte Strukturen für eine flexible UI-Gestaltung ermöglicht:
+
+        ![Beispielhafte Hierarchie von ContentDataLayout](diagram_hierarchie_contentdatalayout.png)
+
+        ### **Parametrierung der `basic`-Case**
+        ```swift
+        let itemsPerson = [BasicType.basic([layoutImage, [[layoutName, layoutVorname], layoutDatum]])]
+        ```
+        - Die `basic`-Case erhält eine Liste von `ContentDataLayout`-Elementen.
+        - Diese Elemente können **verschachtelt** sein, um z. B. ein **horizontales Layout** für Name und Vorname zu erzeugen.
+
+        ## Fazit
+        Die Kombination von `ContentData`, `ContentDataLayout` und `BasicType` ermöglicht eine hochflexible Konfiguration der `UICollectionView`-Zellen, ohne dass für jede Ansicht eigene Zellen implementiert werden müssen.
+
+
+        """
 }
 

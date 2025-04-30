@@ -88,6 +88,10 @@ private func makeRunDelegate(for attachment: ImageAttachment) -> CTRunDelegate {
 protocol BlockRenderer: AnyObject {
     /// Inhalt des Blockes
     var blockContent: MarkdownScrollView.BlockContent { get set }
+   
+    // NEU: auf welcher PDF-Seite wird dieser Block ausgegeben?
+    var pageIndex: Int { get set }                // 0-basiert
+
     /// Zeichen­rechteck relativ zum Content‑View (UIKit‑Koordinaten, (0,0) = oben links)
     var frame: CGRect { get set }
     /// Höhe berechnen, wenn eine bestimmte Breite vorgegeben ist
@@ -186,11 +190,20 @@ extension BlockRenderer {
                                height: asc + desc)
                 
                 context.saveGState()
-                context.translateBy(x: 0, y: r.origin.y * 2 + r.height)
+
+                // 1) unten-links → oben-links
+                context.translateBy(x: r.minX, y: r.minY)
+                context.translateBy(x: 0,      y: r.height)
                 context.scaleBy(x: 1, y: -1)
 
-                /// UIImage im nun wieder uprighten Sub-Kontext zeichnen
-                attach.image.draw(in: r)
+                // 2) Debug-Hintergrund
+//                context.setFillColor(UIColor.systemOrange.cgColor)
+//                context.fill(CGRect(origin: .zero, size: r.size))
+
+                // 3)  UIKit-Bridge: jetzt darf UIImage zeichnen
+                UIGraphicsPushContext(context)                // ★ neu
+                attach.image.draw(in: CGRect(origin: .zero, size: r.size))
+                UIGraphicsPopContext()                        // ★ neu
 
                 context.restoreGState()
             }
@@ -286,7 +299,8 @@ func makeSetting<T>(_ spec: CTParagraphStyleSpecifier,
 final class ParagraphRenderer: BlockRenderer {
     var blockContent: MarkdownScrollView.BlockContent
     var frame: CGRect = .zero
-    
+    var pageIndex: Int = 0                 // 0-basiert
+
     init(blockContent: MarkdownScrollView.BlockContent) {
         self.blockContent = blockContent
         self.blockContent.attrText = preprocess(blockContent.attrText)
@@ -317,6 +331,7 @@ final class ParagraphRenderer: BlockRenderer {
 final class HeadingRenderer: BlockRenderer {
     var blockContent: MarkdownScrollView.BlockContent
     var frame: CGRect = .zero
+    var pageIndex: Int = 0                 // 0-basiert
     var insets: NSDirectionalEdgeInsets = .zero
 
     init(blockContent: MarkdownScrollView.BlockContent) {
@@ -351,6 +366,7 @@ final class HeadingRenderer: BlockRenderer {
 final class CodeBlockRenderer: BlockRenderer {
     var blockContent: MarkdownScrollView.BlockContent
     var frame: CGRect = .zero
+    var pageIndex: Int = 0                 // 0-basiert
     var insets: NSDirectionalEdgeInsets = .zero
     private let text: NSAttributedString
 
@@ -391,6 +407,7 @@ final class CodeBlockRenderer: BlockRenderer {
 final class TableRenderer: BlockRenderer {
     var blockContent: MarkdownScrollView.BlockContent
     var frame: CGRect = .zero
+    var pageIndex: Int = 0                 // 0-basiert
     var insets: NSDirectionalEdgeInsets = .zero
 
     private let text: NSAttributedString
@@ -423,6 +440,7 @@ final class TableRenderer: BlockRenderer {
 final class HorizontalRuleRenderer: BlockRenderer {
     var blockContent: MarkdownScrollView.BlockContent
     var frame: CGRect = .zero
+    var pageIndex: Int = 0                 // 0-basiert
     var insets: NSDirectionalEdgeInsets = .zero
 
     private let text: NSAttributedString

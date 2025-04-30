@@ -18,7 +18,6 @@ import PDFKit
 
 class MarkdownScrollView: UIScrollView {
     
-    private let contentView = MarkdownContentView()
     private var textSize: CGFloat = 13.0
 
     // MARK: Setup
@@ -31,12 +30,13 @@ class MarkdownScrollView: UIScrollView {
         commonInit()
     }
     private func commonInit() {
-        addSubview(contentView)
         showsVerticalScrollIndicator = true
         showsHorizontalScrollIndicator = false
     }
 
+    ///---------------------------------------------------------------------------------------
     /// Main entry: parse Markdown string, build renderers, trigger layout
+    ///
     func markdown(string: String, size: CGFloat = 17, weight: UIFont.Weight = .regular, textColor: UIColor = .gray) {
  
         self.textSize = size
@@ -49,6 +49,8 @@ class MarkdownScrollView: UIScrollView {
             fallback.font = .systemFont(ofSize: 20, weight: .bold)
               
             let blockContent = BlockContent(attrText: fallback)
+            guard let contentView = subviews.first as? MarkdownContentView else { return }
+
             contentView.renderers = [ParagraphRenderer(blockContent: blockContent)]
             setNeedsLayout(); return
         }
@@ -105,6 +107,8 @@ class MarkdownScrollView: UIScrollView {
         // ----------------------------------------------------------
         // PARSING:  AttributedString  →  [BlockRenderer]
         // ----------------------------------------------------------
+        guard let contentView = subviews.first as? MarkdownContentView else { return }
+
         let renderers = CoreTextBlockFactory.renderers(from: attr, textSize: size)
         contentView.renderers = renderers
         setNeedsLayout()
@@ -112,6 +116,8 @@ class MarkdownScrollView: UIScrollView {
 
     // MARK: Layout
     override func layoutSubviews() {
+        guard let contentView = subviews.first as? MarkdownContentView else { return }
+        
         super.layoutSubviews()
         let width = bounds.width
         let totalHeight = contentView.layout(width: width)
@@ -122,59 +128,9 @@ class MarkdownScrollView: UIScrollView {
     }
 
     // MARK: PDF‑Export
-    func exportPDF() -> Data? { contentView.exportPDF() }
-}
-
-// MARK: - ---------------------------------------------------------
-// MARK: MarkdownContentView (zeichnet alles)
-// --------------------------------------------------------------
-private final class MarkdownContentView: UIView {
-    var renderers: [BlockRenderer] = []
-
-    /// Frames zuweisen & Gesamthöhe liefern
-    @discardableResult
-    func layout(width: CGFloat) -> CGFloat {
-        var y: CGFloat = 0
-        for renderer in renderers {
-            let h = renderer.measure(y: y, width: width)
-//            renderer.frame = CGRect(x: 0, y: y, width: width, height: h)
-            y += h
-        }
-        return y
-    }
-
-    // ----------------------------------------------------------
-    override func draw(_ rect: CGRect) {
-        guard let ctx = UIGraphicsGetCurrentContext() else { return }
-
-        self.backgroundColor = .white
-        
-        for renderer in renderers {            // Reihenfolge 0 → N
-            let f = renderer.frame
-            ctx.saveGState()
-            // 1) Ursprung an die Block‑Ecke
-            ctx.translateBy(x: f.minX, y: f.minY)
-            // 2) Clipping auf Block‑Rect
-            ctx.clip(to: CGRect(origin: .zero, size: f.size))
-            // 3) lokal flippen → Core‑Text will (0,0) unten links
-            ctx.translateBy(x: 0, y: f.height)
-            ctx.scaleBy(x: 1, y: -1)
-            renderer.draw(in: ctx)
-            ctx.restoreGState()
-        }
-        
-        
-    }
-
-    // ----------------------------------------------------------
-    func exportPDF() -> Data? {
-        let data = NSMutableData()
-        UIGraphicsBeginPDFContextToData(data, bounds, nil)
-        UIGraphicsBeginPDFPage()
-        guard let ctx = UIGraphicsGetCurrentContext() else { return nil }
-        layer.render(in: ctx)
-        UIGraphicsEndPDFContext()
-        return data as Data
+    func exportPDF(presentSavePanel: () -> URL?) {
+        guard let contentView = subviews.first as? MarkdownContentView else { return }
+        contentView.exportPDF(presentSavePanel: presentSavePanel)
     }
 }
 
