@@ -152,8 +152,8 @@ class MarkdownContentView: UIView {
 // MARK: - ---------------------------------------------------------
 // MARK: Block‑Factory  (AttributedString → Renderer‑Liste)
 // --------------------------------------------------------------
-
-fileprivate enum CoreTextBlockFactory {
+/*
+public enum CoreTextBlockFactory {
 
     /// Haupt‑Einstieg: komplette AttributedString in BlockRenderer aufspalten
     static func renderers(from attr: AttributedString, textSize: CGFloat) -> [BlockRenderer] {
@@ -206,3 +206,4 @@ fileprivate enum CoreTextBlockFactory {
     }
 }
  
+*/

@@ -422,12 +422,15 @@ extension MarkdownScrollView {
         for (index, blockContent) in allBlocks.enumerated() {
             guard let block = blockContent.block else { continue }
             
+            let font = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
+            let fontSize: CGFloat = (font?.pointSize ?? textSize) //* 0.5
+            
             var attrText = NSMutableAttributedString(attributedString: blockContent.attrText)
             var tabulators             : [CTTextTab] = []
             var firstLineHeadIndent    : CGFloat     = block.hasBlockQuote ? Markdown.blockquoteContentIndent : 0
             var headIndent             : CGFloat     = block.hasBlockQuote ? Markdown.blockquoteContentIndent : 0
             let tailIndent             : CGFloat     = -20
-            var paragraphSpacing       : CGFloat     = 15
+            var paragraphSpacing       : CGFloat     = fontSize * 0.75
             var paragraphSpacingBefore : CGFloat     = 0
             
             ///-------------------------------------------------------------------------------
@@ -465,6 +468,7 @@ extension MarkdownScrollView {
             /// Header erkennen und den Font des Headers ergänzen
             if block.hasHeader {
                 attrText.addAttributes([.font: block.headerFont])
+                paragraphSpacingBefore = fontSize * 1.2
             }
             
             ///-------------------------------------------------------------------------------
@@ -498,7 +502,7 @@ extension MarkdownScrollView {
                         
             /// Style einfügen
             attrText.addCTParagraphStyle([
-                .lineHeightMultiple:     1.0,
+                .lineHeightMultiple:     1.1,
                 .lineSpacingAdjustment:  0,
                 .defaultTabInterval:     100,
                 .tabStops:               tabulators,
