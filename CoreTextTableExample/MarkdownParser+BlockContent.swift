@@ -427,7 +427,7 @@ extension MarkdownScrollView {
             var firstLineHeadIndent    : CGFloat     = block.hasBlockQuote ? Markdown.blockquoteContentIndent : 0
             var headIndent             : CGFloat     = block.hasBlockQuote ? Markdown.blockquoteContentIndent : 0
             let tailIndent             : CGFloat     = -20
-            var paragraphSpacing       : CGFloat     = 5
+            var paragraphSpacing       : CGFloat     = 15
             var paragraphSpacingBefore : CGFloat     = 0
             
             ///-------------------------------------------------------------------------------
@@ -467,7 +467,17 @@ extension MarkdownScrollView {
                 attrText.addAttributes([.font: block.headerFont])
             }
             
-            /// List erkennen und die Bullets voranstellen
+            ///-------------------------------------------------------------------------------
+            /// Code Block  erkennen und den Font des Code Block ergänzen
+            if block.hasCodeBlock {
+                let font = UIFont.monospacedSystemFont(ofSize: Markdown.codeblockTextsize, weight: .regular)
+                attrText.addAttributes([.font: font])
+                paragraphSpacingBefore = 0
+                paragraphSpacing = 5
+            }
+
+            ///-------------------------------------------------------------------------------
+           /// List erkennen und die Bullets voranstellen
             if block.hasList {
                 let bullet = NSMutableAttributedString(         /// Bullet-Point dem Attributed String voranstellen
                     string:     blockContent.listBulletPointStr,
@@ -485,13 +495,7 @@ extension MarkdownScrollView {
                 tabulators          = [CTTextTabCreate(.right, headIndent - w, nil),
                                        CTTextTabCreate(.left,  headIndent, nil ) ]
             }
-            
-            /// Code-Block
-            if block.hasCodeBlock {
-                paragraphSpacingBefore = 0
-                paragraphSpacing = 5
-            }
-            
+                        
             /// Style einfügen
             attrText.addCTParagraphStyle([
                 .lineHeightMultiple:     1.0,
@@ -504,6 +508,8 @@ extension MarkdownScrollView {
                 .paragraphSpacing:       paragraphSpacing,
                 .paragraphSpacingBefore: paragraphSpacingBefore,
             ])
+            
+//            attrText.scaleFonts(by: 0.5)
             
             allBlocks[index].attrText = attrText
         }

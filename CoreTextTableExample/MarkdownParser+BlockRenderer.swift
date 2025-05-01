@@ -113,7 +113,8 @@ extension BlockRenderer {
         rect.origin.x    += Markdown.blockquoteHorzIndent
         rect.origin.y    += blockContent.isLastBlockQuote ? after/2 : 0
         rect.size.width  -= Markdown.blockquoteHorzIndent * 2
-        context.setFillColor(Markdown.blockquoteColor.cgColor)
+        let color = blockContent.isLastBlockQuote ? .systemYellow.highlight : Markdown.blockquoteColor
+        context.setFillColor(color.cgColor)
         context.fill(rect)
         
         /// Balken am linken Rand
@@ -372,10 +373,7 @@ final class CodeBlockRenderer: BlockRenderer {
 
     init(blockContent: MarkdownScrollView.BlockContent) {
         self.blockContent = blockContent
-
-        let mut = NSMutableAttributedString(attributedString: blockContent.attrText)
-        mut.addAttribute(.font, value: UIFont.monospacedSystemFont(ofSize: 13, weight: .regular), range: NSRange(location: 0, length: mut.length))
-        self.text = mut
+        self.text = blockContent.attrText
     }
     
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {

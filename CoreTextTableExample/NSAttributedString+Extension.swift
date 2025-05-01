@@ -11,6 +11,25 @@ import UIKit
 import CoreText
 import Foundation
 
+extension NSMutableAttributedString {
+
+    /// Skaliert alle `.font`-Attribute (UIKit/AppKit) im gegebenen Range
+    /// (default = kompletter String).
+    func scaleFonts(by factor: CGFloat, in range: NSRange? = nil) {
+        guard factor != 1 else { return }
+
+        let full = range ?? NSRange(location: 0, length: length)
+        enumerateAttribute(.font,           // nur Font-Runs
+                           in: full,
+                           options: []) { value, r, _ in
+            guard let old = value as? UIFont else { return }
+            let scaled = UIFont(descriptor: old.fontDescriptor,
+                                size: max(1, old.pointSize * factor))
+            addAttribute(.font, value: scaled, range: r)
+        }
+    }
+}
+
 extension NSAttributedString {
 
     /// Liefert `(before, after)` – also paragraphSpacingBefore und paragraphSpacing.

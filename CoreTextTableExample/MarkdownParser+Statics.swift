@@ -12,6 +12,8 @@ import UIKit
 
 public struct Markdown {
     
+    static let _1cm: CGFloat = 1 / 2.54 * 72                    /// 1cm in Zoll umrechnen und 72dpi Standard
+
     /// Soft Break aktivieren
     static var useSoftBreaks : Bool = true                      /// Soft Breaks aktivieren / deaktivieren
     

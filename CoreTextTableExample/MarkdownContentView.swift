@@ -15,6 +15,9 @@ import PDFKit
 
 class MarkdownContentView: UIView {
 
+    /// Länge von 1cm in PPI
+    static let _1cm = Markdown._1cm
+    
     var renderers: [BlockRenderer] = []
 
     /// Frames zuweisen & Gesamthöhe liefern
@@ -23,7 +26,6 @@ class MarkdownContentView: UIView {
         var y: CGFloat = 0
         for renderer in renderers {
             let h = renderer.measure(y: y, width: width)
-//            renderer.frame = CGRect(x: 0, y: y, width: width, height: h)
             y += h
         }
         return y
@@ -54,8 +56,8 @@ class MarkdownContentView: UIView {
     /// Liefert die Gesamt-Seitenzahl
     func layoutForPDF(pageWidth:    CGFloat,
                       pageHeight:   CGFloat,
-                      topMargin:    CGFloat = 36,
-                      bottomMargin: CGFloat = 36) -> Int {
+                      topMargin:    CGFloat = 2 * _1cm,
+                      bottomMargin: CGFloat = 2 * _1cm) -> Int {
 
         var y: CGFloat = topMargin
         var currentPage = 0
@@ -89,8 +91,11 @@ class MarkdownContentView: UIView {
     func exportPDF(presentSavePanel: () -> URL?) {
 
         // -------- PDF-Seiten-Geometrie ------------------------------------
-        var pageRect = CGRect(x: 0, y: 0, width: 595.2, height: 841.8)   // A-4
-        let margin: CGFloat = 36
+        
+        /// Maße A4:  21 cm x 29,7 cm (Rand 2 cm)
+        var pageRect = CGRect(x: 0, y: 0, width: 21 * Self._1cm, height: 29.7 * Self._1cm)
+        
+        let margin: CGFloat = 2 * Markdown._1cm
         let printableWidth  = pageRect.width  - 2*margin
 
         // -------- Renderer zuerst layouten --------------------------------
