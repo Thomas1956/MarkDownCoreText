@@ -422,7 +422,10 @@ extension MarkdownScrollView {
         for (index, blockContent) in allBlocks.enumerated() {
             guard let block = blockContent.block else { continue }
             
-            let font = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
+            var font = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
+            font = block.hasHeader    ? block.headerFont : font
+            font = block.hasCodeBlock ? UIFont.monospacedSystemFont(ofSize: Markdown.codeblockTextsize, weight: .regular) : font
+
             let fontSize: CGFloat = (font?.pointSize ?? textSize) //* 0.5
             
             var attrText = NSMutableAttributedString(attributedString: blockContent.attrText)
@@ -443,14 +446,12 @@ extension MarkdownScrollView {
             /// Start eines BlockQuote
             if  currBlockQuote && !prevBlockQuote {
                 allBlocks[index].isFirstBlockQuote = true
-                paragraphSpacingBefore = 20
                 attrText.addAttributes([.foregroundColor: UIColor.systemPurple], range: NSRange(location: 0, length: 1))
             }
             
             /// Ende eines BlockQuote
             if currBlockQuote && !nextBlockQuote {
                 allBlocks[index].isLastBlockQuote = true
-                paragraphSpacing = 20
                 attrText.addAttributes([.foregroundColor: UIColor.systemTeal], range: NSRange(location: 1, length: 1))
             }
             

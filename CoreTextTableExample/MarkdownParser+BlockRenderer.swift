@@ -37,13 +37,14 @@ extension BlockRenderer {
     /// Zeichnen des Hintergrundes von BlockQuote. Das Rechteck ist der gesamte Frame des Renderers.
     func drawBlockQuote(in context: CGContext, rect: CGRect) {
         
-        let (_, after) = blockContent.attrText.paragraphSpacings
+        let (before, after) = blockContent.attrText.paragraphSpacings
 
         /// Hintergrund füllen
         var rect = rect
         rect.origin.x    += Markdown.blockquoteHorzIndent
-        rect.origin.y    += blockContent.isLastBlockQuote ? after/2 : 0
+        rect.origin.y    += blockContent.isLastBlockQuote ? after : 0
         rect.size.width  -= Markdown.blockquoteHorzIndent * 2
+        rect.size.height -= (blockContent.isLastBlockQuote ? after : 0) + (blockContent.isFirstBlockQuote ? before : 0)
         let color = Markdown.blockquoteColor
         context.setFillColor(color.cgColor)
         context.fill(rect)
@@ -64,10 +65,21 @@ extension BlockRenderer {
         let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
         return ceil(size.height)
     }
-     
+    
+    var fontSize: CGFloat {
+        let font = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
+        return (font?.pointSize ?? 20) //* 0.5
+    }
+    
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
+        /// Eingestellte Abstände des Absatzes
         let (before, after) = blockContent.attrText.paragraphSpacings
-        let height = self.contentHeight(width) + after + before
+        ///
+        let paddingH: CGFloat = 0 // blockContent.block?.hasBlockQuote ?? false ? fontSize * 0.5 : 0   // 0.5em horizontal
+        let paddingBefore = blockContent.isFirstBlockQuote ? fontSize * 0.3 : 0   // 0.3em vertikal
+        let paddingAfter  = blockContent.isLastBlockQuote  ? fontSize * 0.3 : 0   // 0.3em vertikal
+
+        let height = self.contentHeight(width - 2 * paddingH) + after + before + paddingBefore + paddingAfter
         self.frame = CGRect(x: 0, y: y, width: width, height: height)
         return height
     }
@@ -75,18 +87,25 @@ extension BlockRenderer {
     func drawContent(in context: CGContext) {
         /// Wenn `paragraphSpacingBefore` definiert ist, muss der zu zeichnende Inhalt um diese Höhe nach unten
         /// geschoben werden.
-        let (before, _) = blockContent.attrText.paragraphSpacings
+        let (before, after) = blockContent.attrText.paragraphSpacings
+
+        let paddingH: CGFloat = 0 // blockContent.block?.hasBlockQuote ?? false ? fontSize * 0.5 : 0   // 0.5em horizontal
+        let paddingBefore = blockContent.isFirstBlockQuote ? fontSize * 0.3 : 0   // 0.3em vertikal
+        let paddingAfter  = blockContent.isLastBlockQuote  ? fontSize * 0.3 : 0   // 0.3em vertikal
 
         /// Rechteck für das Zeichnen des Inhaltes
-        var contentRect: CGRect {
-            CGRect(x: 0, y: -before,
-//                    (blockContent.isFirstBlockQuote ? -10 : 0),
-                   width:  frame.width,
-                   height: frame.height)
-        }
-        
-//                context.setFillColor(UIColor.systemYellow.highlight.highlight.cgColor)
-//                context.fill(contentRect)
+        let contentRect =
+                CGRect(x:      paddingH,
+                       y:      -before + paddingAfter,
+                       width:  frame.width  - 2 * paddingH,
+                       height: frame.height - paddingBefore - paddingAfter)
+ 
+//        if blockContent.block?.hasBlockQuote ?? false {
+//            context.setFillColor(UIColor.systemYellow.highlight.cgColor)
+//            let colorRect = CGRect(x: 400.0, y: after + paddingAfter, width: 50.0,
+//                                   height: frame.height - before - after - paddingBefore - paddingAfter)
+//            context.fill(colorRect)
+//        }
         
         let text = blockContent.attrText
         let path = CGMutablePath()
@@ -250,17 +269,17 @@ final class ParagraphRenderer: BlockRenderer {
             drawBlockQuote(in: context, rect: rect)
         }
 
-        let (before, after) = blockContent.attrText.paragraphSpacings
-        
-        let indent: CGFloat = blockContent.attrText.ctParagraphStyleValue(for: .firstLineHeadIndent) ?? 0
-        
-        context.setFillColor(UIColor.systemIndigo.highlight.highlight.cgColor)
-        let rectBefore = CGRect(x: indent, y: frame.height - before, width: frame.width, height: before)
-        context.fill(rectBefore)
- 
-        context.setFillColor(UIColor.systemTeal.highlight.highlight.cgColor)
-        let rectAfter = CGRect(x: indent, y: 0, width: frame.width, height: after)
-        context.fill(rectAfter)
+//        let (before, after) = blockContent.attrText.paragraphSpacings
+//        
+//        let indent: CGFloat = blockContent.attrText.ctParagraphStyleValue(for: .firstLineHeadIndent) ?? 0
+//        
+//        context.setFillColor(UIColor.systemIndigo.highlight.highlight.cgColor)
+//        let rectBefore = CGRect(x: indent, y: frame.height - before, width: frame.width, height: before)
+//        context.fill(rectBefore)
+// 
+//        context.setFillColor(UIColor.systemTeal.highlight.highlight.cgColor)
+//        let rectAfter = CGRect(x: indent, y: 0, width: frame.width, height: after)
+//        context.fill(rectAfter)
 /*
         context.setLineWidth(4)
         context.addRect(CGRect(x: 0, y: 1, width: frame.width, height: frame.height).insetBy(dx: 2, dy: 2))
