@@ -20,7 +20,7 @@ var debugColor: Bool = !true
 protocol BlockRenderer: AnyObject {
     
     /// Inhalt des Blockes
-    var blockContent: MarkdownScrollView.BlockContent { get set }
+    var blockContent: BlockContent { get set }
    
     /// PDF-Seite, auf der  dieser Block ausgegeben wird (0-basiert)
     var pageIndex: Int { get set }
@@ -295,11 +295,11 @@ func makeSetting<T>(_ spec: CTParagraphStyleSpecifier,
 
 // -------- Paragraph ---------------------------------------------------
 final class ParagraphRenderer: BlockRenderer {
-    var blockContent: MarkdownScrollView.BlockContent
+    var blockContent: BlockContent
     var frame: CGRect = .zero
     var pageIndex: Int = 0                 // 0-basiert
 
-    init(blockContent: MarkdownScrollView.BlockContent) {
+    init(blockContent: BlockContent) {
         self.blockContent = blockContent
         self.blockContent.attrText = preprocessImages(blockContent.attrText)
     }
@@ -367,12 +367,12 @@ final class ParagraphRenderer: BlockRenderer {
 // -------- CodeBlock ---------------------------------------------------
 
 final class CodeBlockRenderer: BlockRenderer {
-    var blockContent: MarkdownScrollView.BlockContent
+    var blockContent: BlockContent
     var frame: CGRect = .zero
     var pageIndex: Int = 0                 // 0-basiert
     private let text: NSAttributedString
 
-    init(blockContent: MarkdownScrollView.BlockContent) {
+    init(blockContent: BlockContent) {
         self.blockContent = blockContent
         self.text = blockContent.attrText
     }
@@ -410,15 +410,15 @@ final class CodeBlockRenderer: BlockRenderer {
 // -------- Table -------------------------------------------------------
 /// Noch sehr einfach: fixed‑width Spalten, automatische Zeilenhöhe pro Zelle
 final class TableRenderer: BlockRenderer {
-    var blockContent: MarkdownScrollView.BlockContent
+    var blockContent: BlockContent
     var frame: CGRect = .zero
     var pageIndex: Int = 0                 // 0-basiert
 
     private let text: NSAttributedString
-    private let block: MarkdownScrollView.BlockContent.TableBlock
+    private let block: BlockContent.TableBlock
     private let cellText: NSAttributedString
 
-    init(blockContent: MarkdownScrollView.BlockContent) {
+    init(blockContent: BlockContent) {
         self.blockContent = blockContent
         self.text = blockContent.attrText
 
@@ -442,13 +442,13 @@ final class TableRenderer: BlockRenderer {
 }
 
 final class HorizontalRuleRenderer: BlockRenderer {
-    var blockContent: MarkdownScrollView.BlockContent
+    var blockContent: BlockContent
     var frame: CGRect = .zero
     var pageIndex: Int = 0                 // 0-basiert
 
     private let text: NSAttributedString
    
-    init(blockContent: MarkdownScrollView.BlockContent) {
+    init(blockContent: BlockContent) {
         self.blockContent = blockContent
         self.text = blockContent.attrText
     }

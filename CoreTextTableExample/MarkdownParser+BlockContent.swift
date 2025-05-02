@@ -11,143 +11,138 @@ import Foundation
 // TODO: - Noch einmal intensiv prüfen, ob das Zusammenspiel von Listen und Block Quote funktioniert.
 
 //--------------------------------------------------------------------------------------------
-// MARK: Extension Markdown Parser
-
-extension MarkdownScrollView {
-
-    ///---------------------------------------------------------------------------------------
-    /// Struktur für die Vorauswertung der PresentationIntentAttribute
+// MARK: - BlockContent: Struktur für die Vorauswertung der PresentationIntentAttribute
     
-    struct BlockContent {
-        var attrText = NSAttributedString()
-        var block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value?
-        var range: Range<AttributedString.Index>
+struct BlockContent {
+    var attrText = NSAttributedString()
+    var block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value?
+    var range: Range<AttributedString.Index>
+    
+    var kind     : PresentationIntent.Kind = .paragraph
+    var identity : Int = 0
+    
+    var listBulletPointStr  : String
+    var widthDefault        : CGFloat
+    var headIndent          : CGFloat
+    var firstLineHeadIndent : CGFloat
+    var blockQuoteIndent    : CGFloat
+    var tableBlock          : TableBlock
+    
+    var isFirstBlockQuote   : Bool
+    var isLastBlockQuote    : Bool
+    
+    /// Spaltenspezifisch
+    struct TableColumn {
+        var lineText     : String = ""
+        var lineWidth    : CGFloat = 0
+        var lengthOffset : CGFloat = 0
+        var alignment    : NSTextAlignment = .left
+    }
+    
+    struct TableBlock {
+        var lastRow      : Int = 0
+        var lastColumn   : Int = 0
         
-        var kind     : PresentationIntent.Kind = .paragraph
-        var identity : Int = 0
+        var lineOben     : String = ""
+        var lineMitte    : String = ""
+        var lineUnten    : String = ""
+        var tabStops     : [NSTextTab] = []
         
-        var listBulletPointStr  : String
-        var widthDefault        : CGFloat
-        var headIndent          : CGFloat
-        var firstLineHeadIndent : CGFloat
-        var blockQuoteIndent    : CGFloat
-        var tableBlock          : TableBlock
+        var columns      : [TableColumn] = []
         
-        var isFirstBlockQuote   : Bool
-        var isLastBlockQuote    : Bool
-
-        /// Spaltenspezifisch
-        struct TableColumn {
-            var lineText     : String = ""
-            var lineWidth    : CGFloat = 0
-            var lengthOffset : CGFloat = 0
-            var alignment    : NSTextAlignment = .left
-        }
+        /// Standard-Initialisierung
+        init() {}
         
-        struct TableBlock {
-            var lastRow      : Int = 0
-            var lastColumn   : Int = 0
-            
-            var lineOben     : String = ""
-            var lineMitte    : String = ""
-            var lineUnten    : String = ""
-            var tabStops     : [NSTextTab] = []
-
-            var columns      : [TableColumn] = []
-            
-            /// Standard-Initialisierung
-            init() {}
-            
-            /// Initialisierung mit Übergabe der Spalten und des Alignments
-            init(_ alignments: [NSTextAlignment]?) {
-                guard let alignments else { return }
-                self.columns = alignments.map( { TableColumn(alignment: $0)})
-                self.lastColumn = columns.count - 1
-            }
-        }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Initialisierung
-        ///
-        init(attrText: AttributedString) {
-            self.init(attrText: NSAttributedString(attrText),
-                      block: PresentationIntent(.paragraph, identity: 1),
-                      range: attrText.startIndex..<attrText.endIndex)
-        }
-        
-        init(attrText: NSAttributedString,
-             runsBlock: AttributedString.Runs.Element,
-             range: Range<AttributedString.Index>)
-        {
-            self.init(attrText: attrText, block: runsBlock.presentationIntent, range: range)
-        }
-        
-        init(attrText: NSAttributedString,
-             block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value?,
-             range: Range<AttributedString.Index>)
-        {
-            self.attrText = attrText
-            self.block = block
-            self.range = range
-            
-            if let ident = self.block?.blockIdentity {
-                self.identity = ident.identity
-                self.kind     = ident.kind
-            }
-            
-            /// Anführungszeichen vordefinieren
-            self.listBulletPointStr = ""
-            self.widthDefault       = 0
-            
-            /// Einzüge für die Listen und die Block Quote
-            self.firstLineHeadIndent = 0
-            self.headIndent          = 0
-            self.blockQuoteIndent    = 5
-            
-            self.tableBlock = TableBlock()
-            
-            self.isFirstBlockQuote  = false
-            self.isLastBlockQuote   = false
-        }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Hilfsfunktionen
-        ///
-        var hasBlockQuote: Bool { block?.hasBlockQuote ?? false }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Index für das Dictionary der Listeneinträge
-        var key: String {
-            if let block = self.block {
-                return "\(block.listIdentity)-\(block.listHierarchie ?? 0)-\(block.listOrdinal)"
-            }
-            return "??????"
-        }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Debug-Anzeige
-        ///
-        var debugString: String {
-            let bulletPoint = listBulletPointStr.dropLast().padding(to: 3)
-            
-            var listString = "??????"
-            if let block = self.block {
-                
-                listString =  String(!block.hasList ? "" :
-                                     String(format: "%2d ",    block.listIdentity) +
-                                     String(format: "%2d ",    block.listHierarchie ?? 0) + "List" +
-                                     String(format: "%2d -> ", block.listOrdinal) +
-                                     String(format: "%2.1f  ", headIndent) +
-                                     bulletPoint
-                ).padding(to: 24)
-            }
-            listString = String(format: " %2d  ", identity) + "\(kind)".padding(to: 15) + listString
-            if let block = self.block {
-                listString += "\t \(isFirstBlockQuote ? 1 : 0) \(isLastBlockQuote ? 1 : 0) \(String(describing: block))"
-            }
-            return listString
+        /// Initialisierung mit Übergabe der Spalten und des Alignments
+        init(_ alignments: [NSTextAlignment]?) {
+            guard let alignments else { return }
+            self.columns = alignments.map( { TableColumn(alignment: $0)})
+            self.lastColumn = columns.count - 1
         }
     }
+    
+    ///-----------------------------------------------------------------------------------
+    /// Initialisierung
+    ///
+    init(attrText: AttributedString) {
+        self.init(attrText: NSAttributedString(attrText),
+                  block: PresentationIntent(.paragraph, identity: 1),
+                  range: attrText.startIndex..<attrText.endIndex)
+    }
+    
+    init(attrText: NSAttributedString,
+         runsBlock: AttributedString.Runs.Element,
+         range: Range<AttributedString.Index>)
+    {
+        self.init(attrText: attrText, block: runsBlock.presentationIntent, range: range)
+    }
+    
+    init(attrText: NSAttributedString,
+         block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value?,
+         range: Range<AttributedString.Index>)
+    {
+        self.attrText = attrText
+        self.block = block
+        self.range = range
+        
+        if let ident = self.block?.blockIdentity {
+            self.identity = ident.identity
+            self.kind     = ident.kind
+        }
+        
+        /// Anführungszeichen vordefinieren
+        self.listBulletPointStr = ""
+        self.widthDefault       = 0
+        
+        /// Einzüge für die Listen und die Block Quote
+        self.firstLineHeadIndent = 0
+        self.headIndent          = 0
+        self.blockQuoteIndent    = 5
+        
+        self.tableBlock = TableBlock()
+        
+        self.isFirstBlockQuote  = false
+        self.isLastBlockQuote   = false
+    }
+    
+    ///-----------------------------------------------------------------------------------
+    /// Hilfsfunktionen
+    ///
+    var hasBlockQuote: Bool { block?.hasBlockQuote ?? false }
+    
+    ///-----------------------------------------------------------------------------------
+    /// Index für das Dictionary der Listeneinträge
+    var key: String {
+        if let block = self.block {
+            return "\(block.listIdentity)-\(block.listHierarchie ?? 0)-\(block.listOrdinal)"
+        }
+        return "??????"
+    }
+    
+    ///-----------------------------------------------------------------------------------
+    /// Debug-Anzeige
+    ///
+    var debugString: String {
+        let bulletPoint = listBulletPointStr.dropLast().padding(to: 3)
+        
+        var listString = "??????"
+        if let block = self.block {
+            
+            listString =  String(!block.hasList ? "" :
+                                    String(format: "%2d ",    block.listIdentity) +
+                                 String(format: "%2d ",    block.listHierarchie ?? 0) + "List" +
+                                 String(format: "%2d -> ", block.listOrdinal) +
+                                 String(format: "%2.1f  ", headIndent) +
+                                 bulletPoint
+            ).padding(to: 24)
+        }
+        listString = String(format: " %2d  ", identity) + "\(kind)".padding(to: 15) + listString
+        if let block = self.block {
+            listString += "\t \(isFirstBlockQuote ? 1 : 0) \(isLastBlockQuote ? 1 : 0) \(String(describing: block))"
+        }
+        return listString
+    }
+    
     
     ///---------------------------------------------------------------------------------------
     /// Alle Block Content eines AttributedString ermittlen und aufbereiten (Indent der Listen)
@@ -184,7 +179,7 @@ extension MarkdownScrollView {
         prepareBlocks(allBlocks: &allBlocks, attrText: attrText, textSize: textSize)
         return allBlocks
     }
-
+    
     
     private static func prepareBlocks(allBlocks: inout [BlockContent],
                                       attrText: AttributedString, textSize: CGFloat)
@@ -194,7 +189,7 @@ extension MarkdownScrollView {
         typealias ML = Markdown.List
         typealias MT = Markdown.Table
         typealias MC = Markdown.CodeBlock
-
+        
         ///-----------------------------------------------------------------------------------
         /// 1 .  D U R C H L A U F  :   Berechnen der Arrays für die Tabellen und Listen
         ///
@@ -299,13 +294,13 @@ extension MarkdownScrollView {
                 headIndent = dictIndent
             } else {
                 listBulletPoint = "\t" + listBulletPoint + "\t" /// Aufzählungszeichen mit TAB ergänzen
-//                
-//                let bullet = NSMutableAttributedString(         /// Bullet-Point dem Attributed String voranstellen
-//                    string:     listBulletPoint,
-//                    attributes: blockContent.attrText.attributes(at: 0, effectiveRange: nil))
-//                
-//                bullet.append(blockContent.attrText)            /// Original-Text anhängen
-//                allBlocks[index].attrText = bullet              /// und zurückspeichern
+                //
+                //                let bullet = NSMutableAttributedString(         /// Bullet-Point dem Attributed String voranstellen
+                //                    string:     listBulletPoint,
+                //                    attributes: blockContent.attrText.attributes(at: 0, effectiveRange: nil))
+                //
+                //                bullet.append(blockContent.attrText)            /// Original-Text anhängen
+                //                allBlocks[index].attrText = bullet              /// und zurückspeichern
                 dictHeadIndent[blockContent.key] = headIndent   /// Einzug dieses Absatzes merken
             }
             
@@ -391,9 +386,9 @@ extension MarkdownScrollView {
                 /// wird links und rechts bei der Position berücksichtigt.
                 let location = {
                     switch alignment {
-                        case .right:  locationRight - lengthOffset/2
-                        case .center: (locationLeft + locationRight)/2
-                        default:      locationLeft  + lengthOffset/2
+                    case .right:  locationRight - lengthOffset/2
+                    case .center: (locationLeft + locationRight)/2
+                    default:      locationLeft  + lengthOffset/2
                     }
                 }()
                 
@@ -437,7 +432,7 @@ extension MarkdownScrollView {
             var font = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             font = block.hasHeader    ? block.headerFont : font
             font = block.hasCodeBlock ? UIFont.monospacedSystemFont(ofSize: MC.textsize, weight: .regular) : font
-
+            
             let fontSize: CGFloat = (font?.pointSize ?? textSize) //* 0.5
             
             var attrText = NSMutableAttributedString(attributedString: blockContent.attrText)
@@ -476,7 +471,7 @@ extension MarkdownScrollView {
             if !currBlockQuote && nextBlockQuote {
                 
             }
-
+            
             ///-------------------------------------------------------------------------------
             /// Header erkennen und den Font des Headers ergänzen
             if block.hasHeader {
@@ -492,9 +487,9 @@ extension MarkdownScrollView {
                 paragraphSpacingBefore = 0
                 paragraphSpacing = 5
             }
-
+            
             ///-------------------------------------------------------------------------------
-           /// List erkennen und die Bullets voranstellen
+            /// List erkennen und die Bullets voranstellen
             if block.hasList {
                 let bullet = NSMutableAttributedString(         /// Bullet-Point dem Attributed String voranstellen
                     string:     blockContent.listBulletPointStr,
@@ -512,7 +507,7 @@ extension MarkdownScrollView {
                 tabulators          = [CTTextTabCreate(.right, headIndent - w, nil),
                                        CTTextTabCreate(.left,  headIndent, nil ) ]
             }
-                        
+            
             /// Style einfügen
             attrText.addCTParagraphStyle([
                 .lineHeightMultiple:     1.1,
@@ -526,10 +521,9 @@ extension MarkdownScrollView {
                 .paragraphSpacingBefore: paragraphSpacingBefore,
             ])
             
-//            attrText.scaleFonts(by: 0.5)
+            //            attrText.scaleFonts(by: 0.5)
             
             allBlocks[index].attrText = attrText
         }
     }
 }
-

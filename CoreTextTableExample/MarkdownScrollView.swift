@@ -145,16 +145,16 @@ fileprivate enum CoreTextBlockFactory {
     static func renderers(from attr: AttributedString, textSize: CGFloat) -> [BlockRenderer] {
         
         // 1) Alle BlockContent‑Elemente (liefert dein bestehender Code)
-        let blocks = MarkdownScrollView.allBlockContents(attrText: attr, textSize: textSize)
+        let blocks = BlockContent.allBlockContents(attrText: attr, textSize: textSize)
         blocks.forEach { block in
             print(block.debugString)
         }
         
         // 2) Gruppen nach (kind, identity) zusammenfassen → je 1 Renderer
         var renderers: [BlockRenderer] = []
-        var currentTableBlock: MarkdownScrollView.BlockContent.TableBlock? = nil
+        var currentTableBlock: BlockContent.TableBlock? = nil
 
-        func makeRenderer(intentBlock: MarkdownScrollView.BlockContent) {
+        func makeRenderer(intentBlock: BlockContent) {
             guard let block = intentBlock.block else { return }
             
             if block.hasCodeBlock {
