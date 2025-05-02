@@ -27,8 +27,10 @@ class ViewController: UIViewController, UIDocumentPickerDelegate {
 
     @IBAction func actionExport(_ sender: Any) {
 
+        let renderers = MarkdownParser.markdown(string: text2, size: 12, textColor: textColor )
+        
         // 1) PDF erzeugen → tmpURL zurückgeben
-        scrollView.exportPDF { [unowned self] in
+        MarkdownParser.exportPDF(renderers: renderers) { [unowned self] in
             let tmp = FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent("Markdown")

@@ -24,9 +24,10 @@
 		E9A940802DC4ECA6004501E6 /* MarkdownParser+Statics.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406A2DC4ECA6004501E6 /* MarkdownParser+Statics.swift */; };
 		E9A940812DC4ECA6004501E6 /* MarkdownScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406B2DC4ECA6004501E6 /* MarkdownScrollView.swift */; };
 		E9A940822DC4ECA6004501E6 /* MarkdownScrollView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406C2DC4ECA6004501E6 /* MarkdownScrollView+Extension.swift */; };
-		E9A940832DC4ECA6004501E6 /* NSAttributedString+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406D2DC4ECA6004501E6 /* NSAttributedString+Extension.swift */; };
+		E9A940832DC4ECA6004501E6 /* MarkdownParser+NSAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406D2DC4ECA6004501E6 /* MarkdownParser+NSAttributedString.swift */; };
 		E9A940842DC4ECA6004501E6 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406E2DC4ECA6004501E6 /* SceneDelegate.swift */; };
 		E9A940852DC4ECA6004501E6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406F2DC4ECA6004501E6 /* ViewController.swift */; };
+		E9A940882DC4EE4D004501E6 /* MarkdownParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,9 +50,10 @@
 		E9A9406A2DC4ECA6004501E6 /* MarkdownParser+Statics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MarkdownParser+Statics.swift"; sourceTree = "<group>"; };
 		E9A9406B2DC4ECA6004501E6 /* MarkdownScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownScrollView.swift; sourceTree = "<group>"; };
 		E9A9406C2DC4ECA6004501E6 /* MarkdownScrollView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MarkdownScrollView+Extension.swift"; sourceTree = "<group>"; };
-		E9A9406D2DC4ECA6004501E6 /* NSAttributedString+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+Extension.swift"; sourceTree = "<group>"; };
+		E9A9406D2DC4ECA6004501E6 /* MarkdownParser+NSAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MarkdownParser+NSAttributedString.swift"; sourceTree = "<group>"; };
 		E9A9406E2DC4ECA6004501E6 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		E9A9406F2DC4ECA6004501E6 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownParser.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,7 +88,6 @@
 			children = (
 				E9A940582DC4ECA6004501E6 /* Color.swift */,
 				E9A940592DC4ECA6004501E6 /* String.swift */,
-				E9A9406D2DC4ECA6004501E6 /* NSAttributedString+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -114,13 +115,15 @@
 		E9A940862DC4ECB8004501E6 /* MarkdownParser */ = {
 			isa = PBXGroup;
 			children = (
+				E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */,
+				E9A9406A2DC4ECA6004501E6 /* MarkdownParser+Statics.swift */,
 				E9A940642DC4ECA6004501E6 /* MarkdownParser+AttributedString.swift */,
 				E9A940652DC4ECA6004501E6 /* MarkdownParser+BlockContent.swift */,
 				E9A940662DC4ECA6004501E6 /* MarkdownParser+BlockRenderer.swift */,
 				E9A940672DC4ECA6004501E6 /* MarkdownParser+Font.swift */,
 				E9A940682DC4ECA6004501E6 /* MarkdownParser+ImageAttachment.swift */,
 				E9A940692DC4ECA6004501E6 /* MarkdownParser+PresentationIntent.swift */,
-				E9A9406A2DC4ECA6004501E6 /* MarkdownParser+Statics.swift */,
+				E9A9406D2DC4ECA6004501E6 /* MarkdownParser+NSAttributedString.swift */,
 			);
 			path = MarkdownParser;
 			sourceTree = "<group>";
@@ -204,6 +207,7 @@
 				E9A940772DC4ECA6004501E6 /* AppDelegate.swift in Sources */,
 				E9A940782DC4ECA6004501E6 /* CoreTextTableView.swift in Sources */,
 				E9A940792DC4ECA6004501E6 /* MarkdownContentView.swift in Sources */,
+				E9A940882DC4EE4D004501E6 /* MarkdownParser.swift in Sources */,
 				E9A9407A2DC4ECA6004501E6 /* MarkdownParser+AttributedString.swift in Sources */,
 				E9A9407B2DC4ECA6004501E6 /* MarkdownParser+BlockContent.swift in Sources */,
 				E9A9407C2DC4ECA6004501E6 /* MarkdownParser+BlockRenderer.swift in Sources */,
@@ -213,7 +217,7 @@
 				E9A940802DC4ECA6004501E6 /* MarkdownParser+Statics.swift in Sources */,
 				E9A940812DC4ECA6004501E6 /* MarkdownScrollView.swift in Sources */,
 				E9A940822DC4ECA6004501E6 /* MarkdownScrollView+Extension.swift in Sources */,
-				E9A940832DC4ECA6004501E6 /* NSAttributedString+Extension.swift in Sources */,
+				E9A940832DC4ECA6004501E6 /* MarkdownParser+NSAttributedString.swift in Sources */,
 				E9A940842DC4ECA6004501E6 /* SceneDelegate.swift in Sources */,
 				E9A940852DC4ECA6004501E6 /* ViewController.swift in Sources */,
 			);
