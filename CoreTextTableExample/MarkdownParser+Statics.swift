@@ -12,45 +12,55 @@ import UIKit
 
 public struct Markdown {
     
-    static let _1cm: CGFloat = 1 / 2.54 * 72                    /// 1cm in Zoll umrechnen und 72dpi Standard
-
-    /// Soft Break aktivieren
-    static var useSoftBreaks : Bool = true                      /// Soft Breaks aktivieren / deaktivieren
+    static let _1cm          : CGFloat = 1 / 2.54 * 72         /// 1cm in Zoll umrechnen und 72dpi Standard
+    static var useSoftBreaks : Bool = true                     /// Soft Breaks aktivieren / deaktivieren
     
     /// Konstanten für die Tabelle
-    static var tableWeightText   : UIFont.Weight = .regular     /// Stil des Textes in der Tabelle
-    static var tableWeightHeader : UIFont.Weight = .bold        /// Stil der Überschrift in der Tabelle
-    static var tableWeightBox    : UIFont.Weight = .ultraLight  /// Stil der Balken in der Tabelle
-    static var tableColorBox     : UIColor?      = nil          /// Farbe der Balken der Tabelle
-
-    /// Konstanten für die Liste (Anführungszeichen der Liste in der Hierarchie)
-    static var listBulletPoint         :[String] = [.listBullet_1, .listBullet_2, .listBullet_3]
-    static var listLeftIndent          : CGFloat = 10           /// Linker Rand der untersten Hierarchie
-
-    /// Konstanten für den vertikalen Trennstrich (Ruler)
-    static var rulerRightIndent        : CGFloat = 5            /// rechter Rand der Trennlinie
-    static var rulerHeight             : CGFloat = 20           /// Höhe des Hintergrundes der Trennlinie
-    static var rulerLineHeight         : CGFloat = 4            /// Strichdicke der Trennlinie
-    static var rulerColorHighLight     : Bool    = true         /// Die Farbe der Trennlinie wird etwas heller
-                                                                /// als die Textfarbe dargestellt
-    /// Konstanten für den Hintergrund des Block Quote
-    static var blockquoteContentIndent : CGFloat = 30           /// Abstand des Inhaltes vom Rand des Block Quote
-    static var blockquoteHorzIndent    : CGFloat = 0            /// Ränder Hintergrund links und rechts
-    static var blockquoteVertOffset    : CGFloat = 5            /// Verschiebung des  Hintergrunds nach unten
-    static var blockquoteColor         : UIColor = .systemGray6 /// Farbe für den Hintergrund
+    struct Table {
+        static var weightText   : UIFont.Weight = .regular     /// Stil des Textes in der Tabelle
+        static var weightHeader : UIFont.Weight = .bold        /// Stil der Überschrift in der Tabelle
+        static var weightBox    : UIFont.Weight = .ultraLight  /// Stil der Balken in der Tabelle
+        static var colorBox     : UIColor?      = nil          /// Farbe der Balken der Tabelle
+    }
     
-    static var blockquoteBarIndent     : CGFloat = 5            /// Linker Rand des Balkens
-    static var blockquoteBarWidth      : CGFloat = 10           /// Breite des Balkens
-    static var blockquoteBarColor      : UIColor = .systemGray4 /// Farbe für den Balken
+    /// Konstanten für die Liste (Anführungszeichen der Liste in der Hierarchie)
+    struct List {
+        static var bulletPoint        : [String] = [.listBullet_1, .listBullet_2, .listBullet_3]
+        static var leftIndent         : CGFloat = 10           /// Linker Rand der untersten Hierarchie
+    }
+    
+    /// Konstanten für den vertikalen Trennstrich (Ruler)
+    struct Ruler {
+        static var rightIndent        : CGFloat = 5            /// rechter Rand der Trennlinie
+        static var height             : CGFloat = 20           /// Höhe des Hintergrundes der Trennlinie
+        static var lineHeight         : CGFloat = 4            /// Strichdicke der Trennlinie
+        static var colorHighLight     : Bool    = true         /// Die Farbe der Trennlinie wird etwas heller
+    }                                                          /// als die Textfarbe dargestellt
+    
+    /// Konstanten für den Hintergrund des Block Quote
+    struct BlockQuote {
+        static var contentIndent    : CGFloat = 30           /// Abstand des Inhaltes vom Rand des Block Quote
+        static var horizontalIndent : CGFloat = 0            /// Ränder Hintergrund links und rechts
+        static var verticalOffset   : CGFloat = 5            /// Verschiebung des  Hintergrunds nach unten
+        static var backgroundColor  : UIColor = .systemGray6 /// Farbe für den Hintergrund
+        
+        static var barIndent     : CGFloat = 5            /// Linker Rand des Balkens
+        static var barWidth      : CGFloat = 10           /// Breite des Balkens
+        static var barColor      : UIColor = .systemGray4 /// Farbe für den Balken
+    }
     
     /// Konstanten für den Code Block
-    static var codeblockTextsize       : CGFloat = 14           /// Größe des Textfonts im Code Block
+    struct CodeBlock {
+        static var textsize       : CGFloat = 14           /// Größe des Textfonts im Code Block
+    }
     
     /// Konstanten für den  Header
-    static var fontSizes: [UIUserInterfaceIdiom : [CGFloat]] =  /// Gerätespezifische Fontgrößen für  Header
-    [.mac:   [34, 30, 24, 20, 18, 16],
-     .pad:   [32, 24, 20, 18, 16, 16],
-     .phone: [24, 18, 16, 16, 16, 16]]
+    struct Header {                                        /// Gerätespezifische Fontgrößen für  Header
+        static var fontSizes: [UIUserInterfaceIdiom : [CGFloat]] =
+        [.mac:   [34, 30, 24, 20, 18, 16],
+         .pad:   [32, 24, 20, 18, 16, 16],
+         .phone: [24, 18, 16, 16, 16, 16]]
+    }
 }
 
 

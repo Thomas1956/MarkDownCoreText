@@ -42,6 +42,10 @@ protocol BlockRenderer: AnyObject {
 
 extension BlockRenderer {
     
+    typealias M  = Markdown
+    typealias MB = Markdown.BlockQuote
+    typealias MR = Markdown.Ruler
+    
     ///---------------------------------------------------------------------------------------
     /// Textgröße des aktuellen Fonts
     var fontSize: CGFloat {
@@ -52,10 +56,10 @@ extension BlockRenderer {
     ///---------------------------------------------------------------------------------------
     /// Umranden des Rechteckes für Paragraph Spacing (danach)
     var blockQouteSpacings: (paddingBefore: CGFloat, paddingAfter: CGFloat, paddingHorz: CGFloat) {
+        guard let block   = blockContent.block else { return (0,0,0) }
         let paddingBefore = blockContent.isFirstBlockQuote ? fontSize * 0.3 : 0   // 0.3em vertikal
         let paddingAfter  = blockContent.isLastBlockQuote  ? fontSize * 0.3 : 0   // 0.3em vertikal
-        let paddingHorz   = CGFloat.zero
-        // blockContent.block?.hasBlockQuote ?? false ? fontSize * 0.5 : 0   // 0.5em horizontal
+        let paddingHorz   = block       .hasBlockQuote     ? fontSize * 0.5 : 0   // 0.5em horizontal
         return (paddingBefore, paddingAfter, paddingHorz)
     }
     
@@ -114,19 +118,19 @@ extension BlockRenderer {
 
         /// Hintergrund füllen
         var rect = rect
-        rect.origin.x    += Markdown.blockquoteHorzIndent
+        rect.origin.x    += MB.horizontalIndent
         rect.origin.y    += blockContent.isLastBlockQuote ? after : 0
-        rect.size.width  -= Markdown.blockquoteHorzIndent * 2
+        rect.size.width  -= MB.horizontalIndent * 2
         rect.size.height -= (blockContent.isLastBlockQuote ? after : 0) + (blockContent.isFirstBlockQuote ? before : 0)
-        let color = Markdown.blockquoteColor
+        let color = MB.backgroundColor
         context.setFillColor(color.cgColor)
         context.fill(rect)
         
         /// Balken am linken Rand
         var balken = rect
-        balken.origin.x  += Markdown.blockquoteBarIndent
-        balken.size.width = Markdown.blockquoteBarWidth
-        context.setFillColor(Markdown.blockquoteBarColor.cgColor)
+        balken.origin.x  += MB.barIndent
+        balken.size.width = MB.barWidth
+        context.setFillColor(MB.barColor.cgColor)
         context.fill(balken)
     }
     
@@ -386,7 +390,7 @@ final class CodeBlockRenderer: BlockRenderer {
     func draw(in context: CGContext) {
         // Hintergrund
         context.setFillColor(UIColor.systemGray6.cgColor)
-        context.setStrokeColor(Markdown.blockquoteColor.lowlight.cgColor)
+        context.setStrokeColor(MB.backgroundColor.lowlight.cgColor)
         context.setLineWidth(1)
         
         let rectBackground = CGRect(origin: .zero, size: frame.size)
@@ -449,7 +453,7 @@ final class HorizontalRuleRenderer: BlockRenderer {
         self.text = blockContent.attrText
     }
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
-        let h = Markdown.rulerHeight
+        let h = MR.height
         self.frame = CGRect(x: 0, y: y, width: width, height: h)
         return h
     }
@@ -462,14 +466,18 @@ final class HorizontalRuleRenderer: BlockRenderer {
             let rect = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             drawBlockQuote(in: context, rect: rect)
             
-            leftIndent = Markdown.blockquoteContentIndent
+            leftIndent = MB.contentIndent
         }
 
+        var color = UIColor.label
+        /// Die Farbe der Linie  wird etwas heller als der Text dargestellt
+        if MR.colorHighLight { color = color.highlight }
+        
         let y = CGFloat(frame.height/2)
         context.move(to: CGPoint(x: leftIndent, y: y))
-        context.addLine(to: CGPoint(x: self.frame.width - Markdown.rulerRightIndent, y: y))
-        context.setLineWidth(Markdown.rulerLineHeight)
-        context.setStrokeColor(UIColor.systemGray4.cgColor)
+        context.addLine(to: CGPoint(x: self.frame.width - MR.rightIndent, y: y))
+        context.setLineWidth(MR.lineHeight)
+        context.setStrokeColor(color.cgColor)
         context.strokePath()
     }
 }

@@ -110,6 +110,12 @@ extension MarkdownScrollView {
             self.isLastBlockQuote   = false
         }
         
+        ///-----------------------------------------------------------------------------------
+        /// Hilfsfunktionen
+        ///
+        var hasBlockQuote: Bool { block?.hasBlockQuote ?? false }
+        
+        ///-----------------------------------------------------------------------------------
         /// Index für das Dictionary der Listeneinträge
         var key: String {
             if let block = self.block {
@@ -183,10 +189,16 @@ extension MarkdownScrollView {
     private static func prepareBlocks(allBlocks: inout [BlockContent],
                                       attrText: AttributedString, textSize: CGFloat)
     {
+        typealias M = Markdown
+        typealias MB = Markdown.BlockQuote
+        typealias ML = Markdown.List
+        typealias MT = Markdown.Table
+        typealias MC = Markdown.CodeBlock
+
         ///-----------------------------------------------------------------------------------
         /// 1 .  D U R C H L A U F  :   Berechnen der Arrays für die Tabellen und Listen
         ///
-        var arrIndent       = [Markdown.listLeftIndent] /// Array der Einzüge nach Hierarchie (Summe bilden)
+        var arrIndent       = [ML.leftIndent]           /// Array der Einzüge nach Hierarchie (Summe bilden)
         var dictHeadIndent  = [String: CGFloat]()       /// Dictionary der Einzüge in der Hierachie für gleiche Absätze
         var dictBlockIndent = [Int: CGFloat]()          /// Dictionary der Einzüge für den Block Indent
         var dictTableBlock  = [Int: BlockContent.TableBlock]()
@@ -206,9 +218,9 @@ extension MarkdownScrollView {
                 var tableBlock = dictTableBlock[id] ?? BlockContent.TableBlock(block.tableAlignments)
                 
                 /// Getrennte Fonts für Header, Text und Rahmen
-                let fontText   = UIFont.systemFont          (ofSize: textSize, weight: Markdown.tableWeightText)
-                let fontHeader = UIFont.systemFont          (ofSize: textSize, weight: Markdown.tableWeightHeader)
-                let fontBoxes  = UIFont.monospacedSystemFont(ofSize: textSize, weight: Markdown.tableWeightBox)
+                let fontText   = UIFont.systemFont          (ofSize: textSize, weight: MT.weightText)
+                let fontHeader = UIFont.systemFont          (ofSize: textSize, weight: MT.weightHeader)
+                let fontBoxes  = UIFont.monospacedSystemFont(ofSize: textSize, weight: MT.weightBox)
                 
                 /// Die Breite des Textes in der Zelle mit dem richtigen Font ermitteln
                 let text = String(AttributedString(attrText[blockContent.range]).characters)
@@ -244,7 +256,7 @@ extension MarkdownScrollView {
                 
                 /// Anführungszeichen (-zahl) für die Liste
                 let listBulletPoint = block.hasOrderedList ? "\(block.listOrdinal)." :
-                Markdown.listBulletPoint[(id-1) % Markdown.listBulletPoint.count]
+                ML.bulletPoint[(id-1) % ML.bulletPoint.count]
                 
                 /// Ermitteln der Breite der Anführungszeichen der Liste (oder Ordnungszahlen)
                 let font = UIFont.systemFont(ofSize: textSize)
@@ -274,7 +286,7 @@ extension MarkdownScrollView {
             
             /// Anführungszeichen (-zahl) für die Liste
             var listBulletPoint = block.hasOrderedList ? "\(block.listOrdinal)." :
-            Markdown.listBulletPoint[(id-1) % Markdown.listBulletPoint.count]
+            ML.bulletPoint[(id-1) % ML.bulletPoint.count]
             
             /// Es muss geprüft werden, ob im Dictionary schon ein Eintrag mit dem gleichen Key existiert.
             /// Der Key wird aus `identity`, `hierarchie`und `ordinal`gebildet.
@@ -355,7 +367,7 @@ extension MarkdownScrollView {
             var unten = String.ul            ///┗━━━━━┻━━┻━━━━━━━┛
             
             var tabStops: [NSTextTab] = []
-            let fontBoxes = UIFont.monospacedSystemFont(ofSize: textSize, weight: Markdown.tableWeightBox)
+            let fontBoxes = UIFont.monospacedSystemFont(ofSize: textSize, weight: MT.weightBox)
             
             ///-------------------------------------------------------------------------------
             /// Berechnung der Breiten der Tabelle, der Linien und der Tabulatoren
@@ -424,14 +436,14 @@ extension MarkdownScrollView {
             
             var font = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             font = block.hasHeader    ? block.headerFont : font
-            font = block.hasCodeBlock ? UIFont.monospacedSystemFont(ofSize: Markdown.codeblockTextsize, weight: .regular) : font
+            font = block.hasCodeBlock ? UIFont.monospacedSystemFont(ofSize: MC.textsize, weight: .regular) : font
 
             let fontSize: CGFloat = (font?.pointSize ?? textSize) //* 0.5
             
             var attrText = NSMutableAttributedString(attributedString: blockContent.attrText)
             var tabulators             : [CTTextTab] = []
-            var firstLineHeadIndent    : CGFloat     = block.hasBlockQuote ? Markdown.blockquoteContentIndent : 0
-            var headIndent             : CGFloat     = block.hasBlockQuote ? Markdown.blockquoteContentIndent : 0
+            var firstLineHeadIndent    : CGFloat     = block.hasBlockQuote ? MB.contentIndent : 0
+            var headIndent             : CGFloat     = block.hasBlockQuote ? MB.contentIndent : 0
             let tailIndent             : CGFloat     = -20
             var paragraphSpacing       : CGFloat     = fontSize * 0.75
             var paragraphSpacingBefore : CGFloat     = 0
@@ -439,8 +451,8 @@ extension MarkdownScrollView {
             ///-------------------------------------------------------------------------------
             /// Blockerkennung, um Abstände nach Bedarf einzustellen
             ///
-            let prevBlockQuote = index > 0                   && allBlocks[index-1].block?.hasBlockQuote ?? false
-            let nextBlockQuote = index < allBlocks.count - 1 && allBlocks[index+1].block?.hasBlockQuote ?? false
+            let prevBlockQuote = index > 0                   && allBlocks[index-1].hasBlockQuote
+            let nextBlockQuote = index < allBlocks.count - 1 && allBlocks[index+1].hasBlockQuote
             let currBlockQuote = block.hasBlockQuote
             
             /// Start eines BlockQuote
@@ -469,13 +481,13 @@ extension MarkdownScrollView {
             /// Header erkennen und den Font des Headers ergänzen
             if block.hasHeader {
                 attrText.addAttributes([.font: block.headerFont])
-                paragraphSpacingBefore = fontSize * 1.2
+                paragraphSpacingBefore = index > 0 ? fontSize * 1.2 : 0
             }
             
             ///-------------------------------------------------------------------------------
             /// Code Block  erkennen und den Font des Code Block ergänzen
             if block.hasCodeBlock {
-                let font = UIFont.monospacedSystemFont(ofSize: Markdown.codeblockTextsize, weight: .regular)
+                let font = UIFont.monospacedSystemFont(ofSize: MC.textsize, weight: .regular)
                 attrText.addAttributes([.font: font])
                 paragraphSpacingBefore = 0
                 paragraphSpacing = 5

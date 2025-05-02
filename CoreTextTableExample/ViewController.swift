@@ -72,14 +72,11 @@ class ViewController: UIViewController, UIDocumentPickerDelegate {
     Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
     
     _______________
-    > ## Überschrift 2
-    
+    > ## Überschrift 2    
     > Blockquote loorem ipsum dolor sit amet, **consectetur** adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut ~***aliquip***~ ex ea ^[commodo consequat](size:20, weight: 'bold', color: 'orange'). Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-        0 1 2 3 4 5 6 7 8 9 
-    
+        0 1 2 3 4 5 6 7 8 9     
     > - Erstens Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore 
-    > - Zweitens
-    
+    > - Zweitens    
     > Ende
     
     0 1 2 3 4

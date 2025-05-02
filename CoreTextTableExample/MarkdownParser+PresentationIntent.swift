@@ -106,11 +106,12 @@ extension AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value
     
     /// Gerätespezifischen Font für den Level des Header zurückgeben
     var headerFont: UIFont {
-        guard let level = self.headerLevel, case 1...6 = level, let defaultFont = Markdown.fontSizes[.phone]
+        typealias MH = Markdown.Header
+        guard let level = self.headerLevel, case 1...6 = level, let defaultFont = MH.fontSizes[.phone]
         else { return .systemFont(ofSize: 16) }
         
         let device = UIDevice.current.userInterfaceIdiom
-        let size = Markdown.fontSizes[device, default: defaultFont] [level - 1]
+        let size = MH.fontSizes[device, default: defaultFont] [level - 1]
         return .systemFont(ofSize: size, weight: .bold)
     }
     
