@@ -4,23 +4,28 @@
 //
 //  Created by Thomas on 29.04.25.
 //
+
 import UIKit
-import CoreText
-import PDFKit
 
 
-// MARK: - ---------------------------------------------------------
+//--------------------------------------------------------------------------------------------
 // MARK: MarkdownContentView (zeichnet alles)
-// --------------------------------------------------------------
 
 class MarkdownContentView: UIView {
 
-    /// Länge von 1cm in PPI
-    static let _1cm = Markdown._1cm
-    
-    var renderers: [BlockRenderer] = []
+    private var renderers: [BlockRenderer] = []
 
+    ///---------------------------------------------------------------------------------------
+    /// Main entry: parse Markdown string, build renderers, trigger layout
+    ///
+    func markdown(string: String, size: CGFloat = 17, weight: UIFont.Weight = .regular, textColor: UIColor = .gray) {
+        self.renderers = MarkdownParser.markdown(string: string, size: size, weight: weight, textColor: textColor)
+        setNeedsLayout()
+    }
+    
+    ///---------------------------------------------------------------------------------------
     /// Frames zuweisen & Gesamthöhe liefern
+    ///
     @discardableResult
     func layout(width: CGFloat) -> CGFloat {
         var y: CGFloat = 0
@@ -31,7 +36,9 @@ class MarkdownContentView: UIView {
         return y
     }
 
-    // ----------------------------------------------------------
+    ///---------------------------------------------------------------------------------------
+    /// Zeichnen des Inhaltes
+    ///
     override func draw(_ rect: CGRect) {
         guard let ctx = UIGraphicsGetCurrentContext() else { return }
 

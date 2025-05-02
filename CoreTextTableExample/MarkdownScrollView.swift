@@ -35,13 +35,11 @@ class MarkdownScrollView: UIScrollView {
     ///---------------------------------------------------------------------------------------
     /// Main entry: parse Markdown string, build renderers, trigger layout
     ///
-    func markdown(string: String, size: CGFloat = 17, weight: UIFont.Weight = .regular, textColor: UIColor = .gray) {
+    func markdown(string: String, size: CGFloat, weight: UIFont.Weight, textColor: UIColor) {
+        
         guard let contentView = subviews.first as? MarkdownContentView else { return }
-
-        let renderers = MarkdownParser.markdown(string: string, size: size, weight: weight, textColor: textColor)
-        contentView.renderers = renderers
-        setNeedsLayout()
-    }
+        contentView.markdown(string: string, size: size, weight: weight, textColor: textColor)
+     }
 
     // MARK: Layout
     override func layoutSubviews() {

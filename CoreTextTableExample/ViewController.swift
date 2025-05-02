@@ -16,8 +16,7 @@ class ViewController: UIViewController, UIDocumentPickerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
- 
-        scrollView.markdown(string: text2, size: textSize, textColor: textColor )
+        scrollView.markdown(string: text2, size: textSize, weight: .regular, textColor: textColor )
     }
     
     ///---------------------------------------------------------------------------------------
