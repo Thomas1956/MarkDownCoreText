@@ -9,6 +9,7 @@ import UIKit
 import CoreText
 import PDFKit
 
+var debugColor: Bool = !true
 
 //--------------------------------------------------------------------------------------------
 // MARK: BlockRenderer (Protokoll)
@@ -17,24 +18,96 @@ import PDFKit
 /// Dadurch dürfen wir ihre Properties ändern, auch wenn die Referenz `let` ist.
 ///
 protocol BlockRenderer: AnyObject {
+    
     /// Inhalt des Blockes
     var blockContent: MarkdownScrollView.BlockContent { get set }
    
-    // NEU: auf welcher PDF-Seite wird dieser Block ausgegeben?
-    var pageIndex: Int { get set }                // 0-basiert
+    /// PDF-Seite, auf der  dieser Block ausgegeben wird (0-basiert)
+    var pageIndex: Int { get set }
 
     /// Zeichen­rechteck relativ zum Content‑View (UIKit‑Koordinaten, (0,0) = oben links)
     var frame: CGRect { get set }
+    
     /// Höhe berechnen, wenn eine bestimmte Breite vorgegeben ist
     func measure(y: CGFloat, width: CGFloat) -> CGFloat
+    
     /// Inhalt in den bereits nach (0,0) verschobenen CGContext zeichnen.
     /// Erwartet, dass das Koordinatensystem **bereits** für Core Text geflippt wurde
     func draw(in context: CGContext)
 }
 
+
+//--------------------------------------------------------------------------------------------
+// MARK: Extension BlockRenderer für die Standard-Funktionen
+
 extension BlockRenderer {
     
+    ///---------------------------------------------------------------------------------------
+    /// Textgröße des aktuellen Fonts
+    var fontSize: CGFloat {
+        let font = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
+        return (font?.pointSize ?? 20) //* 0.5
+    }
+    
+    ///---------------------------------------------------------------------------------------
+    /// Umranden des Rechteckes für Paragraph Spacing (danach)
+    var blockQouteSpacings: (paddingBefore: CGFloat, paddingAfter: CGFloat, paddingHorz: CGFloat) {
+        let paddingBefore = blockContent.isFirstBlockQuote ? fontSize * 0.3 : 0   // 0.3em vertikal
+        let paddingAfter  = blockContent.isLastBlockQuote  ? fontSize * 0.3 : 0   // 0.3em vertikal
+        let paddingHorz   = CGFloat.zero
+        // blockContent.block?.hasBlockQuote ?? false ? fontSize * 0.5 : 0   // 0.5em horizontal
+        return (paddingBefore, paddingAfter, paddingHorz)
+    }
+    
+    ///---------------------------------------------------------------------------------------
+    /// Berechnen der Höhe des Inhaltes
+    func contentHeight(_ width: CGFloat) -> CGFloat {
+        let text = blockContent.attrText
+        let constraint = CGSize(width: width, height: .greatestFiniteMagnitude)
+        let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
+        let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
+        return ceil(size.height)
+    }
+    
+    ///---------------------------------------------------------------------------------------
+    /// Rechteck für den Inhalt des Absatzes (korrigiert um Abstände oben/unten)
+    ///
+    var contentRect: CGRect {
+        /// Wenn `paragraphSpacingBefore` und `paragraphSpacing` definiert sind, muss der zu zeichnende Inhalt
+        /// in Y-Richtung verschoben und in der Höhe verkleinert werden.
+        let (before, after) = blockContent.attrText.paragraphSpacings
+        
+        /// Im Block Quote muss abgefragt werden, ob der Absatz der erste und/oder der letzte im Block Quote ist. Auch hier
+        /// müssen die Abstände ermittelt und die Y-Position sowie die Höhe korrigiert werden.
+        let (paddingBefore, paddingAfter, paddingHorz) = self.blockQouteSpacings
+        
+        /// Rechteck für das Zeichnen des Inhaltes
+        return CGRect( x:      paddingHorz,                     /// Linker Einzug beim Block Quote
+                       y:      after + paddingAfter,            /// Y-Position nach oben verschieben
+                       width:  frame.width  - 2 * paddingHorz,  /// Breite beim Block Quote reduzieren
+                       height: frame.height - after - before -  /// Höhe beim Block Quote und/oder
+                               paddingBefore - paddingAfter)    /// bem Paragraph Spacing reduzieren
+    }
+        
+    ///---------------------------------------------------------------------------------------
+    /// Größe des Inhaltes berechnen und den Frame setzen
+    ///
+    func measure(y: CGFloat, width: CGFloat) -> CGFloat {
+        /// Eingestellte Abstände des Absatzes
+        let (before, after) = blockContent.attrText.paragraphSpacings
+        
+        /// Im Block Quote muss abgefragt werden, ob der Absatz der erste und/oder der letzte im Block Quote ist. Auch hier
+        /// müssen die Abstände ermittelt und die Y-Position sowie die Höhe korrigiert werden.
+        let (paddingBefore, paddingAfter, paddingHorz) = self.blockQouteSpacings
+
+        let height = self.contentHeight(width - 2 * paddingHorz) + after + before + paddingBefore + paddingAfter
+        self.frame = CGRect(x: 0, y: y, width: width, height: height)
+        return height
+    }
+    
+    ///---------------------------------------------------------------------------------------
     /// Zeichnen des Hintergrundes von BlockQuote. Das Rechteck ist der gesamte Frame des Renderers.
+    ///
     func drawBlockQuote(in context: CGContext, rect: CGRect) {
         
         let (before, after) = blockContent.attrText.paragraphSpacings
@@ -57,56 +130,11 @@ extension BlockRenderer {
         context.fill(balken)
     }
     
-    /// Berechnen der Höhe des Inhaltes
-    func contentHeight(_ width: CGFloat) -> CGFloat {
-        let text = blockContent.attrText
-        let constraint = CGSize(width: width, height: .greatestFiniteMagnitude)
-        let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
-        let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
-        return ceil(size.height)
-    }
-    
-    var fontSize: CGFloat {
-        let font = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
-        return (font?.pointSize ?? 20) //* 0.5
-    }
-    
-    func measure(y: CGFloat, width: CGFloat) -> CGFloat {
-        /// Eingestellte Abstände des Absatzes
-        let (before, after) = blockContent.attrText.paragraphSpacings
-        ///
-        let paddingH: CGFloat = 0 // blockContent.block?.hasBlockQuote ?? false ? fontSize * 0.5 : 0   // 0.5em horizontal
-        let paddingBefore = blockContent.isFirstBlockQuote ? fontSize * 0.3 : 0   // 0.3em vertikal
-        let paddingAfter  = blockContent.isLastBlockQuote  ? fontSize * 0.3 : 0   // 0.3em vertikal
-
-        let height = self.contentHeight(width - 2 * paddingH) + after + before + paddingBefore + paddingAfter
-        self.frame = CGRect(x: 0, y: y, width: width, height: height)
-        return height
-    }
-    
+    ///---------------------------------------------------------------------------------------
+    /// Zeichnen des Inhaltes (Text und Bilder)
+    ///
     func drawContent(in context: CGContext) {
-        /// Wenn `paragraphSpacingBefore` definiert ist, muss der zu zeichnende Inhalt um diese Höhe nach unten
-        /// geschoben werden.
-        let (before, after) = blockContent.attrText.paragraphSpacings
-
-        let paddingH: CGFloat = 0 // blockContent.block?.hasBlockQuote ?? false ? fontSize * 0.5 : 0   // 0.5em horizontal
-        let paddingBefore = blockContent.isFirstBlockQuote ? fontSize * 0.3 : 0   // 0.3em vertikal
-        let paddingAfter  = blockContent.isLastBlockQuote  ? fontSize * 0.3 : 0   // 0.3em vertikal
-
-        /// Rechteck für das Zeichnen des Inhaltes
-        let contentRect =
-                CGRect(x:      paddingH,
-                       y:      -before + paddingAfter,
-                       width:  frame.width  - 2 * paddingH,
-                       height: frame.height - paddingBefore - paddingAfter)
- 
-//        if blockContent.block?.hasBlockQuote ?? false {
-//            context.setFillColor(UIColor.systemYellow.highlight.cgColor)
-//            let colorRect = CGRect(x: 400.0, y: after + paddingAfter, width: 50.0,
-//                                   height: frame.height - before - after - paddingBefore - paddingAfter)
-//            context.fill(colorRect)
-//        }
-        
+        /// Zeichnen des Inaltes mit Core Text
         let text = blockContent.attrText
         let path = CGMutablePath()
         path.addRect(contentRect)
@@ -114,11 +142,15 @@ extension BlockRenderer {
         let ctFrame = CTFramesetterCreateFrame(fs, CFRange(location: 0, length: text.length), path, nil)
         CTFrameDraw(ctFrame, context)
         
-        
-        //------------------------------------------------------------------------------------
-        // MARK: - ImageURL bearbeiten
-        
-        // 2) Bilder nachziehen – Attribute & Geometrie aus CTFrame ablesen
+        drawImages(in: context, ctFrame: ctFrame)
+    }
+    
+    ///---------------------------------------------------------------------------------------
+    /// Zeichnen der Bilder - Erkennen der Einträge vom Preprocessing im `myImageAttachment`
+    ///
+    func drawImages(in context: CGContext, ctFrame: CTFrame)
+    {
+        /// Images  – Attribute & Geometrie aus CTFrame ablesen
         let lines = CTFrameGetLines(ctFrame) as! [CTLine]
         var origins = [CGPoint](repeating: .zero, count: lines.count)
         CTFrameGetLineOrigins(ctFrame, .init(location: 0, length: 0), &origins)
@@ -132,6 +164,7 @@ extension BlockRenderer {
                     let attach = dict[.myImageAttachment] as? ImageAttachment
                 else { continue }
                 
+                /// In den Attributen nach dem Key `myImageAttachment` suchen und ImageAttachment auslesen
                 var asc: CGFloat = 0, desc: CGFloat = 0
                 let width = CGFloat(CTRunGetTypographicBounds(run, .init(),
                                                               &asc, &desc, nil))
@@ -146,16 +179,20 @@ extension BlockRenderer {
                 
                 context.saveGState()
 
-                // 1) unten-links → oben-links
+                /// Koordinatenursprung von unten/links → oben/links
                 context.translateBy(x: r.minX, y: r.minY)
                 context.translateBy(x: 0,      y: r.height)
                 context.scaleBy(x: 1, y: -1)
 
-                // 2) Debug-Hintergrund
-//                context.setFillColor(UIColor.systemOrange.cgColor)
-//                context.fill(CGRect(origin: .zero, size: r.size))
+                //----------------------------------------------------------------------------
+                // D E B U G
+                if debugColor {
+                    context.setFillColor(UIColor.systemOrange.cgColor)
+                    context.fill(CGRect(origin: .zero, size: r.size))
+                }
+                //----------------------------------------------------------------------------
 
-                // 3)  UIKit-Bridge: jetzt darf UIImage zeichnen
+                /// UIKit-Bridge für die Ausgabe im PDF-Renderer, um UIImage zu zeichnen
                 UIGraphicsPushContext(context)                // ★ neu
                 attach.image.draw(in: CGRect(origin: .zero, size: r.size))
                 UIGraphicsPopContext()                        // ★ neu
@@ -165,11 +202,13 @@ extension BlockRenderer {
         }
     }
     
+    ///---------------------------------------------------------------------------------------
+    /// Preprocessing der Bilder - Das Image Attachment erzeugen und in den Attributen ablegen
+    ///
     func preprocessImages(_ src: NSAttributedString) -> NSMutableAttributedString {
 
-        // 1) bridgen – Attribute bleiben erhalten
+        /// Attribute bleiben erhalten
         let mutable = NSMutableAttributedString(attributedString: src)
-
 
         mutable.enumerateAttribute(.imageURL, in: mutable.rangeAll, options: [.reverse]) { value, nsRange, _ in
             let pointSize = CGFloat(20)
@@ -268,34 +307,53 @@ final class ParagraphRenderer: BlockRenderer {
             let rect = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             drawBlockQuote(in: context, rect: rect)
         }
-
-//        let (before, after) = blockContent.attrText.paragraphSpacings
-//        
-//        let indent: CGFloat = blockContent.attrText.ctParagraphStyleValue(for: .firstLineHeadIndent) ?? 0
-//        
-//        context.setFillColor(UIColor.systemIndigo.highlight.highlight.cgColor)
-//        let rectBefore = CGRect(x: indent, y: frame.height - before, width: frame.width, height: before)
-//        context.fill(rectBefore)
-// 
-//        context.setFillColor(UIColor.systemTeal.highlight.highlight.cgColor)
-//        let rectAfter = CGRect(x: indent, y: 0, width: frame.width, height: after)
-//        context.fill(rectAfter)
-/*
-        context.setLineWidth(4)
-        context.addRect(CGRect(x: 0, y: 1, width: frame.width, height: frame.height).insetBy(dx: 2, dy: 2))
-        context.setStrokeColor(UIColor.systemOrange.cgColor)
-        context.strokePath()
         
-        context.move(to:    CGPoint(x: 0,           y: after))
-        context.addLine(to: CGPoint(x: frame.width, y: after))
-        context.setStrokeColor(UIColor.systemTeal.cgColor)
-        context.strokePath()
+        //------------------------------------------------------------------------------------
+        // D E B U G
+        
+        if debugColor {
+            
+            /// Zeichnen der Fläche des Inhaltes
+            context.setFillColor(UIColor.systemYellow.highlight.cgColor)
+            var colorRect = contentRect
+            colorRect.origin.x   = 30.0
+            colorRect.size.width = 500.0
+            context.fill(colorRect)
 
-        context.move(to:    CGPoint(x: 0,           y: frame.height - before))
-        context.addLine(to: CGPoint(x: frame.width, y: frame.height - before))
-        context.setStrokeColor(UIColor.systemIndigo.cgColor)
-        context.strokePath()
-*/
+            let (before, after) = blockContent.attrText.paragraphSpacings
+            let indent: CGFloat = blockContent.attrText.ctParagraphStyleValue(for: .firstLineHeadIndent) ?? 0
+            
+            /// Zeichnen des Rechteckes für Paragraph Spacing Before
+            context.setFillColor(UIColor.systemIndigo.highlight.highlight.cgColor)
+            let rectBefore = CGRect(x: indent, y: frame.height - before, width: frame.width, height: before)
+            context.fill(rectBefore)
+            
+            /// Zeichnen des Rechteckes für Paragraph Spacing (danach)
+            context.setFillColor(UIColor.systemTeal.highlight.highlight.cgColor)
+            let rectAfter = CGRect(x: indent, y: 0, width: frame.width, height: after)
+            context.fill(rectAfter)
+            
+            /// Zeichnen des Rechtecks des gesamten Absatzes
+            context.setLineWidth(4)
+            context.addRect(CGRect(x: 0, y: 1, width: frame.width, height: frame.height).insetBy(dx: 2, dy: 2))
+            context.setStrokeColor(UIColor.systemOrange.cgColor)
+            context.strokePath()
+            
+            
+            /// Umranden des Rechteckes für Paragraph Spacing (danach)
+            context.move(to:    CGPoint(x: 0,           y: after))
+            context.addLine(to: CGPoint(x: frame.width, y: after))
+            context.setStrokeColor(UIColor.systemTeal.cgColor)
+            context.strokePath()
+            
+            /// Umranden des Rechteckes für Paragraph Spacing Before
+            context.move(to:    CGPoint(x: 0,           y: frame.height - before))
+            context.addLine(to: CGPoint(x: frame.width, y: frame.height - before))
+            context.setStrokeColor(UIColor.systemIndigo.cgColor)
+            context.strokePath()
+        }
+        
+        //------------------------------------------------------------------------------------
 
         drawContent(in: context)
     }
