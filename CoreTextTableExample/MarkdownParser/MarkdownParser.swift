@@ -12,20 +12,13 @@ import UIKit
 // MARK: - Parser für die Auswertung des Markdown-Syntax
 
 public class MarkdownParser {
-    
-    ///----------------------------------------------------------------------------------------
-    /// Variablen
-    ///
-    var attrText: AttributedString! // REVIEW: Avoid force‑unwrap optionals; use '?' and safe unwrapping
-//    var textSize: CGFloat = 17.0
-    
+
     ///---------------------------------------------------------------------------------------
     /// Main entry: parse Markdown string, build renderers, trigger layout
     ///
     static func markdown(string: String, size: CGFloat = 17, weight: UIFont.Weight = .regular,
                          textColor: UIColor = .gray) -> [BlockRenderer]
     {
-//        self.textSize = size
         let rawAttr: AttributedString
         do {
             rawAttr = try AttributedString(markdown: string, including: \.commonAttr)
@@ -183,34 +176,36 @@ extension MarkdownParser {
     }
     
     
-    // MARK: - ---------------------------------------------------------
-    // MARK: Block‑Factory  (AttributedString → Renderer‑Liste)
-    // --------------------------------------------------------------
+    //----------------------------------------------------------------------------------------
+    // MARK: - Block‑Factory  (AttributedString → Renderer‑Liste)
 
     fileprivate enum CoreTextBlockFactory {
 
         /// Haupt‑Einstieg: komplette AttributedString in BlockRenderer aufspalten
         static func renderers(from attr: AttributedString, textSize: CGFloat) -> [BlockRenderer] {
             
-            // 1) Alle BlockContent‑Elemente (liefert dein bestehender Code)
+            ///  Alle BlockContent‑Elemente ermitteln
             let blocks = BlockContent.allBlockContents(attrText: attr, textSize: textSize)
-            blocks.forEach { block in
-                print(block.debugString)
-            }
             
-            // 2) Gruppen nach (kind, identity) zusammenfassen → je 1 Renderer
+            /// Gruppen nach (kind, identity) zusammenfassen → je 1 Renderer
             var renderers: [BlockRenderer] = []
             var currentTableBlock: BlockContent.TableBlock? = nil
 
+            ///-------------------------------------------------------------------------------
+            /// Einen Renderer aus dem BlockContent heraus erstellen
+            ///
             func makeRenderer(intentBlock: BlockContent) {
                 guard let block = intentBlock.block else { return }
                 
+                /// Code Block
                 if block.hasCodeBlock {
                     renderers.append(CodeBlockRenderer(blockContent: intentBlock))
                 }
+                /// Ruler
                 if block.hasThematicBreak {
                     renderers.append(HorizontalRuleRenderer(blockContent: intentBlock))
                 }
+                /// Tabelle
                 if block.hasTable {
                     // Tabelle oder normaler Absatz?
                     if let table = currentTableBlock, table.lastColumn > 0 {
@@ -219,10 +214,11 @@ extension MarkdownParser {
                         renderers.append(ParagraphRenderer(blockContent: intentBlock))
                     }
                 }
+                /// Header
                 if block.hasHeader {
                     renderers.append(ParagraphRenderer(blockContent: intentBlock))
-    //                renderers.append(HeadingRenderer(blockContent: intentBlock))
                 }
+                /// Normaler Abstatz
                 if block.hasParagraph {
                     renderers.append(ParagraphRenderer(blockContent: intentBlock))
                 }
@@ -242,47 +238,43 @@ extension MarkdownParser {
 }
 
 //--------------------------------------------------------------------------------------------
-// MARK: - Parser für die Auswertung des Markdown-Syntax
-
+// MARK: - Extension für die PDF-Ausgabe
 
 extension MarkdownParser {
     
     typealias M = Markdown
     
-    // ----------------------------------------------------------
+    ///---------------------------------------------------------------------------------------
     /// Liefert die Gesamt-Seitenzahl
+    ///
     static func layoutForPDF(renderers:    [BlockRenderer],
                              pageWidth:    CGFloat,
                              pageHeight:   CGFloat,
-                             topMargin:    CGFloat = 2 * M._1cm,
-                             bottomMargin: CGFloat = 2 * M._1cm) -> Int {
+                             topMargin:    CGFloat,
+                             bottomMargin: CGFloat) -> Int {
 
-        var y: CGFloat = topMargin
-        var currentPage = 0
+        let printableHeight = pageHeight - topMargin - bottomMargin
+
+        var y: CGFloat   = 0              // ← kein Rand mehr hier!
+        var currentPage  = 0
 
         for r in renderers {
-
             let h = r.measure(y: y, width: pageWidth)
 
-            // Passt der Block noch auf die aktuelle Seite?
-            if y + h > pageHeight - bottomMargin {
-
-                // neue Seite
+            if y + h > printableHeight {  // Grenze ist Printable‑Höhe
                 currentPage += 1
-                y = topMargin          // wieder oben anfangen
+                y = 0                     // nächstes Blatt, oben anfangen
             }
 
             r.pageIndex = currentPage
-            r.frame     = CGRect(x: 0,
-                                 y: y,
-                                 width: pageWidth,
-                                 height: h)
+            r.frame     = CGRect(x: 0, y: y, width: pageWidth, height: h)
 
             y += h
         }
-        return currentPage + 1          // Seiten sind 0-basiert
+        return currentPage + 1
     }
     
+        
     //----------------------------------------------------------------------------------------
     // MARK: - PDF-Export
     
@@ -290,18 +282,15 @@ extension MarkdownParser {
 
         // -------- PDF-Seiten-Geometrie ------------------------------------
         
-        /// Maße A4:  21 cm x 29,7 cm (Rand 2 cm)
-        var pageRect = CGRect(x: 0, y: 0, width: 21 * M._1cm, height: 29.7 * M._1cm)
-        
-        let margin: CGFloat = 2 * Markdown._1cm
-        let printableWidth  = pageRect.width  - 2*margin
+        var pageRect = M.PDF.pageRect      /// Standard-Maße A4:  21 cm x 29,7 cm (Rand 2 cm)
+        let printableWidth = pageRect.width - M.PDF.leftMargin - M.PDF.rightMargin
 
         // -------- Renderer zuerst layouten --------------------------------
         let pageCount = layoutForPDF(renderers:    renderers,
                                      pageWidth:    printableWidth,
                                      pageHeight:   pageRect.height,
-                                     topMargin:    margin,
-                                     bottomMargin: margin)
+                                     topMargin:    M.PDF.topMargin,
+                                     bottomMargin: M.PDF.bottomMargin)
 
         // -------- Ziel-URL vom User holen ---------------------------------
         guard let url = presentSavePanel() else { return }
@@ -320,7 +309,7 @@ extension MarkdownParser {
             ctx.scaleBy(x: 1, y: -1)
 
             // (1) linke / obere Margin
-            ctx.translateBy(x: margin, y: margin)
+            ctx.translateBy(x: M.PDF.leftMargin, y: M.PDF.topMargin)
 
             // (2) alle Blöcke dieser Seite
             for r in renderers where r.pageIndex == p {
@@ -345,5 +334,4 @@ extension MarkdownParser {
         }
         ctx.closePDF()
     }
-
 }

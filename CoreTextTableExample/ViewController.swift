@@ -11,12 +11,12 @@ class ViewController: UIViewController, UIDocumentPickerDelegate {
 
     @IBOutlet weak var scrollView: MarkdownScrollView!
 
-    var textSize:CGFloat = 20
+    var textSize:CGFloat = 17
     var textColor = UIColor.label
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        scrollView.markdown(string: text2, size: textSize, weight: .regular, textColor: textColor )
+        scrollView.markdown(string: text1, size: textSize, weight: .regular, textColor: textColor )
     }
     
     ///---------------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ class ViewController: UIViewController, UIDocumentPickerDelegate {
 
     @IBAction func actionExport(_ sender: Any) {
 
-        let renderers = MarkdownParser.markdown(string: text2, size: 12, textColor: textColor )
+        let renderers = MarkdownParser.markdown(string: text1, size: 12, textColor: textColor )
         
         // 1) PDF erzeugen → tmpURL zurückgeben
         MarkdownParser.exportPDF(renderers: renderers) { [unowned self] in
@@ -156,6 +156,14 @@ class ViewController: UIViewController, UIDocumentPickerDelegate {
 
     let text1 =
         """
+        1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident, sunt in culpa qui o f f i c i a d e s e r u n t m o l l i t a n i m i d e s t l a b o r u m .\
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\ 
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        
+        2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\ 
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        
         1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\
         Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\ 
         Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -163,6 +171,96 @@ class ViewController: UIViewController, UIDocumentPickerDelegate {
         2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\
         Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\ 
         Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+        1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\ 
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        
+        2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+        1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+        2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+        1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+        2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+
+        1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+        2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+        2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+        1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+        2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+        1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+        2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+
+        1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+        2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident
+        
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum d
+        
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
+        
+         
         """
 }
 

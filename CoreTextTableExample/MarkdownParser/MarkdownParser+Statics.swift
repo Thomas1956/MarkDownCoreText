@@ -23,6 +23,15 @@ public struct Markdown {
     static var paddingBefore          : CGFloat = 0.3
     static var paddingAfter           : CGFloat = 0.3
 
+    /// Konstanten für die PDF-Ausgabe
+    struct PDF {                                             /// Seitengröße A4
+        static var pageRect     = CGRect(x: 0, y: 0, width: 21 * _1cm, height: 29.7 * _1cm)
+        static var leftMargin   : CGFloat = 2 * _1cm         /// Seitenränder definieren
+        static var topMargin    : CGFloat = 2 * _1cm
+        static var rightMargin  : CGFloat = 2 * _1cm
+        static var bottomMargin : CGFloat = 2 * _1cm
+    }
+    
     /// Konstanten für die Tabelle
     struct Table {
         static var weightText  : UIFont.Weight = .regular    /// Stil des Textes in der Tabelle
