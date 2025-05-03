@@ -55,7 +55,16 @@ extension AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value
             if case .codeBlock(let languageHint) = component.kind { return languageHint }
             return nil
         }).first
-     }
+    }
+    
+    /// Gerätespezifischen Font für den Level des Header zurückgeben
+    func codeBlockFont(baseBodySize: CGFloat? = nil) -> UIFont {
+        let codeSize = 0.9 * (baseBodySize ?? UIFont.preferredFont(forTextStyle: .body).pointSize)
+ 
+        /// Monospaced Font holen und skalieren
+        let baseCodeFont = UIFont.monospacedSystemFont(ofSize: codeSize, weight: .regular)
+        return UIFontMetrics(forTextStyle: .body).scaledFont(for: baseCodeFont)
+    }
     
     ///---------------------------------------------------------------------------------------
     /// B L O C K   Q U O T E
@@ -105,14 +114,29 @@ extension AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value
     }
     
     /// Gerätespezifischen Font für den Level des Header zurückgeben
-    var headerFont: UIFont {
-        typealias MH = Markdown.Header
-        guard let level = self.headerLevel, case 1...6 = level, let defaultFont = MH.fontSizes[.phone]
-        else { return .systemFont(ofSize: 16) }
+    func headerFont(baseBodySize: CGFloat = 20) -> UIFont {
+        enum HeaderLevel: Int {
+            case h1 = 1, h2, h3, h4, h5, h6
+            var textStyle: UIFont.TextStyle {
+                switch self {
+                case .h1: return .largeTitle
+                case .h2: return .title1
+                case .h3: return .title2
+                case .h4: return .title3
+                case .h5: return .headline
+                case .h6: return .callout
+                }
+            }
+        }
+        /// Den Header Style auf die gewünschte Standardgröße umskalieren
+        let style = HeaderLevel(rawValue: self.headerLevel ?? 1)?.textStyle ?? .body
+        let defaultStyleSize = UIFont.preferredFont(forTextStyle: style).pointSize
+        let defaultBodySize  = UIFont.preferredFont(forTextStyle: .body).pointSize
+        let ratio            = defaultStyleSize / defaultBodySize
+        let targetSize       = baseBodySize * ratio
+        let baseFont         = UIFont.systemFont(ofSize: targetSize, weight: .bold)
         
-        let device = UIDevice.current.userInterfaceIdiom
-        let size = MH.fontSizes[device, default: defaultFont] [level - 1]
-        return .systemFont(ofSize: size, weight: .bold)
+        return UIFontMetrics(forTextStyle: style).scaledFont(for: baseFont)
     }
     
     ///---------------------------------------------------------------------------------------
