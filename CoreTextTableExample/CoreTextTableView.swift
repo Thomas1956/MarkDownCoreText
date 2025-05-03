@@ -4,7 +4,7 @@
 //
 //  Created by Thomas on 24.04.25.
 //
-
+/*
 import UIKit
 import CoreText
 
@@ -143,3 +143,4 @@ class CoreTextTableView: UIView {
     }
 }
 
+*/
