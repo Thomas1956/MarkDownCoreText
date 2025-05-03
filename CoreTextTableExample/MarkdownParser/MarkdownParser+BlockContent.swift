@@ -429,18 +429,21 @@ struct BlockContent {
         for (index, blockContent) in allBlocks.enumerated() {
             guard let block = blockContent.block else { continue }
             
-            var font = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
-            font = block.hasHeader    ? block.headerFont : font
-            font = block.hasCodeBlock ? UIFont.monospacedSystemFont(ofSize: MC.textsize, weight: .regular) : font
+            /// Den Font des Attributed String ermitteln. Wenn es keinen Font gibt, den System Font erstellen. Zusätzlich die
+            /// Sonderfälle Header und Code Block berücksichtigen und den Font für diese Fälle setzen.
+            var font = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont ??
+                                                       UIFont.systemFont(ofSize: textSize)
+            font = block.hasHeader    ? block.headerFont   (baseBodySize: textSize) : font
+            font = block.hasCodeBlock ? block.codeBlockFont(baseBodySize: textSize) : font
             
-            let fontSize: CGFloat = (font?.pointSize ?? textSize) //* 0.5
+            let fontSize = font.pointSize
             
             var attrText = NSMutableAttributedString(attributedString: blockContent.attrText)
             var tabulators             : [CTTextTab] = []
             var firstLineHeadIndent    : CGFloat     = block.hasBlockQuote ? MB.contentIndent : 0
             var headIndent             : CGFloat     = block.hasBlockQuote ? MB.contentIndent : 0
-            let tailIndent             : CGFloat     = -20
-            var paragraphSpacing       : CGFloat     = fontSize * 0.75
+            let tailIndent             : CGFloat     = 0 //-20
+            var paragraphSpacing       : CGFloat     = fontSize * M.paragraphSpacing
             var paragraphSpacingBefore : CGFloat     = 0
             
             ///-------------------------------------------------------------------------------
@@ -475,14 +478,13 @@ struct BlockContent {
             ///-------------------------------------------------------------------------------
             /// Header erkennen und den Font des Headers ergänzen
             if block.hasHeader {
-                attrText.addAttributes([.font: block.headerFont])
-                paragraphSpacingBefore = index > 0 ? fontSize * 1.2 : 0
+                attrText.addAttributes([.font: font])
+                paragraphSpacingBefore = index > 0 ? fontSize * M.paragraphSpacingBefore : 0
             }
             
             ///-------------------------------------------------------------------------------
             /// Code Block  erkennen und den Font des Code Block ergänzen
             if block.hasCodeBlock {
-                let font = UIFont.monospacedSystemFont(ofSize: MC.textsize, weight: .regular)
                 attrText.addAttributes([.font: font])
                 paragraphSpacingBefore = 0
                 paragraphSpacing = 5
@@ -510,7 +512,7 @@ struct BlockContent {
             
             /// Style einfügen
             attrText.addCTParagraphStyle([
-                .lineHeightMultiple:     1.1,
+                .lineHeightMultiple:     M.lineHeightMultiple,
                 .lineSpacingAdjustment:  0,
                 .defaultTabInterval:     100,
                 .tabStops:               tabulators,
@@ -520,8 +522,6 @@ struct BlockContent {
                 .paragraphSpacing:       paragraphSpacing,
                 .paragraphSpacingBefore: paragraphSpacingBefore,
             ])
-            
-            //            attrText.scaleFonts(by: 0.5)
             
             allBlocks[index].attrText = attrText
         }
