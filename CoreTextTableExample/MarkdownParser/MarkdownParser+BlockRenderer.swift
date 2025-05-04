@@ -146,6 +146,55 @@ extension BlockRenderer {
         let ctFrame = CTFramesetterCreateFrame(fs, CFRange(location: 0, length: text.length), path, nil)
         CTFrameDraw(ctFrame, context)
         
+        context.textMatrix = .identity
+        
+        let lines  = CTFrameGetLines(ctFrame) as! [CTLine]
+        var origins = Array(repeating: CGPoint.zero, count: lines.count)
+        CTFrameGetLineOrigins(ctFrame, .init(location: 0, length: 0), &origins)
+        
+        let shyScalar: UInt16 = 0x00AD
+        let runsString = text.string              // dein String
+        
+        for (i, line) in lines.enumerated() {
+            
+            let rng = CTLineGetStringRange(line)
+            guard rng.length > 0 else { continue }
+            
+            // 1) endet dieser String‑Range auf U+00AD?
+            let lastIdx = rng.location + rng.length - 1
+            let utf16Idx  = runsString.utf16.index(runsString.utf16.startIndex,
+                                                   offsetBy: lastIdx)
+            guard runsString.utf16[utf16Idx] == shyScalar else { continue }
+            
+            // 2) Breite des letzten Glyphs (≠ 0 ⇒ Umbruch genau hier)
+            var lastRunAsc: CGFloat = 0, lastRunDesc: CGFloat = 0
+            guard let lastRun = (CTLineGetGlyphRuns(line) as! [CTRun]).last,
+                  CTRunGetGlyphCount(lastRun) > 0 else { continue }
+            
+            let w = CTRunGetTypographicBounds(lastRun,
+                                              CFRangeMake(CTRunGetGlyphCount(lastRun)-1, 1),
+                                              &lastRunAsc, &lastRunDesc, nil)
+            guard w > 0 else { continue }          // 0 → kein Glyph → nicht umgebrochen
+            
+            // X‑Position relativ zum Frame‑Ursprung
+            var x = CTLineGetOffsetForStringIndex(line, lastIdx + 1, nil)
+            x += origins[i].x                       // Zeilen‑Origin dazurechnen
+            
+            // Baseline‑Y relativ zum Frame‑Ursprung
+            let y = origins[i].y                    // Baseline direkt (kein descent)
+            
+            // Font aus letztem Run
+            let attrs = CTRunGetAttributes(lastRun) as NSDictionary
+            guard let rawfont = attrs[kCTFontAttributeName] else { continue }
+            let font = rawfont as! CTFont
+            
+            // Glyph "hyphen" (U+2010)
+            let glyph = CTFontGetGlyphWithName(font, "hyphen" as CFString)
+            
+            var pos = CGPoint(x: x, y: y)
+            CTFontDrawGlyphs(font, [glyph], &pos, 1, context)
+        }
+        
         drawImages(in: context, ctFrame: ctFrame)
     }
     
