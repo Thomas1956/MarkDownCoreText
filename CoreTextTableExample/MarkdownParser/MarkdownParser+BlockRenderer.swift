@@ -109,355 +109,6 @@ extension BlockRenderer {
         return height
     }
     
-    func paragraphWithVisibleHyphens(_ src: NSAttributedString,
-                                     width: CGFloat) -> NSAttributedString {
-
-        let typesetter = CTTypesetterCreateWithAttributedString(src)
-        let dst = NSMutableAttributedString(attributedString: src)
-
-        var idx = 0
-        var delta = 0          // Verschiebung durch bereits ersetzte Zeichen
-
-        while idx < src.length {
-
-            // 1) Zeilenlänge ermitteln (ohne Break‑Fahnen)
-            let lineLen = CTTypesetterSuggestLineBreak(typesetter, idx, Double(width))
-
-            let nsStr = dst.string as NSString
-            // 2) Soft‑Hyphen genau an der Break‑Position?
-            let breakPos = idx + lineLen - 1
-            guard breakPos >= 0,
-                  breakPos < dst.length,
-                  nsStr.character(at: breakPos) == 0x00AD    // SHY ?
-            else { idx += lineLen; continue }
-
-            // 3) Einfügen: SHY → sichtbarer Hyphen
-            let range = NSRange(location: breakPos, length: 1)
-            dst.replaceCharacters(in: range, with: "\u{2010}")      // U+2010
-
-            
-            // 1) Attribute an der Stelle **vor** dem Soft‑Hyphen kopieren
-            let baseAttrs = dst.attributes(at: breakPos - 1, effectiveRange: nil)
-
-            //    (enthält Font, Farbe, Unterstreichung, etc.)
-            let font = baseAttrs[.font] as! UIFont
-            
-            // 2) Advance‑Breite des Bindestrich‑Glyphs
-            var hyGlyph = CTFontGetGlyphWithName(font as CTFont, "hyphen" as CFString)
-            let adv = CTFontGetAdvancesForGlyphs(font as CTFont, .horizontal, &hyGlyph, nil, 1)
-
-            // 3) Hyphen‑String **mit** kopierten Attributen + negativem Kern
-            let rep = NSMutableAttributedString(string: "\u{2010}", attributes: baseAttrs)
-            rep.addAttribute(.kern, value: -adv, range: NSRange(location: 0, length: 1))
-
-            // 4) SHY (1 Zeichen) durch sichtbaren Hyphen ersetzen
-            dst.replaceCharacters(in: NSRange(location: breakPos, length: 1), with: rep)
-            
-            
-            // 4) alle anderen SHY aus diesem Wort entfernen
-            //    (optional, damit nichts doppelt erscheint)
-            // …
-
-            idx += lineLen         // zur nächsten Zeile
-        }
-        return dst
-    }
-    
-    
-    func paragraphWithHyphens(src: NSAttributedString,
-                              columnWidth: CGFloat) -> NSAttributedString {
-
-        let dst = NSMutableAttributedString()
-        let ts  = CTTypesetterCreateWithAttributedString(src)
-        var idx = 0
-
-        while idx < src.length {
-
-            // ---------- 1) Standard‑Break -------------------------------
-            var len  = CTTypesetterSuggestLineBreak(ts, idx, Double(columnWidth))
-            var end  = idx + len                           // Break‑Index
-            var addHyphen = false
-
-            // ---------- 2) Endet auf SHY? ------------------------------
-            if end < src.length,
-               (src.string as NSString).character(at: end-1) == 0x00AD {
-
-                // Font an dieser Position holen
-                let attrs = src.attributes(at: end-2, effectiveRange: nil)
-                let font  = (attrs[.font] as? UIFont) ?? UIFont.systemFont(ofSize: 12)
-                var g     = CTFontGetGlyphWithName(font as CTFont, "hyphen" as CFString)
-                let adv   = CTFontGetAdvancesForGlyphs(font as CTFont, .horizontal,
-                                                       &g, nil, 1)  // CGFloat
-
-                // ---------- 2a) Enger messen ---------------------------
-                let tight = Double(columnWidth - CGFloat(adv))
-                len = CTTypesetterSuggestLineBreak(ts, idx, tight)
-                end = idx + len
-                addHyphen = true
-            }
-
-            // ---------- 3) Stück kopieren ------------------------------
-            let copyRange = NSRange(location: idx, length: end - idx)
-            var chunk = NSMutableAttributedString(attributedString:
-                                                  src.attributedSubstring(from: copyRange))
-
-            // SHY entfernen (falls da) …
-            if chunk.string.hasSuffix("\u{00AD}") {
-                chunk.deleteCharacters(in: NSRange(location: chunk.length-1, length: 1))
-            }
-            dst.append(chunk)
-
-            // ---------- 4) sichtbaren Hyphen einfügen ------------------
-            if addHyphen {
-                let attrs = src.attributes(at: end-2, effectiveRange: nil)
-                let hy    = NSMutableAttributedString(string: "\u{2010}", attributes: attrs)
-                dst.append(hy)
-                idx = end          // SHY war ein Zeichen → überspringen
-            } else {
-                idx = end
-            }
-        }
-        return dst
-    }
-    
-    func breakAndHyphenate(_ ts: CTTypesetter,
-                           start idx: Int,
-                           width: CGFloat,
-                           src: NSAttributedString) -> (NSAttributedString, Int) {
-
-        let ns = src.string as NSString
-        let shy: unichar = 0x00AD
-        var lineEnd = idx
-        var maxW = width
-
-        while true {
-
-            // 1) Standard‑Break
-            let len = CTTypesetterSuggestLineBreak(ts, lineEnd, Double(maxW))
-            guard len > 0 else { break }
-            lineEnd += len
-
-            // 2) Letzten nicht‑Whitespace‑Char vor Break
-            var last = lineEnd - 1
-            while last >= idx, CharacterSet.whitespaces.contains(UnicodeScalar(ns.character(at: last))!) {
-                last -= 1
-            }
-
-            // 3) endet wirklich auf SHY ?
-            guard last >= idx, ns.character(at: last) == shy else { break }
-
-            // 4) Probe‑Zeile MIT sichtbarem Hyphen bauen
-            let probe   = NSMutableAttributedString(
-                            attributedString: src.attributedSubstring(
-                                from: NSRange(location: idx, length: last - idx)))
-            let attrs   = src.attributes(at: last-1, effectiveRange: nil)
-
-            // ‑ Glyph‑Breite des Fonts
-            let font    = (attrs[.font] as? UIFont) ?? UIFont.systemFont(ofSize: 12)
-            var g       = CTFontGetGlyphWithName(font as CTFont, "hyphen" as CFString)
-            let adv     = CTFontGetAdvancesForGlyphs(font as CTFont, .horizontal, &g, nil, 1)
-
-            // sichtbaren Hyphen einsetzen
-            probe.append(NSAttributedString(string: "\u{2010}", attributes: attrs))
-
-            // 5) passt Probe noch in die Breite?
-            let tmpLine = CTLineCreateWithAttributedString(probe)
-            let lineW   = CGFloat(CTLineGetTypographicBounds(tmpLine, nil, nil, nil))
-
-            if lineW <= width {                // ✔ Zeile passt
-                return (probe, lineEnd)        //    … und wird übernommen
-            }
-
-            // 6) sonst: einen SHY früher testen
-            maxW = width - CGFloat(adv)        // enger werden
-            lineEnd = last                     // zurückspringen
-        }
-
-        // kein SHY → einfacher Break ohne sichtbaren Strich
-        let plain = src.attributedSubstring(
-                      from: NSRange(location: idx, length: lineEnd - idx))
-        return (plain, lineEnd)
-    }
-    
-    /// Baut einen Absatz neu auf und ersetzt nur die
-    /// wirklich genutzten Soft‑Hyphens (U+00AD) durch sichtbare Hyphens (U+2010).
-    ///
-    /// - parameter src:  Original‑AttributedString mit Soft‑Hyphens
-    /// - parameter width: maximale Spaltenbreite
-    ///
-    /// - returns:         Neuer AttributedString mit echten Bindestrichen
-    ///
-    func relayoutWithVisibleHyphens(src: NSAttributedString,
-                                    width: CGFloat) -> NSAttributedString {
-
-        let ns = src.string as NSString
-        let shy: unichar = 0x00AD
-        let dst = NSMutableAttributedString()
-
-        var idx = 0
-        while idx < src.length {
-
-            // 1) typesetten ab idx
-            let ts  = CTTypesetterCreateWithAttributedString(
-                        src.attributedSubstring(from: NSRange(location: idx, length: src.length-idx)))
-            var len = CTTypesetterSuggestLineBreak(ts, 0, Double(width))
-            var end = idx + len                               // Break‑Pos im Original
-
-            while end > idx,
-                  CharacterSet.whitespaces.contains(
-                     UnicodeScalar(ns.character(at: end - 1))!) {
-                end -= 1                 // Leerzeichen überspringen
-            }
-            
-            // 2) Rückwärts zum ersten SHY in dieser Zeile
-            var hyPos: Int? = nil
-            var p = end - 1
-            while p >= idx, !CharacterSet.whitespaces.contains(
-                                UnicodeScalar(ns.character(at: p))!) {
-                if ns.character(at: p) == shy { hyPos = p; break }
-                p -= 1
-            }
-
-            var addHyphen = false
-            var hyAttrs: [NSAttributedString.Key: Any] = [:]
-
-            if let pos = hyPos {
-
-                // Font & Breite des sichtbaren Hyphen
-                let attrs = src.attributes(at: pos-1, effectiveRange: nil)
-                let font  = (attrs[.font] as? UIFont) ?? UIFont.systemFont(ofSize: 12)
-                var g     = CTFontGetGlyphWithName(font as CTFont, "hyphen" as CFString)
-                let adv   = CTFontGetAdvancesForGlyphs(font as CTFont, .horizontal, &g, nil, 1)
-
-                // Miss Zeile bis SHY + Bindestrich
-                let probeRange = NSRange(location: idx, length: pos - idx)
-                let probe      = NSMutableAttributedString(
-                                    attributedString: src.attributedSubstring(from: probeRange))
-                let hy = NSAttributedString(string: "\u{2010}", attributes: attrs)
-                probe.append(hy)
-
-                let testLine = CTLineCreateWithAttributedString(probe)
-                let w = CGFloat(CTLineGetTypographicBounds(testLine, nil, nil, nil))
-
-                if w <= width {            // ✔ passt in Spalte
-                    end = pos + 1          // Zeile endet direkt nach SHY
-                    addHyphen = true
-                    hyAttrs   = attrs
-                }
-            }
-            
-            // Länge des sichtbaren Teils der Zeile
-            // – Wenn wir einen Soft‑Hyphen entfernen          → −1
-            // – Wenn kein Soft‑Hyphen an dieser Stelle steht  →  0
-            let deleteCount = addHyphen ? 1 : 0
-            let chunkLen    = end - idx - deleteCount
-            dst.append(src.attributedSubstring(
-                          from: NSRange(location: idx, length: chunkLen)))
-
-            // sichtbaren Bindestrich nur anhängen, wenn wir wirklich einen SHY
-            // an dieser Stelle entfernt haben
-            if addHyphen {
-                dst.append(NSAttributedString(string: "\u{2010}", attributes: hyAttrs))
-            }
-
-            // Leerzeichen, die wir beim Rückwärts‑Skippen ausgeblendet haben,
-            // jetzt wieder anhängen (damit das nächste Wort mit Abstand startet)
-            if end < src.length,
-               CharacterSet.whitespaces.contains(
-                   UnicodeScalar(ns.character(at: end))!) {
-                dst.append(NSAttributedString(string: " ",
-                                              attributes: src.attributes(at: end,
-                                                                          effectiveRange: nil)))
-            }
-            print("Breite: \(width) Index: \(idx)")
-            print(src.attributedSubstring(from: NSRange(location: idx, length: chunkLen)).string +
-                  (addHyphen ? "\u{2010}" : "")
-            )
-            
- 
-            // nächster Durchlauf startet exakt hinter dem zuletzt kopierten Zeichen
-            idx = addHyphen ? end : end + 1   // SHY war 1 Zeichen
-            
-        }
-        
-        
-        print("--------------------------------------------------------------------")
-        return dst
-    }
-
-    func reflowWithVisibleHyphens(src: NSAttributedString,
-                                  columnWidth: CGFloat) -> NSAttributedString {
-
-        let dst = NSMutableAttributedString()
-        let ns  = src.string as NSString
-        let shy = 0x00AD as unichar
-
-        var start = 0
-        while start < src.length {
-
-            // ---- 1) typesetten ab 'start'
-            let sub = src.attributedSubstring(from: NSRange(location: start,
-                                                            length: src.length - start))
-            let ts  = CTTypesetterCreateWithAttributedString(sub)
-            var len = CTTypesetterSuggestLineBreak(ts, 0, Double(columnWidth))
-            var end = start + len           // Index im Original‑String
-            var lineHasHyphen = false
-            var hyAttrs: [NSAttributedString.Key: Any] = [:]
-
-            // ---- 2) suche rückwärts bis zum Wortanfang nach SHY
-            var scan = end - 1
-            var hyPos: Int?
-            while scan >= start, ns.character(at: scan) != 0x20 { // 0x20 = space
-                if ns.character(at: scan) == shy { hyPos = scan; break }
-                scan -= 1
-            }
-
-            if let pos = hyPos {
-                // ---- 3) passt Zeile inkl. sichtbarem Hyphen?
-                let attrs = src.attributes(at: pos - 1, effectiveRange: nil)
-                let font  = (attrs[.font] as? UIFont) ?? .systemFont(ofSize: 12)
-                var g     = CTFontGetGlyphWithName(font as CTFont, "hyphen" as CFString)
-                let adv   = CTFontGetAdvancesForGlyphs(font as CTFont, .horizontal, &g, nil, 1)
-
-                if Double(columnWidth - CGFloat(adv)) >=
-                   CTLineGetTypographicBounds(
-                       CTLineCreateWithAttributedString(
-                           src.attributedSubstring(from: NSRange(location: start,
-                                                                 length: pos - start))),
-                       nil, nil, nil) {
-
-                    // Zeile endet direkt HINTER pos
-                    end = pos + 1
-                    lineHasHyphen = true
-                    hyAttrs = attrs
-                }
-            }
-
-            // ---- 4) String‑Teil KOPIEREN (ohne SHY selbst!)
-            let copyLen = end - start - (lineHasHyphen ? 1 : 0)
-            dst.append(src.attributedSubstring(from: NSRange(location: start,
-                                                             length: copyLen)))
-
-            // ---- 5) sichtbaren Bindestrich einfügen
-            if lineHasHyphen {
-                dst.append(NSAttributedString(string: "\u{2010}", attributes: hyAttrs))
-            }
-
-            // ---- 6) eventuelles Leerzeichen hinter der Zeile mitnehmen
-            if end < src.length, ns.character(at: end) == 0x20 {
-                dst.append(NSAttributedString(string: " ",
-                                              attributes: src.attributes(at: end,
-                                                                         effectiveRange: nil)))
-                start = end + 1
-            } else {
-                start = end
-            }
-        }
-
-        return dst
-    }
-    
-    
     ///---------------------------------------------------------------------------------------
     /// Zeichnen des Hintergrundes von BlockQuote. Das Rechteck ist der gesamte Frame des Renderers.
     ///
@@ -483,36 +134,135 @@ extension BlockRenderer {
         context.fill(balken)
     }
     
+    //----------------------------------------------------------------------------------------
+    // MARK:
+
+    func insertHyphensWithNegativeKerning(in src: NSAttributedString,
+                                           columnWidth: CGFloat) -> NSAttributedString {
+        let mutable = NSMutableAttributedString(attributedString: src)
+        let fullRange = CFRange(location: 0, length: src.length)
+
+        // 1) Framesetter & Frame in Ziel-Breite
+        let framesetter = CTFramesetterCreateWithAttributedString(src as CFAttributedString)
+        let path        = CGMutablePath()
+        path.addRect(CGRect(x: 0, y: 0, width: columnWidth, height: .greatestFiniteMagnitude))
+        let frame       = CTFramesetterCreateFrame(framesetter, fullRange, path, nil)
+
+        // 2) Pro Zeile den letzten Index ermitteln
+        let lines = CTFrameGetLines(frame) as! [CTLine]
+        for line in lines {
+            let cfRange = CTLineGetStringRange(line)
+            guard cfRange.length > 0 else { continue }
+            let nsRange    = NSRange(location: cfRange.location, length: cfRange.length)
+            let lastIndex  = nsRange.location + nsRange.length - 1
+            let ch         = (src.string as NSString).character(at: lastIndex)
+            guard ch == 0x00AD else { continue }  // nur SHY → ersetzen
+
+            // 3) Basis-Attribute an dieser Stelle ermitteln
+            let baseAttrs = src.attributes(at: lastIndex, effectiveRange: nil)
+            guard let font = baseAttrs[.font] as? UIFont else { continue }
+
+            // 4) Advance-Breite des Hyphen-Glyphs
+            var glyph = CTFontGetGlyphWithName(font as CTFont, "hyphen" as CFString)
+            let adv    = CTFontGetAdvancesForGlyphs(font as CTFont,
+                                                    .horizontal, &glyph, nil, 1)
+
+            // 5) Ersetze SHY durch echten Hyphen + negativen Kerning-Ausgleich
+            let rep = NSMutableAttributedString(
+                string: "\u{2010}",
+                attributes: baseAttrs
+            )
+            rep.addAttribute(.kern,
+                             value: -adv,
+                             range: NSRange(location: 0, length: 1))
+
+            mutable.replaceCharacters(in: NSRange(location: lastIndex, length: 1),
+                                      with: rep)
+        }
+
+        return mutable
+    }
+    
+    func insertHyphensAndCompressLines(
+        in src: NSAttributedString,
+        columnWidth: CGFloat,
+        compression: Double = -0.102   // z.B. -0.02 = 2% Stauchung
+    ) -> NSAttributedString {
+        let mutable    = NSMutableAttributedString(attributedString: src)
+        let fullRange  = CFRange(location: 0, length: src.length)
+        let framesetter = CTFramesetterCreateWithAttributedString(src as CFAttributedString)
+        let path        = CGMutablePath()
+        path.addRect(CGRect(x: 0, y: 0,
+                            width: columnWidth,
+                            height: .greatestFiniteMagnitude))
+        let frame       = CTFramesetterCreateFrame(
+                            framesetter,
+                            fullRange,
+                            path,
+                            nil)
+        
+        let lines = CTFrameGetLines(frame) as! [CTLine]
+        for line in lines {
+            // 1) bestimme NS-Range der Zeile
+            let cfR   = CTLineGetStringRange(line)
+            let nsR   = NSRange(location: cfR.location,
+                                length: cfR.length)
+            guard nsR.length > 0 else { continue }
+            
+            // 2) prüfe, ob dort ein Soft-Hyphen steht
+            let lastIdx = nsR.location + nsR.length - 1
+            let ch      = (src.string as NSString).character(at: lastIdx)
+            guard ch == 0x00AD else { continue }
+            
+            // 3) Attribute & Font holen
+            let baseAttrs = src.attributes(at: lastIdx,
+                                           effectiveRange: nil)
+            guard let font = baseAttrs[.font] as? UIFont else { continue }
+            
+            // 4) Advance des echten Hyphens
+            var glyph = CTFontGetGlyphWithName(
+                            font as CTFont,
+                            "hyphen" as CFString)
+            let adv    = CTFontGetAdvancesForGlyphs(
+                            font as CTFont,
+                            .horizontal,
+                            &glyph,
+                            nil,
+                            1)
+            
+            // 5) SHY durch echten Hyphen + negativen Kern ersetzen
+            let rep = NSMutableAttributedString(
+                string: "\u{2010}",
+                attributes: baseAttrs
+            )
+            rep.addAttribute(.kern,
+                             value: -adv,
+                             range: NSRange(location: 0, length: 1))
+            mutable.replaceCharacters(in: NSRange(location: lastIdx, length: 1),
+                                      with: rep)
+            
+            // 6) **hier** die gesamte Zeile leicht komprimieren
+            mutable.addAttribute(.expansion,
+                                 value: NSNumber(value: compression),
+                                 range: nsR)
+        }
+        
+        return mutable
+    }
+    
     ///---------------------------------------------------------------------------------------
     /// Zeichnen des Inhaltes (Text und Bilder)
     ///
     func drawContent(in context: CGContext) {
         /// Zeichnen des Inaltes mit Core Text
         var text = blockContent.attrText
-        
-        ///-----------------------------------------------------------------------------------
-        /// Variante 4
-//        text = relayoutWithVisibleHyphens(src: text, width: contentRect.width)
 
         ///-----------------------------------------------------------------------------------
-        /// Variante 3
-        var dst = NSMutableAttributedString()
-        
-        let ts  = CTTypesetterCreateWithAttributedString(text)
-        var idx = 0
-        while idx < text.length {
-            let (line, newIdx) = breakAndHyphenate(ts, start: idx,
-                                                   width: contentRect.width,
-                                                   src: text)
-            dst.append(line)
-            idx = newIdx
-            
-            print("Breite: \(contentRect.width) Index: \(idx)/\(text.length)")
-            print(line.string)
-        }
-        text = dst
-         
-        ///-----------------------------------------------------------------------------------
+        /// Variante 4
+        text = insertHyphensAndCompressLines(in: text, columnWidth: contentRect.width)
+        print(text)
+
+         ///-----------------------------------------------------------------------------------
 
         let path = CGMutablePath()
         path.addRect(contentRect)
