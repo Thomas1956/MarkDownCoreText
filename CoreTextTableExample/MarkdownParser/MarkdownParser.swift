@@ -19,6 +19,9 @@ public class MarkdownParser {
     static func markdown(string: String, size: CGFloat = 17, weight: UIFont.Weight = .regular,
                          textColor: UIColor = .gray) -> [BlockRenderer]
     {
+        /// Automatischen Silbentrennung mit dem Einfügen von Soft-Hyphen
+        let string = stringWithHyphens(string)
+        
         let rawAttr: AttributedString
         do {
             rawAttr = try AttributedString(markdown: string, including: \.commonAttr)
@@ -90,6 +93,48 @@ public class MarkdownParser {
 
 extension MarkdownParser {
     
+    //----------------------------------------------------------------------------------------
+    // MARK: - Automatische Silbentrennung mit Einfügen von Soft-Hyphen
+
+    static func stringWithHyphens(_ s: String, lang: String = "de-DE") -> String {
+        let cfLoc = CFLocaleCreate(nil, CFLocaleIdentifier(rawValue: lang as CFString))
+
+        guard CFStringIsHyphenationAvailableForLocale(cfLoc) else { return s }
+
+        let shy = "\u{00AD}"                        // Soft‑Hyphen
+        
+        let ns  = s as NSString
+        let full = CFRange(location: 0, length: ns.length)
+
+        var hyphenPositions = Set<Int>()
+
+        ns.enumerateSubstrings(
+            in: NSRange(location: 0, length: ns.length),
+            options: [.byWords, .substringNotRequired]) { _, r, _, _ in
+
+            var idx = r.location + r.length        // hinter das Wort
+            while true {
+                let pos = CFStringGetHyphenationLocationBeforeIndex(
+                            ns, idx, full, 0, cfLoc, nil)
+                if pos == kCFNotFound || pos <= r.location { break }
+                hyphenPositions.insert(pos)
+                idx = pos - 1                      // weiter nach vorn suchen
+            }
+        }
+
+        // Soft‑Hyphens von hinten nach vorn einfügen, damit Indizes stabil bleiben
+        let sorted = hyphenPositions.sorted()
+        var out = s
+        for p in sorted.reversed() {
+            let utf16Idx = out.utf16.index(out.utf16.startIndex, offsetBy: p)
+            let strIdx   = String.Index(utf16Idx, within: out)!
+            out.insert(contentsOf: shy, at: strIdx)
+        }
+        return out
+    }
+    
+    
+    //----------------------------------------------------------------------------------------
     // MARK: - Inline-Presentation bearbeiten
     
     static func inlinePresentation(text: AttributedString, size: CGFloat, weight: UIFont.Weight) -> AttributedString {
@@ -186,6 +231,10 @@ extension MarkdownParser {
             
             ///  Alle BlockContent‑Elemente ermitteln
             let blocks = BlockContent.allBlockContents(attrText: attr, textSize: textSize)
+            
+            blocks.forEach { block in
+                print(block.attrText)
+            }
             
             /// Gruppen nach (kind, identity) zusammenfassen → je 1 Renderer
             var renderers: [BlockRenderer] = []
