@@ -112,10 +112,14 @@ extension NSMutableAttributedString {
     {
         var floats = [CGFloat]()
         var arrays = [CFArray]()
-        
+        var u8s    = [UInt8]()      // Alignment (1 Byte)
+        var i32s   = [Int32]()      // LineBreakMode / WritingDirection (4 Byte)
+
         floats.reserveCapacity(styles.count)   //  ◀︎ Pointer bleibt gültig
         arrays.reserveCapacity(styles.count)
-        
+        u8s.reserveCapacity(styles.count)
+        i32s.reserveCapacity(styles.count)
+
         var settings = [CTParagraphStyleSetting]()
         settings.reserveCapacity(styles.count)
         
@@ -139,10 +143,55 @@ extension NSMutableAttributedString {
             }
         }
         
+        func addU8(_ spec: CTParagraphStyleSpecifier, _ v: UInt8) {
+            u8s.append(v)
+            withUnsafePointer(to: &u8s[u8s.count - 1]) { p in
+                settings.append(.init(spec: spec,
+                                      valueSize: MemoryLayout<UInt8>.size,
+                                      value: p))
+            }
+        }
+        
+        func addI32(_ spec: CTParagraphStyleSpecifier, _ v: Int32) {
+            i32s.append(v)
+            withUnsafePointer(to: &i32s[i32s.count - 1]) { p in
+                settings.append(.init(spec: spec,
+                                      valueSize: MemoryLayout<Int32>.size,
+                                      value: p))
+            }
+        }
+ 
         ///-----------------------------------------------------------------------------------
         /// Werte einsortieren
         ///
         for (spec, raw) in styles {
+            
+            // ---------- Alignment (UInt8) -----------------------------------
+            if spec == .alignment {
+                if let ns = raw as? NSTextAlignment {
+                    addU8(spec, UInt8(ns.rawValue))
+                    continue
+                }
+                if let ct = raw as? CTTextAlignment {
+                    addU8(spec, ct.rawValue)
+                    continue
+                }
+            }
+
+            // ---------- LineBreakMode (Int32) -------------------------------
+            if spec == .lineBreakMode,
+               let lb = raw as? CTLineBreakMode {
+                addI32(spec, Int32(lb.rawValue))
+                continue
+            }
+
+            // ---------- WritingDirection (Int32) ----------------------------
+            if spec == .baseWritingDirection,
+               let wd = raw as? CTWritingDirection {
+                addI32(spec, Int32(wd.rawValue))
+                continue
+            }
+
             switch raw {
             case let n as CGFloat:   addFloat(spec, n)
             case let n as Double:    addFloat(spec, CGFloat(n))
