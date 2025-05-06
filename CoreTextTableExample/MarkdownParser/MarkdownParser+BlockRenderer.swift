@@ -64,9 +64,9 @@ extension BlockRenderer {
     }
     
     ///---------------------------------------------------------------------------------------
-    /// Berechnen der Höhe des Inhaltes (Breite um 5 Pts reduzieren, damit bei den Umbrüchen keine Zeile fehlt)
+    /// Berechnen der Höhe des Inhaltes
     func contentHeight(_ width: CGFloat) -> CGFloat {
-        let text = insertHyphens(in: blockContent.attrText, width: contentRect.width - 5)
+        let text = blockContent.attrText.insertingLineEndHyphens(width: contentRect.width)
         let constraint = CGSize(width: width, height: .greatestFiniteMagnitude)
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
         let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
@@ -136,101 +136,13 @@ extension BlockRenderer {
     
     
     //----------------------------------------------------------------------------------------
-    // MARK: - Den Text umbrechen lassen und die SHY durch HYPHEN ersetzen.
-
-    func insertHyphens(in src: NSAttributedString, width: CGFloat) -> NSAttributedString {
-        
-        ///-----------------------------------------------------------------------------------
-        /// Rendert den aktuellen Text in der gegebenen Breite und liefert alle Zeilen.
-        ///
-        func frameLines(_ attrText: NSAttributedString) -> [CTLine] {
-            let fullRange = CFRange(location: 0, length: attrText.length)
-            let framesetter = CTFramesetterCreateWithAttributedString(attrText as CFAttributedString)
-            let path = CGMutablePath()
-            path.addRect(CGRect(x: 0, y: 0, width: width, height: .greatestFiniteMagnitude))
-            let frame = CTFramesetterCreateFrame(framesetter, fullRange, path, nil)
-            return CTFrameGetLines(frame) as? [CTLine] ?? []
-        }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Liest das wirklich letzte Zeichen einer CTLine (im String-Index) aus.
-        /// Gibt nil zurück, wenn die Zeile leer ist oder außerhalb des Strings läge.
-        ///
-        func lineEndCharacter(_ attrText: NSAttributedString, for line: CTLine) -> (char: Character, index: Int)? {
-            let cfRange = CTLineGetStringRange(line)
-            guard cfRange.length > 0 else { return nil }
-
-            // Range in String-Indices umwandeln
-            let start = cfRange.location
-            let length = cfRange.length
-            let lastIndex = start + length - 1
-            guard lastIndex < attrText.length else { return nil }
-
-            // Sichere Swift-Indexierung
-            let str = attrText.string
-            let strIndex = str.index(str.startIndex, offsetBy: lastIndex)
-            return (str[strIndex], lastIndex)
-        }
-
-        ///-----------------------------------------------------------------------------------
-        /// Alle Zeilen durchlaufen
-        ///
-        let mutable = NSMutableAttributedString(attributedString: src)
-        var lineIndex = 0
-        var lines = frameLines(mutable)
-        
-        /// Da sich der String ständig ändert, muss der Inhalt jedes Mal neu gerendert werden. Nur so bekommen wir die
-        /// korrekten Zeilen.
-        while lineIndex < lines.count {
-            let line = lines[lineIndex]
-            
-            ///-------------------------------------------------------------------------------
-            /// 1. P A S S  -  Zeilenende ermitteln, SHY durch HYPHEN ersetzen
-            ///
-            guard let (lastChar, lastIndex) = lineEndCharacter(mutable, for: line),
-                  lastChar == "\u{00AD}"
-            else { lineIndex += 1;   continue }
-
-            /// Attribute an dieser Stelle ermitteln und den HYPHEN erzeugen.
-            let baseAttrs = mutable.attributes(at: lastIndex, effectiveRange: nil)
-            let hyphen = NSAttributedString(string: "\u{2010}", attributes: baseAttrs)
-            
-            /// HYPHEN an die Stelle des SHY setzen
-            mutable.replaceCharacters(in: NSRange(location: lastIndex, length: 1), with: hyphen)
-            
-            ///-------------------------------------------------------------------------------
-            /// 2. P A S S  -  Ein zweites Mal rendern
-            
-            let line1 = frameLines(mutable)[lineIndex]
- 
-            /// Wenn der HYPHEN noch am Zeilenende ist, dann Abbruch
-            guard let (lastChar1, lastIndex1) = lineEndCharacter(mutable, for: line1),
-                  lastChar1 != "\u{2010}"
-            else { lines = frameLines(mutable); lineIndex += 1; continue }
-            
-            /// Zufügen des HYPHEN im 1. Pass hat die Zeile so verlängert, dass neu umgebrochen wird. HYPEN wieder löschen.
-            mutable.deleteCharacters(in: NSRange(location: lastIndex, length: 1))
-
-            /// Wenn ein SHY am neuen Zeilenende ist, ihn durch HYPEN ersetzen.
-            if lastChar1 == "\u{00AD}" {
-                mutable.replaceCharacters(in: NSRange(location: lastIndex1, length: 1), with: hyphen)
-            }
-            
-            lines = frameLines(mutable)
-            lineIndex += 1;
-        }
-        return mutable
-    }
-    
-    
-    //----------------------------------------------------------------------------------------
     // MARK: - Zeichnen des Inhaltes (Text und Bilder)
     
     func drawContent(in context: CGContext) {
         
-        /// Zeilenumbruch berechnen und die HYPHEN einfügen
-        var text = insertHyphens(in: blockContent.attrText, width: contentRect.width)
- 
+        /// Zeilenumbrüche berechnen und die HYPHEN einfügen
+        let text = blockContent.attrText.insertingLineEndHyphens(width: contentRect.width)
+
         /// Zeichnen des Textes mit Core Text
         let path = CGMutablePath()
         path.addRect(contentRect)
