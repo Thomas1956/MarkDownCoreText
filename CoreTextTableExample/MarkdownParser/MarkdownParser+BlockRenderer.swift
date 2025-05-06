@@ -177,18 +177,19 @@ extension BlockRenderer {
         ///
         let mutable = NSMutableAttributedString(attributedString: src)
         var lineIndex = 0
+        var lines = frameLines(mutable)
         
         /// Da sich der String ständig ändert, muss der Inhalt jedes Mal neu gerendert werden. Nur so bekommen wir die
         /// korrekten Zeilen.
-        while lineIndex < frameLines(mutable).count {
-            let line = frameLines(mutable)[lineIndex]
+        while lineIndex < lines.count {
+            let line = lines[lineIndex]
             
             ///-------------------------------------------------------------------------------
             /// 1. P A S S  -  Zeilenende ermitteln, SHY durch HYPHEN ersetzen
             ///
             guard let (lastChar, lastIndex) = lineEndCharacter(mutable, for: line),
                   lastChar == "\u{00AD}"
-            else { lineIndex += 1;   continue }  // nur SHY → ersetzen
+            else { lineIndex += 1;   continue }
 
             /// Attribute an dieser Stelle ermitteln und den HYPHEN erzeugen.
             let baseAttrs = mutable.attributes(at: lastIndex, effectiveRange: nil)
@@ -205,7 +206,7 @@ extension BlockRenderer {
             /// Wenn der HYPHEN noch am Zeilenende ist, dann Abbruch
             guard let (lastChar1, lastIndex1) = lineEndCharacter(mutable, for: line1),
                   lastChar1 != "\u{2010}"
-            else { lineIndex += 1; continue }
+            else { lines = frameLines(mutable); lineIndex += 1; continue }
             
             /// Zufügen des HYPHEN im 1. Pass hat die Zeile so verlängert, dass neu umgebrochen wird. HYPEN wieder löschen.
             mutable.deleteCharacters(in: NSRange(location: lastIndex, length: 1))
@@ -215,6 +216,7 @@ extension BlockRenderer {
                 mutable.replaceCharacters(in: NSRange(location: lastIndex1, length: 1), with: hyphen)
             }
             
+            lines = frameLines(mutable)
             lineIndex += 1;
         }
         return mutable
