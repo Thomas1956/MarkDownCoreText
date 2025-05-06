@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E949006C2DC90E0200DD7880 /* UsefulExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = E949006B2DC90E0200DD7880 /* UsefulExtensions */; };
+		E949006E2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */; };
 		E9A940712DC4ECA6004501E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E9A9405C2DC4ECA6004501E6 /* Assets.xcassets */; };
 		E9A940732DC4ECA6004501E6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9A940602DC4ECA6004501E6 /* LaunchScreen.storyboard */; };
 		E9A940742DC4ECA6004501E6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9A940622DC4ECA6004501E6 /* Main.storyboard */; };
@@ -33,6 +34,7 @@
 
 /* Begin PBXFileReference section */
 		E928C3912DBA315C006D071D /* CoreTextTableExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoreTextTableExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Markdown+Hyphenation.swift"; sourceTree = "<group>"; };
 		E9A940582DC4ECA6004501E6 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		E9A940592DC4ECA6004501E6 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		E9A9405B2DC4ECA6004501E6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 				E9A940642DC4ECA6004501E6 /* MarkdownParser+AttributedString.swift */,
 				E9A940652DC4ECA6004501E6 /* MarkdownParser+BlockContent.swift */,
 				E9A940662DC4ECA6004501E6 /* MarkdownParser+BlockRenderer.swift */,
+				E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */,
 				E9A940672DC4ECA6004501E6 /* MarkdownParser+Font.swift */,
 				E9A940682DC4ECA6004501E6 /* MarkdownParser+ImageAttachment.swift */,
 				E9A940692DC4ECA6004501E6 /* MarkdownParser+PresentationIntent.swift */,
@@ -225,6 +228,7 @@
 				E9A940822DC4ECA6004501E6 /* MarkdownScrollView+Extension.swift in Sources */,
 				E9A940832DC4ECA6004501E6 /* MarkdownParser+NSAttributedString.swift in Sources */,
 				E9A940842DC4ECA6004501E6 /* SceneDelegate.swift in Sources */,
+				E949006E2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift in Sources */,
 				E9A940852DC4ECA6004501E6 /* ViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
