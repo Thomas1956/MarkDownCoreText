@@ -1,0 +1,15 @@
+{
+  "originHash" : "0a92e20915ff305abc8fcb7bb39c3c91bcdb47a28f58937cef34b2665bdaf93e",
+  "pins" : [
+    {
+      "identity" : "usefulextensions",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Thomas1956/UsefulExtensions",
+      "state" : {
+        "revision" : "fe234b3cfef621b847c38087acff425696b9aff8",
+        "version" : "1.2.4"
+      }
+    }
+  ],
+  "version" : 3
+}
