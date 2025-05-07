@@ -21,13 +21,15 @@ extension NSAttributedString {
     ///
     /// - parameter width: maximale Zeilenbreite (Pt)
     /// - returns: AttributedString mit sichtbaren Hyphens nur am Zeilenende
+    
     func insertingLineEndHyphens(width: CGFloat) -> NSAttributedString {
-
+        guard width > 0 else { return self }
+        
         let mutable = NSMutableAttributedString(attributedString: self)
 
         /// UTF‑16 Codes der beiden Zeichen SHY und HYPHEN
         let softHy: UInt16 = 0x00AD
-        let visHy : UInt16 = 0x2010
+        let _     : UInt16 = 0x2010
 
         /// Index für die Zeilen mit dem Start der ersten Zeile
         var idx = 0
@@ -39,8 +41,29 @@ extension NSAttributedString {
             let slice      = mutable.attributedSubstring(from: sliceRange)
             let ts         = CTTypesetterCreateWithAttributedString(slice as CFAttributedString)
 
+            ///-------------------------------------------------------------------------------
+            /// Einzüge und Listen berücksichtigen
+            ///
+            let firstIndent: CGFloat = slice.ctParagraphStyleValue(for: .firstLineHeadIndent) ?? 0
+            let headIndent : CGFloat = slice.ctParagraphStyleValue(for: .headIndent) ?? 0
+            let tailIndent : CGFloat = slice.ctParagraphStyleValue(for: .tailIndent) ?? 0
+
+            var effWidth = width - max(0, -tailIndent)
+            
+            /// Ist es die erste Zeile im Absatz?
+            if idx == 0 {
+                /// Nur wenn kein Tabulator am Anfang steht (Liste), den `firstLineHeadIndent` abziehen.
+                if slice.string.first != "\t" { effWidth -= firstIndent }
+            }
+            else {
+                /// In allen Folgezeilen den `heaIndent` abziehen.
+                effWidth -= headIndent
+            }
+            
+            ///-------------------------------------------------------------------------------
+
             /// Zeichenanzahl, die in `width` passt
-            let len = CTTypesetterSuggestLineBreak(ts, 0, Double(width))
+            let len = CTTypesetterSuggestLineBreak(ts, 0, Double(effWidth))
             guard len > 0 else { break }
 
             /// Einen Swift-String aus dem Reststring machen
@@ -69,23 +92,23 @@ extension NSAttributedString {
             }
 
             ///-------------------------------------------------------------------------------
-            /// 2. P A S S :  Die Zeile endet *nicht* mit Hyphen →  evtl. hatten wir zuvor einen Hyphen eingefügt, der jetzt
-            /// mitten in der Zeile steht.  Wir suchen innerhalb *dieser* Zeile danach.
-            ///
-            if lastUTF16 != visHy {
+            /// 2. P A S S :  Wenn wir vorher einen Hyphen eingefügt hatten, der jetzt mitten in der Zeile steht, müssen wir
+            /// den jetzt löschen. Wir suchen in der Zeile nach dem letzten eingesetzen HYPHEN.
+  
+            /// Range ohne den letzten Code‑Unit
+            let innerRange = lineStr[..<lineStr.index(lineStr.startIndex, offsetBy: len - 1)]
+
+            /// Suchen des ersten Auftretens eines HYPHEN
+            if let relPos = innerRange.firstIndex(of: "\u{2010}") {
+
+                /// Auf den Index in `mutable` umrechnen
+                let deleteIdx = idx + lineStr.distance(from: lineStr.startIndex, to: relPos)
                 
-                /// Suchen des ersten Auftretens eines HYPHEN
-                if let relPos = lineStr.firstIndex(of: "\u{2010}") {
-                    
-                    /// Auf den Index in `mutable` umrechnen
-                    let deleteIdx = idx + lineStr.distance(from: lineStr.startIndex, to: relPos)
-                   
-                    /// Löschen des HYPEN
-                    mutable.deleteCharacters(in: .init(location: deleteIdx, length: 1))
-                    
-                    /// Die gleiche Zeile erneut prüfen (keine Erhöhung des Index)
-                    continue
-                }
+                /// Löschen des HYPEN
+                mutable.deleteCharacters(in: .init(location: deleteIdx, length: 1))
+                
+                /// Die gleiche Zeile erneut prüfen (keine Erhöhung des Index)
+                continue
             }
             ///-------------------------------------------------------------------------------
             /// Die Zeile ist stabil  →  zum Anfang der nächsten Zeile wechseln
@@ -139,14 +162,10 @@ extension NSAttributedString {
     //    ─────────────────────────────────────────────────────────────
     //    Ende, mutable mit finalen Hyphens zurückgeben
     
-}
+    
+    //----------------------------------------------------------------------------------------
+    // MARK: - Alte Version
 
-
-//--------------------------------------------------------------------------------------------
-// MARK: - Extension BlockRenderer: Den Text umbrechen und die SHY durch HYPHEN ersetzen.
-
-extension BlockRenderer {
-  
     /// Ersetzt jeden Soft‑Hyphen (`U+00AD`), der nach dem endgültigen
     /// Umbruch wirklich am Zeilenende steht, durch einen sichtbaren
     /// Bindestrich (`U+2010`).  Keine Kerning‑ oder Kompressions‑Tricks,
@@ -160,8 +179,10 @@ extension BlockRenderer {
     /// Das war die erste funktionierende Methode für den Ersatz von SHY durch HYPHEN. Das Problem liegt darin, dass
     /// der Frame Setter oft aufgerufen wird, was von der Laufzeit ineffizient ist. Oben bessere Methode von O3.
     ///
-    static func insertHyphens(in src: NSAttributedString, width: CGFloat) -> NSAttributedString {
-        
+    
+    func insertingLineEndHyphens1(width: CGFloat) -> NSAttributedString {
+        guard width > 0 else { return self }
+
         ///-----------------------------------------------------------------------------------
         /// Rendert den aktuellen Text in der gegebenen Breite und liefert alle Zeilen.
         ///
@@ -197,7 +218,7 @@ extension BlockRenderer {
         ///-----------------------------------------------------------------------------------
         /// Alle Zeilen durchlaufen
         ///
-        let mutable = NSMutableAttributedString(attributedString: src)
+        let mutable = NSMutableAttributedString(attributedString: self)
         var lineIndex = 0
         var lines = frameLines(mutable)
         
@@ -267,7 +288,7 @@ extension BlockRenderer {
 //--------------------------------------------------------------------------------------------
 // MARK: - Extension MarkdownParser: Automatische Silbentrennung mit Einfügen von Soft-Hyphen
 
-extension MarkdownParser {
+extension String {
     
     /// Einen String mit möglichen Zeilenumbrüchen versehen.
     /// An den Stellen, wo ein Umbruch erfolgen kann, wird ein Soft‑Hyphen (`U+00AD`) eingefügt, das im Text unsichtbar ist.
@@ -277,17 +298,17 @@ extension MarkdownParser {
     ///    - lang: Sprache für den Zeilenumbruch (Default: Deutsch)..
     /// - returns: String mit Soft-Hyphens an den möglichen Zeilenumbrüchen.
     ///
-    static func stringWithHyphens(_ s: String, lang: String = "de-DE") -> String {
+    func stringWithHyphens1(lang: String = "de-DE") -> String {
         
         /// Locale aus dem String für die Sprache erzeugen
         let cfLoc = CFLocaleCreate(nil, CFLocaleIdentifier(rawValue: lang as CFString))
-        guard CFStringIsHyphenationAvailableForLocale(cfLoc) else { return s }
+        guard CFStringIsHyphenationAvailableForLocale(cfLoc) else { return self }
         
         /// Soft‑Hyphen
         let shy = "\u{00AD}"
         
         /// Einen NSString und dessen CFRange erzeugen
-        let ns = s as NSString
+        let ns = self as NSString
         let full = CFRange(location: 0, length: ns.length)
         
         var hyphenPositions = Set<Int>()
@@ -311,12 +332,65 @@ extension MarkdownParser {
         
         /// Alle Soft‑Hyphens von hinten nach vorn einfügen, damit Indizes stabil bleiben
         let sorted = hyphenPositions.sorted()
-        var out = s
+        var out = self
         for p in sorted.reversed() {
             let utf16Idx = out.utf16.index(out.utf16.startIndex, offsetBy: p)
             let strIdx   = String.Index(utf16Idx, within: out)!
             out.insert(contentsOf: shy, at: strIdx)
         }
         return out
+    }
+    
+    /// Fügt Soft‑Hyphens (`U+00AD`) nach den deutschen Trennregeln ein,
+    /// lässt jedoch alle Markdown‑Attribute in runden Klammern
+    /// (z. B. `(color:'blue')`) unangetastet.
+    func stringWithHyphens(lang: String = "de-DE") -> String {
+    
+        // -------- 0) Locale prüfen --------
+        let cfLoc = CFLocaleCreate(nil, CFLocaleIdentifier(rawValue: lang as CFString))
+        guard CFStringIsHyphenationAvailableForLocale(cfLoc) else { return self }
+
+        let shy         = "\u{00AD}"   // "😄"              // Soft‑Hyphen
+        let ns          = self as NSString
+        let fullCFRange = CFRange(location: 0, length: ns.length)
+
+        // -------- 1) Attribut‑Segmente finden --------
+        //    ( )‑Block mit mindestens einem ':'  → Markdown‑Attribute
+        let attrRegex = try! NSRegularExpression(
+            pattern: #"(\([^\)]*:[^\)]*\))"#,
+            options: [])
+        let attrMatches = attrRegex.matches(in: self, range: NSRange(location: 0, length: ns.length))
+        let attrIndexSet = NSMutableIndexSet()
+        for m in attrMatches { attrIndexSet.add(in: m.range) }
+
+        // -------- 2) Silbentrennungs‑Positionen sammeln --------
+        var hyphenPos = Set<Int>()
+
+        ns.enumerateSubstrings(in: NSRange(location: 0, length: ns.length),
+                               options: [.byWords, .substringNotRequired]) { _, r, _, _ in
+
+            var probe = r.location + r.length // hinter dem Wort beginnen
+            while true {
+                let pos = CFStringGetHyphenationLocationBeforeIndex(
+                            ns, probe, fullCFRange, 0, cfLoc, nil)
+                if pos == kCFNotFound || pos <= r.location { break }
+
+                // nur wenn Position NICHT in einem Attribut‑Range liegt
+                if !attrIndexSet.contains(pos) {
+                    hyphenPos.insert(pos)
+                }
+                probe = pos - 1               // weiter nach links suchen
+            }
+        }
+
+        // -------- 3) Soft‑Hyphens von hinten einfügen --------
+        var result = self
+        for p in hyphenPos.sorted().reversed() {
+            let u16 = result.utf16
+            let u16Idx = u16.index(u16.startIndex, offsetBy: p)
+            let strIdx = String.Index(u16Idx, within: result)!
+            result.insert(contentsOf: shy, at: strIdx)
+        }
+        return result
     }
 }
