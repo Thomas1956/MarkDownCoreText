@@ -20,8 +20,8 @@ public class MarkdownParser {
                          textColor: UIColor = .gray) -> [BlockRenderer]
     {
         /// Automatischen Silbentrennung mit dem Einfügen von Soft-Hyphen
-        let string = stringWithHyphens(string)
-        
+        let string = string.stringWithHyphens()
+
         let rawAttr: AttributedString
         do {
             rawAttr = try AttributedString(markdown: string, including: \.commonAttr)
@@ -67,8 +67,8 @@ public class MarkdownParser {
             
             /// In allen Blöcken außer dem Code Block die TABs löschen und  \n duch .lineSeparator ersetzen.
             if block.presentationIntent?.hasCodeBlock == false {
-                nsAttrString.mutableString.replaceOccurrences(of: "\t", with: "", range: nsRange)
                 nsAttrString.mutableString.replaceOccurrences(of: "\n", with: .lineSeparator, range: nsRange)
+                nsAttrString.mutableString.replaceOccurrences(of: "\t", with: "", range: nsRange)
             }
             attr = AttributedString(nsAttrString)
         }
