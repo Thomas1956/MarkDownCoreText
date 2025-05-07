@@ -32,9 +32,20 @@
 		E9A940882DC4EE4D004501E6 /* MarkdownParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E949007D2DCB7ECA00DD7880 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E928C3892DBA315C006D071D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E928C3902DBA315C006D071D;
+			remoteInfo = CoreTextTableExample;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		E928C3912DBA315C006D071D /* CoreTextTableExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoreTextTableExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Markdown+Hyphenation.swift"; sourceTree = "<group>"; };
+		E94900792DCB7ECA00DD7880 /* HyphenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HyphenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9A940582DC4ECA6004501E6 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		E9A940592DC4ECA6004501E6 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		E9A9405B2DC4ECA6004501E6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -59,12 +70,27 @@
 		E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownParser.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		E949007A2DCB7ECA00DD7880 /* HyphenTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HyphenTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
 		E928C38E2DBA315C006D071D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				E949006C2DC90E0200DD7880 /* UsefulExtensions in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E94900762DCB7ECA00DD7880 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				E9A940702DC4ECA6004501E6 /* CoreTextTableExample */,
+				E949007A2DCB7ECA00DD7880 /* HyphenTests */,
 				E928C3922DBA315C006D071D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -83,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				E928C3912DBA315C006D071D /* CoreTextTableExample.app */,
+				E94900792DCB7ECA00DD7880 /* HyphenTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -156,6 +184,29 @@
 			productReference = E928C3912DBA315C006D071D /* CoreTextTableExample.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E94900782DCB7ECA00DD7880 /* HyphenTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E949007F2DCB7ECA00DD7880 /* Build configuration list for PBXNativeTarget "HyphenTests" */;
+			buildPhases = (
+				E94900752DCB7ECA00DD7880 /* Sources */,
+				E94900762DCB7ECA00DD7880 /* Frameworks */,
+				E94900772DCB7ECA00DD7880 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E949007E2DCB7ECA00DD7880 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				E949007A2DCB7ECA00DD7880 /* HyphenTests */,
+			);
+			name = HyphenTests;
+			packageProductDependencies = (
+			);
+			productName = HyphenTests;
+			productReference = E94900792DCB7ECA00DD7880 /* HyphenTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -168,6 +219,10 @@
 				TargetAttributes = {
 					E928C3902DBA315C006D071D = {
 						CreatedOnToolsVersion = 16.3;
+					};
+					E94900782DCB7ECA00DD7880 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = E928C3902DBA315C006D071D;
 					};
 				};
 			};
@@ -189,6 +244,7 @@
 			projectRoot = "";
 			targets = (
 				E928C3902DBA315C006D071D /* CoreTextTableExample */,
+				E94900782DCB7ECA00DD7880 /* HyphenTests */,
 			);
 		};
 /* End PBXProject section */
@@ -201,6 +257,13 @@
 				E9A940712DC4ECA6004501E6 /* Assets.xcassets in Resources */,
 				E9A940732DC4ECA6004501E6 /* LaunchScreen.storyboard in Resources */,
 				E9A940742DC4ECA6004501E6 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E94900772DCB7ECA00DD7880 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,7 +296,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E94900752DCB7ECA00DD7880 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E949007E2DCB7ECA00DD7880 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E928C3902DBA315C006D071D /* CoreTextTableExample */;
+			targetProxy = E949007D2DCB7ECA00DD7880 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		E9A940602DC4ECA6004501E6 /* LaunchScreen.storyboard */ = {
@@ -432,6 +510,42 @@
 			};
 			name = Release;
 		};
+		E94900802DCB7ECA00DD7880 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VWRQ7VEHFS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = tw.HyphenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CoreTextTableExample.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CoreTextTableExample";
+			};
+			name = Debug;
+		};
+		E94900812DCB7ECA00DD7880 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VWRQ7VEHFS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = tw.HyphenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CoreTextTableExample.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CoreTextTableExample";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -449,6 +563,15 @@
 			buildConfigurations = (
 				E928C3A52DBA315E006D071D /* Debug */,
 				E928C3A62DBA315E006D071D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E949007F2DCB7ECA00DD7880 /* Build configuration list for PBXNativeTarget "HyphenTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E94900802DCB7ECA00DD7880 /* Debug */,
+				E94900812DCB7ECA00DD7880 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
