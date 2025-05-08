@@ -20,7 +20,6 @@ class MarkdownContentView: UIView {
     ///
     func markdown(string: String, size: CGFloat = 17, weight: UIFont.Weight = .regular, textColor: UIColor = .gray) {
         self.renderers = MarkdownParser.markdown(string: string, size: size, weight: weight, textColor: textColor)
-        setNeedsLayout()
     }
     
     ///---------------------------------------------------------------------------------------

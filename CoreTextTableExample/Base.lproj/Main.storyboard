@@ -17,10 +17,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UN5-4F-yvE" customClass="MarkdownScrollView" customModule="CoreTextTableExample" customModuleProvider="target">
-                                <rect key="frame" x="10" y="202" width="373" height="582"/>
+                                <rect key="frame" x="0.0" y="162" width="393" height="622"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nOc-oS-lsa" customClass="MarkdownContentView" customModule="CoreTextTableExample" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="0.0" width="373" height="582"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="622"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                     </view>
                                 </subviews>
@@ -39,9 +39,9 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="UN5-4F-yvE" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" constant="-10" id="dKw-oZ-KO8"/>
-                            <constraint firstItem="UN5-4F-yvE" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="10" id="llO-zd-QNj"/>
-                            <constraint firstItem="UN5-4F-yvE" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" constant="40" id="yoQ-at-Qvx"/>
+                            <constraint firstItem="UN5-4F-yvE" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="dKw-oZ-KO8"/>
+                            <constraint firstItem="UN5-4F-yvE" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="llO-zd-QNj"/>
+                            <constraint firstItem="UN5-4F-yvE" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="yoQ-at-Qvx"/>
                             <constraint firstItem="UN5-4F-yvE" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="zYJ-hO-8Zn"/>
                         </constraints>
                     </view>

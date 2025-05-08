@@ -15,45 +15,36 @@ class CoreTextViewController: UIViewController, UIDocumentPickerDelegate {
     var textSize:CGFloat = 17
     var textColor = UIColor.label
 
+    var textMarkdown: String = ""
     
     //----------------------------------------------------------------------------------------
     // MARK: - Initialisierung
     
     override func viewDidLoad() {
-        super.viewDidLoad()
+        print("CoreTextViewController \(self)")
         
+        super.viewDidLoad()
+        self.view.backgroundColor = .systemGray6.highlight
         self.extendedLayoutIncludesOpaqueBars = true
-        self.navigationController?.navigationBar.prefersLargeTitles = true
+//        self.navigationController?.navigationBar.prefersLargeTitles = true
 
         if #available(iOS 16, *) {
             navigationItem.style = .navigator
         }
-
         
-        let addButton    = ImageBarButtonItem(systemName: "plus",  action: didPressAddButton(_:))
-        let deleteButton = ImageBarButtonItem(systemName: "trash", action: didPressDeleteButton(_:))
         let importButton = ImageBarButtonItem(systemName: "square.and.arrow.up", bottomOffset: 3, action: didPressExportButton(_:))
-        
-        navigationItem.rightBarButtonItems = [deleteButton, importButton, addButton]
-        
-        /// Beim Start immer das erste Objekt in den Details anzeigen, was das Debuggen vereinfacht.
-//        guard let firstItem = dataSource.snapshot().itemIdentifiers.first
-//        else { return }
-//        
-//        /// DetailViewController anzeigen
-//        detailViewController?.objectID = firstItem.objectID
-//        splitViewController?.show(.secondary)
-        
-        scrollView.markdown(string: text1, size: textSize, weight: .regular, textColor: textColor )
+        navigationItem.rightBarButtonItems = [importButton]
+ 
+        self.markdown(text: self.textMarkdown)
     }
     
-    @objc func didPressAddButton(_ sender: Any) {
+    ///---------------------------------------------------------------------------------------
+    /// Markdown-Text darstellen
+    ///
+    func markdown(text: String) {
+        self.textMarkdown = text
+        scrollView?.markdown(string: text, size: textSize, weight: .regular, textColor: textColor )
     }
-    
-    @objc func didPressDeleteButton(_ sender: Any) {
-    }
-    
-
     
     ///---------------------------------------------------------------------------------------
     /// PDF-Export
@@ -62,7 +53,7 @@ class CoreTextViewController: UIViewController, UIDocumentPickerDelegate {
 
     @objc func didPressExportButton(_ sender: Any) {
 
-        let renderers = MarkdownParser.markdown(string: text1, size: 12, textColor: textColor )
+        let renderers = MarkdownParser.markdown(string: self.textMarkdown, size: 12, textColor: textColor )
         
         // 1) PDF erzeugen → tmpURL zurückgeben
         MarkdownParser.exportPDF(renderers: renderers) { [unowned self] in
