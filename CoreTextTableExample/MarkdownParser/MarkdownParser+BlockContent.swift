@@ -294,13 +294,6 @@ struct BlockContent {
                 headIndent = dictIndent
             } else {
                 listBulletPoint = "\t" + listBulletPoint + "\t" /// Aufzählungszeichen mit TAB ergänzen
-                //
-                //                let bullet = NSMutableAttributedString(         /// Bullet-Point dem Attributed String voranstellen
-                //                    string:     listBulletPoint,
-                //                    attributes: blockContent.attrText.attributes(at: 0, effectiveRange: nil))
-                //
-                //                bullet.append(blockContent.attrText)            /// Original-Text anhängen
-                //                allBlocks[index].attrText = bullet              /// und zurückspeichern
                 dictHeadIndent[blockContent.key] = headIndent   /// Einzug dieses Absatzes merken
             }
             
@@ -439,12 +432,13 @@ struct BlockContent {
             let fontSize = font.pointSize
             
             var attrText = NSMutableAttributedString(attributedString: blockContent.attrText)
-            var tabulators             : [CTTextTab] = []
-            var firstLineHeadIndent    : CGFloat     = block.hasBlockQuote ? MB.contentIndent : 0
-            var headIndent             : CGFloat     = block.hasBlockQuote ? MB.contentIndent : 0
-            let tailIndent             : CGFloat     = 0 //-20
-            var paragraphSpacing       : CGFloat     = fontSize * M.paragraphSpacing
-            var paragraphSpacingBefore : CGFloat     = 0
+            var tabulators         : [NSTextTab]  =  []
+            var firstLineHeadIndent    : CGFloat  =  block.hasBlockQuote ? MB.contentIndent : 0
+            var headIndent             : CGFloat  =  block.hasBlockQuote ? MB.contentIndent : 0
+            let tailIndent             : CGFloat  =  -20
+            var paragraphSpacing       : CGFloat  =  fontSize * M.paragraphSpacing
+            var paragraphSpacingBefore : CGFloat  =  0
+            let alignment      : NSTextAlignment  =  .natural
             
             ///-------------------------------------------------------------------------------
             /// Blockerkennung, um Abstände nach Bedarf einzustellen
@@ -493,37 +487,49 @@ struct BlockContent {
             ///-------------------------------------------------------------------------------
             /// List erkennen und die Bullets voranstellen
             if block.hasList {
-                let bullet = NSMutableAttributedString(         /// Bullet-Point dem Attributed String voranstellen
+                let attrList = NSMutableAttributedString(       /// Bullet-Point dem Attributed String voranstellen
                     string:     blockContent.listBulletPointStr,
                     attributes: blockContent.attrText.attributes(at: 0, effectiveRange: nil))
                 
-                bullet.append(blockContent.attrText)            /// Original-Text anhängen
-                attrText = bullet
-                ///---------------------------------------------------------------------------
-                
+                attrList.append(blockContent.attrText)          /// Original-Text anhängen
+                attrText = attrList
+
+                /// Die Defaultbreite eines SPACE x 3
                 let w = 3 * blockContent.widthDefault
                 
                 /// Einzüge und Tab-Stops festlegen
                 headIndent          = headIndent          + blockContent.headIndent
                 firstLineHeadIndent = firstLineHeadIndent + blockContent.firstLineHeadIndent
-                tabulators          = [CTTextTabCreate(.right, headIndent - w, nil),
-                                       CTTextTabCreate(.left,  headIndent, nil ) ]
+                tabulators          = [NSTextTab(textAlignment: .right, location: headIndent - w),
+                                       NSTextTab(textAlignment: .left,  location: headIndent) ]
             }
             
+            ///-------------------------------------------------------------------------------
             /// Style einfügen
-            attrText.addCTParagraphStyle([
-                .lineHeightMultiple:     M.lineHeightMultiple,
-                .lineSpacingAdjustment:  0,
-                .defaultTabInterval:     100,
-                .tabStops:               tabulators,
-                .headIndent:             headIndent,
-                .firstLineHeadIndent:    firstLineHeadIndent,
-                .tailIndent:             tailIndent,
-                .paragraphSpacing:       paragraphSpacing,
-                .paragraphSpacingBefore: paragraphSpacingBefore,
-            ])
+            ///
+            let ps = NSMutableParagraphStyle()
+            ps.lineHeightMultiple     = M.lineHeightMultiple
+            ps.defaultTabInterval     = 100
+            ps.headIndent             = headIndent
+            ps.firstLineHeadIndent    = firstLineHeadIndent
+            ps.tailIndent             = tailIndent
+            ps.paragraphSpacing       = paragraphSpacing
+            ps.paragraphSpacingBefore = paragraphSpacingBefore
+            ps.alignment              = alignment
+            ps.lineBreakMode          = .byWordWrapping
+            ps.tabStops               = tabulators
+
+            attrText.addAttribute(.paragraphStyle, value: ps,
+                                  range: NSRange(location: 0, length: attrText.length))
+            /// Sprache zufügen
+            attrText.addAttributes([.languageIdentifier: "de-DE"])
+            
+            /// DEBUG
+            print(AttributedString(attrText).debugStringLong)
+            assert(ps.tabStops.map(\.ctTab) == tabulators.map(\.ctTab) )
             
             allBlocks[index].attrText = attrText
         }
     }
 }
+
