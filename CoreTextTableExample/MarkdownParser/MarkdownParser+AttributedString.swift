@@ -157,7 +157,7 @@ public extension AttributedString {
 
 //--------------------------------------------------------------------------------------------
 // MARK: - Zufügen der Userspezifische Attribute zu einen AttributedString
-
+/*
 public extension AttributedString {
 
     /// User-Attribute
@@ -318,3 +318,4 @@ public extension AttributeDynamicLookup {
         self[T.self]
     }
 }
+*/

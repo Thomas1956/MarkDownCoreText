@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="i9p-bJ-ZEO">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
@@ -8,30 +8,19 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Ausgabe-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="CoreTextTableExample" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Ausgabe" id="BYZ-38-t0r" customClass="CoreTextViewController" customModule="CoreTextTableExample" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OYI-ir-r2D">
-                                <rect key="frame" x="8" y="8" width="113" height="35"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="35" id="3EL-pI-epK"/>
-                                </constraints>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="tinted" title="PDF-Export"/>
-                                <connections>
-                                    <action selector="actionExport:" destination="BYZ-38-t0r" eventType="touchUpInside" id="rmu-UJ-0iE"/>
-                                </connections>
-                            </button>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UN5-4F-yvE" customClass="MarkdownScrollView" customModule="CoreTextTableExample" customModuleProvider="target">
-                                <rect key="frame" x="10" y="158" width="373" height="626"/>
+                                <rect key="frame" x="10" y="202" width="373" height="582"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nOc-oS-lsa" customClass="MarkdownContentView" customModule="CoreTextTableExample" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="0.0" width="373" height="626"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="373" height="582"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                     </view>
                                 </subviews>
@@ -50,11 +39,8 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="OYI-ir-r2D" secondAttribute="trailing" constant="20" symbolic="YES" id="52r-Ks-R5a"/>
-                            <constraint firstItem="OYI-ir-r2D" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="8" id="Q4d-Np-tsq"/>
                             <constraint firstItem="UN5-4F-yvE" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" constant="-10" id="dKw-oZ-KO8"/>
                             <constraint firstItem="UN5-4F-yvE" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="10" id="llO-zd-QNj"/>
-                            <constraint firstItem="OYI-ir-r2D" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="8" id="xgn-cP-vyv"/>
                             <constraint firstItem="UN5-4F-yvE" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" constant="40" id="yoQ-at-Qvx"/>
                             <constraint firstItem="UN5-4F-yvE" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="zYJ-hO-8Zn"/>
                         </constraints>
@@ -65,10 +51,60 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="130.53435114503816" y="-34.507042253521128"/>
+            <point key="canvasLocation" x="256" y="-1001"/>
+        </scene>
+        <!--Eingabe-->
+        <scene sceneID="HZx-jq-ZoS">
+            <objects>
+                <viewController title="Eingabe" id="spz-MP-MZU" customClass="EditViewController" customModule="CoreTextTableExample" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Heb-EV-55P">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" layoutManager="textKit1" translatesAutoresizingMaskIntoConstraints="NO" id="c1P-cQ-mY8">
+                                <rect key="frame" x="0.0" y="162" width="393" height="622"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
+                            </textView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="u7C-uY-Dfc"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="u7C-uY-Dfc" firstAttribute="trailing" secondItem="c1P-cQ-mY8" secondAttribute="trailing" id="BBx-oP-Lcj"/>
+                            <constraint firstItem="c1P-cQ-mY8" firstAttribute="top" secondItem="u7C-uY-Dfc" secondAttribute="top" id="OSs-Ye-MdT"/>
+                            <constraint firstItem="c1P-cQ-mY8" firstAttribute="bottom" secondItem="u7C-uY-Dfc" secondAttribute="bottom" id="RNx-sN-cpC"/>
+                            <constraint firstItem="c1P-cQ-mY8" firstAttribute="leading" secondItem="u7C-uY-Dfc" secondAttribute="leading" id="V0b-sX-5IL"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="textView" destination="c1P-cQ-mY8" id="QlT-SZ-TqW"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="sLu-G6-rCj" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="255.72519083969465" y="-289.43661971830988"/>
+        </scene>
+        <!--Common Split View Controller-->
+        <scene sceneID="I6d-yG-CAJ">
+            <objects>
+                <splitViewController allowDoubleColumnStyle="YES" preferredDisplayMode="twoBeside" behavior="tile" primaryBackgroundStyle="sidebar" id="i9p-bJ-ZEO" customClass="CommonSplitViewController" customModule="CoreTextTableExample" customModuleProvider="target" sceneMemberID="viewController">
+                    <connections>
+                        <segue destination="spz-MP-MZU" kind="relationship" relationship="masterViewController" id="W4X-vY-bMy"/>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="detailViewController" id="1HI-zw-iav"/>
+                    </connections>
+                </splitViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Twe-ft-z1P" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-653" y="-712"/>
         </scene>
     </scenes>
     <resources>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

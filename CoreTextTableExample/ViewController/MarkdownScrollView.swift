@@ -48,7 +48,7 @@ class MarkdownScrollView: UIScrollView {
         super.layoutSubviews()
         let width = bounds.width
         let totalHeight = contentView.layout(width: width)
-        contentView.frame = CGRect(x: 0, y: 0, width: width, height: totalHeight)
+        contentView.frame = CGRect(x: 5, y: 0, width: width - 20 , height: totalHeight)
         contentSize = CGSize(width: width, height: totalHeight)
         
         contentView.setNeedsDisplay()

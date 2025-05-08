@@ -6,25 +6,61 @@
 //
 
 import UIKit
+import UsefulExtensions
 
-class ViewController: UIViewController, UIDocumentPickerDelegate {
+class CoreTextViewController: UIViewController, UIDocumentPickerDelegate {
 
     @IBOutlet weak var scrollView: MarkdownScrollView!
 
     var textSize:CGFloat = 17
     var textColor = UIColor.label
 
+    
+    //----------------------------------------------------------------------------------------
+    // MARK: - Initialisierung
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.extendedLayoutIncludesOpaqueBars = true
+        self.navigationController?.navigationBar.prefersLargeTitles = true
+
+        if #available(iOS 16, *) {
+            navigationItem.style = .navigator
+        }
+
+        
+        let addButton    = ImageBarButtonItem(systemName: "plus",  action: didPressAddButton(_:))
+        let deleteButton = ImageBarButtonItem(systemName: "trash", action: didPressDeleteButton(_:))
+        let importButton = ImageBarButtonItem(systemName: "square.and.arrow.up", bottomOffset: 3, action: didPressExportButton(_:))
+        
+        navigationItem.rightBarButtonItems = [deleteButton, importButton, addButton]
+        
+        /// Beim Start immer das erste Objekt in den Details anzeigen, was das Debuggen vereinfacht.
+//        guard let firstItem = dataSource.snapshot().itemIdentifiers.first
+//        else { return }
+//        
+//        /// DetailViewController anzeigen
+//        detailViewController?.objectID = firstItem.objectID
+//        splitViewController?.show(.secondary)
+        
         scrollView.markdown(string: text1, size: textSize, weight: .regular, textColor: textColor )
     }
+    
+    @objc func didPressAddButton(_ sender: Any) {
+    }
+    
+    @objc func didPressDeleteButton(_ sender: Any) {
+    }
+    
+
     
     ///---------------------------------------------------------------------------------------
     /// PDF-Export
     ///
     private var tmpPDF: URL?            // <– merken, um später zu löschen
 
-    @IBAction func actionExport(_ sender: Any) {
+    @objc func didPressExportButton(_ sender: Any) {
 
         let renderers = MarkdownParser.markdown(string: text1, size: 12, textColor: textColor )
         
