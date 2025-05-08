@@ -35,7 +35,14 @@ final class HyphenLayoutTests: XCTestCase {
 
         let nsR = NSRange(location: range.location, length: range.length - 1) // ohne letztes Zeichen
         let sub = attr.attributedSubstring(from: nsR).string
-        return sub.contains("\u{2010}")    // sichtbarer Bindestrich
+        
+        print(sub)
+        
+        let hasHyphen = sub.contains("\u{2010}")
+//        if hasHyphen {
+//            print("inner hyphen in: \(sub)")
+//        }
+        return hasHyphen    // sichtbarer Bindestrich
     }
 
     // ----------------------------------------------------------------------

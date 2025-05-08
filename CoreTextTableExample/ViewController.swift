@@ -64,7 +64,7 @@ class ViewController: UIViewController, UIDocumentPickerDelegate {
     ///---------------------------------------------------------------------------------------
 
     
-    let text2 =
+    let text1 =
     """
     > # Beispiel Blockquote
     
@@ -154,12 +154,12 @@ class ViewController: UIViewController, UIDocumentPickerDelegate {
     """
 
 
-    let text1 =
+    let text2 =
         """
-        1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident, sunt in culpa qui o f f i c i a d e s e r u n t m o l l i t a n i m i d e s t l a b o r u m .\
+        1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident, sunt in culpa qui
         Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\ 
         Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        
+
         2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\
         Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\ 
         Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -167,7 +167,7 @@ class ViewController: UIViewController, UIDocumentPickerDelegate {
         1 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\
         Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\ 
         Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        
+
         2 Duis  ^[dynamisches Blau](color: 'blue') aecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\
         Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\ 
         Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -260,7 +260,121 @@ class ViewController: UIViewController, UIDocumentPickerDelegate {
         
         Excepteur sint occaecat cupidatat non proident, sunt in culpa qui offic
         
-         
         """
+    
+        var text3 =
+"""
+Der Fasan besiedelt halboffene Landschaften, lichte Wälder mit Unterwuchs oder schilfbestandene Feuchtgebiete., die ihm gute Deckung und offene Flächen zur Nahrungssuche bieten. In Europa findet man ihn häufig in der Kulturlandschaft. 
+"""
+var text31 =
+"""
+123. Der Fasan besiedelt halboffene Landschaften, lichte Wälder mit Unterwuchs oder schilfbestandene Feuchtgebiete.
+"""
+    
+    var text4 =
+"""
+In der Nacht zu Samstag ^[dynamisches Blau](color: 'blue') hat ein Geisterfahrer auf der Autobahn A60 einen schweren Verkehrsunfall verursacht. Das Auto des jungen Mannes kollidierte frontal mit einem Pkw, in dem drei junge Frauen saßen. 
+
+Die 23-jährige Fahrerin starb. Ihre beiden 24 Jahre alten Mitfahrerinnen erlitten schwere Verletzungen. Der Falschfahrer zog sich leichte Verletzungen zu. Alle Verletzten wurden den Angaben der Autobahnpolizei in Schweich zufolge in umliegende Krankenhäuser gebracht.
+
+Gegen drei Uhr morgens hätten mehrere Verkehrsteilnehmer einen Falschfahrer auf der A60 bei Landscheid im Kreis Bernkastel-Wittlich über den Notruf gemeldet, erklärte die Polizei laut Nachrichtenagentur dpa. Unter anderem sei eine Meldung dazu im Verkehrswarnfunk eingestellt worden. Kurz darauf sei es zu dem Verkehrsunfall gekommen. Die Autobahn in der Eifel war mehrere Stunden lang gesperrt.
+
+Ein Gutachter soll den genauen Unfallhergang aufklären. Warum der Mann mit seinem Wagen in falscher Richtung auf der Autobahn unterwegs war, war zunächst unklar. Der Polizei zufolge nutzte der Falschfahrer die Fahrbahn Richtung Westen und Belgien, fuhr aber in Richtung Wittlich. Die A60 blieb nach dem Unfall mehrere Stunden lang gesperrt.
+"""
+
+    
+    var text5 =
+"""
+**Entwurf eines Einspruchsschreibens mit Antrag auf Aussetzung der Vollziehung**
+
+Absender:  
+[Name]  
+[Anschrift]  
+[Steuernummer / Steuer-ID]
+
+An  
+Finanzamt [bitte zuständiges Finanzamt eintragen]  
+[Anschrift Finanzamt]
+
+[Ort], [Datum]
+
+**Betreff**: Einspruch gegen die Einkommensteuerbescheide für 2020, 2021 und 2022  
+Steuernummer: [bitte Ihre Steuernummer eintragen]
+
+---
+
+Sehr geehrte Damen und Herren,
+
+hiermit lege ich fristgerecht **Einspruch** gegen die Einkommensteuerbescheide für die Veranlagungszeiträume 2020, 2021 und 2022 ein. Zugleich **beantrage ich** die **Aussetzung der Vollziehung** gem. § 361 AO (ggf. § 69 FGO), soweit aus diesen Bescheiden Forderungen herrühren, die infolge der streitigen Punkte entstanden sind.
+
+---
+
+### 1. Einstufung als „Scheinselbständigkeit“
+
+Nach den vorliegenden Bescheiden hat das Finanzamt meine selbständige Tätigkeit ab dem Jahr 2020 als „Scheinselbständigkeit“ eingestuft. Diese Einstufung ist nach meinem Dafürhalten **nicht haltbar** und entbehrt jeder Grundlage.
+
+- Seit **1996** führe ich durchgehend ein **Ingenieurbüro** unter meinem Namen.  
+- Im Rahmen meiner Tätigkeit habe ich zahlreiche **unterschiedliche Auftraggeber** aus der Automatisierungs- und Softwarebranche (z. B. Siemens, Lenze, Bosch Rexroth, Beckhoff usw.) betreut.  
+- Über den gesamten Zeitraum von 1996 bis 2022 ist ein erheblicher Betrag an **versteuerten Einkünften** (Saldo von 776.000 €) erzielt und ordnungsgemäß gegenüber dem Finanzamt erklärt worden.  
+- Die Langfristigkeit und Vielfalt meiner Auftragsstruktur sowie der Abschluss von Wartungsverträgen im Softwarebereich untermauern eine **echte Selbständigkeit**.
+
+Eine Scheinselbständigkeit setzt voraus, dass ein Arbeitnehmerverhältnis verschleiert wird (Fehlen unternehmerischer Risiken, Eingliederung in eine fremde Betriebsorganisation, Weisungsgebundenheit etc.). All diese Kriterien sind in meinem Fall nachweislich nicht erfüllt.
+
+---
+
+### 2. Beantragung der Aussetzung der Vollziehung
+
+Ich beantrage die **Aussetzung der Vollziehung** der angefochtenen Bescheide, bis über meinen Einspruch rechtskräftig entschieden ist. Der Eintritt finanzieller Nachteile durch eine sofortige Vollstreckung wäre für mich unverhältnismäßig und würde mich unter Umständen in erhebliche Liquiditätsschwierigkeiten bringen, zumal ich seit vielen Jahren eine ordnungsgemäß versteuerte selbständige Tätigkeit ausübe.
+
+Die Aussetzung der Vollziehung ist gem. **§ 361 Abs. 2 AO** geboten, da die Erfolgsaussichten des Einspruchs als offen bzw. sehr aussichtsreich anzusehen sind.
+
+---
+
+### 3. Begründung des Einspruchs
+
+- **Selbständige Unternehmensstruktur**  
+  - Mehrere unterschiedliche Auftraggeber über viele Jahre.  
+  - Langfristige Wartungs- und Supportverträge, z. B. mit Siemens.  
+  - Entwicklung und Vertrieb von Software-Komponenten und iOS-Apps, unabhängig von nur einem Auftraggeber.
+
+- **Fehlen arbeitsverhältnisähnlicher Bedingungen**  
+  - Keine Eingliederung in einen fremden Betrieb (keine festen Arbeitszeiten, kein Arbeitgeber-Weisungsrecht).  
+  - Tragen eines unternehmerischen Risikos, z. B. durch Investitionen (Server, Geräte, Reisekosten, Marketing).  
+  - Selbständige Akquise und Abwicklung von Aufträgen.
+
+- **Historie & Prüfung durch andere Stellen**  
+  - Seit 1996 wurden regelmäßig Steuererklärungen eingereicht und akzeptiert.  
+  - Interne Prüfungen (Internal Audit) bei Siemens stellten keinerlei Interessenkonflikte oder Scheinarrangements fest.
+
+Diese Punkte zeigen eindeutig, dass ich eine **tatsächliche selbständige Tätigkeit** ausübe.
+
+---
+
+### 4. Antrag
+
+- **Aufhebung** bzw. **Anpassung** der Einkommensteuerbescheide für 2020, 2021 und 2022 in Bezug auf die Einstufung als Scheinselbständigkeit.  
+- **Aussetzung der Vollziehung** der strittigen Forderungen, bis über den Einspruch unanfechtbar entschieden wurde.
+
+---
+
+### 5. Schlussbemerkung
+
+Ich bitte um eine schriftliche Bestätigung des Eingangs dieses Einspruchs sowie Ihres Bescheids zur Aussetzung der Vollziehung. Für Rückfragen stehe ich selbstverständlich gerne zur Verfügung.
+
+Mit freundlichen Grüßen,
+
+*[Unterschrift]*
+
+**Anlagen** (beispielsweise):
+- Nachweise zu Kundenaufträgen (Verträge, Rechnungen)
+- Auszüge früherer Steuerbescheide (1996–2019)
+- Übersicht über die versteuerten Einkünfte seit 1996
+- Wartungsvertrag(e) mit Siemens und andere relevante Verträge
+- Schriftstücke aus internen Revisionen/Prüfungen
+
+---
+
+*Hinweis*: Dieses Schreiben stellt einen Musterentwurf dar und ersetzt keine individuelle Rechts- oder Steuerberatung. Es wird empfohlen, das Schreiben gemeinsam mit einer Steuerberaterin/einem Steuerberater oder einer Rechtsanwältin/einem Rechtsanwalt zu prüfen.
+"""
 }
 
