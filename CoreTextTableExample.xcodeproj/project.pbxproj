@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		E949006C2DC90E0200DD7880 /* UsefulExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = E949006B2DC90E0200DD7880 /* UsefulExtensions */; };
 		E949006E2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */; };
+		E94900892DCB99F600DD7880 /* NSTextTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94900882DCB99F000DD7880 /* NSTextTab.swift */; };
 		E9A940712DC4ECA6004501E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E9A9405C2DC4ECA6004501E6 /* Assets.xcassets */; };
 		E9A940732DC4ECA6004501E6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9A940602DC4ECA6004501E6 /* LaunchScreen.storyboard */; };
 		E9A940742DC4ECA6004501E6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9A940622DC4ECA6004501E6 /* Main.storyboard */; };
@@ -46,6 +47,7 @@
 		E928C3912DBA315C006D071D /* CoreTextTableExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoreTextTableExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Markdown+Hyphenation.swift"; sourceTree = "<group>"; };
 		E94900792DCB7ECA00DD7880 /* HyphenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HyphenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E94900882DCB99F000DD7880 /* NSTextTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSTextTab.swift; sourceTree = "<group>"; };
 		E9A940582DC4ECA6004501E6 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		E9A940592DC4ECA6004501E6 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		E9A9405B2DC4ECA6004501E6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -118,6 +120,7 @@
 		E9A9405A2DC4ECA6004501E6 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				E94900882DCB99F000DD7880 /* NSTextTab.swift */,
 				E9A940582DC4ECA6004501E6 /* Color.swift */,
 				E9A940592DC4ECA6004501E6 /* String.swift */,
 			);
@@ -285,6 +288,7 @@
 				E9A9407C2DC4ECA6004501E6 /* MarkdownParser+BlockRenderer.swift in Sources */,
 				E9A9407D2DC4ECA6004501E6 /* MarkdownParser+Font.swift in Sources */,
 				E9A9407E2DC4ECA6004501E6 /* MarkdownParser+ImageAttachment.swift in Sources */,
+				E94900892DCB99F600DD7880 /* NSTextTab.swift in Sources */,
 				E9A9407F2DC4ECA6004501E6 /* MarkdownParser+PresentationIntent.swift in Sources */,
 				E9A940802DC4ECA6004501E6 /* MarkdownParser+Statics.swift in Sources */,
 				E9A940812DC4ECA6004501E6 /* MarkdownScrollView.swift in Sources */,
