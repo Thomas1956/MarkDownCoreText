@@ -30,7 +30,10 @@ public class MarkdownParser {
             fallback.foregroundColor = .systemRed
             fallback.font = .systemFont(ofSize: 20, weight: .bold)
               
-            let blockContent = BlockContent(attrText: fallback)
+            let blockContent = BlockContent(attrText: NSAttributedString(fallback),
+                                            block: PresentationIntent(.paragraph, identity: 1),
+                                            range: fallback.startIndex..<fallback.endIndex)
+
             return [ParagraphRenderer(blockContent: blockContent)]
         }
         
@@ -60,19 +63,22 @@ public class MarkdownParser {
         //------------------------------------------------------------------------------------
         // MARK: - \n durch Line Separator ersetzen und Tabulatoren entfernen (außer Code Block)
         
-        for block in attr.runs.reversed() {
-            /// Den gesamten AttributedString in NSMutableAttributedString umwandeln und Range des Blockes konvertieren
-            let nsAttrString = NSMutableAttributedString(attr)
-            let nsRange = NSRange(block.range, in: attr)
-            
-            /// In allen Blöcken außer dem Code Block die TABs löschen und  \n duch .lineSeparator ersetzen.
-            if block.presentationIntent?.hasCodeBlock == false {
-                nsAttrString.mutableString.replaceOccurrences(of: "\n", with: .lineSeparator, range: nsRange)
-                nsAttrString.mutableString.replaceOccurrences(of: "\t", with: "", range: nsRange)
-            }
-            attr = AttributedString(nsAttrString)
-        }
+        /// Einmaliges Aufsetzen eines mutable Strings
+        let mutable = NSMutableAttributedString(attr)
 
+        /// Nur die relevanten Runs (in umgekehrter Reihenfolge) durchgehen
+        for block in attr.runs.reversed() {
+            /// Nur Non-Code-Blocks bearbeiten
+            if block.presentationIntent?.hasCodeBlock == true { continue }
+         
+            let nsRange = NSRange(block.range, in: attr)
+            /// In allen Blöcken außer dem Code Block die TABs löschen und  \n duch .lineSeparator ersetzen.
+            mutable.mutableString.replaceOccurrences(of: "\n", with: .lineSeparator, range: nsRange)
+            mutable.mutableString.replaceOccurrences(of: "\t", with: "", range: nsRange)
+        }
+        /// Am Ende wieder in AttributedString zurückwandeln
+        attr = AttributedString(mutable)
+        
         //------------------------------------------------------------------------------------
         // MARK: - Inline-Presentation bearbeiten
 
