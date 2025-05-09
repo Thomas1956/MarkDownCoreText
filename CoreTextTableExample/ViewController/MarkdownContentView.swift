@@ -48,24 +48,24 @@ class MarkdownContentView: UIView {
     ///
     @discardableResult
     func layout(width: CGFloat) -> CGFloat {
-
-        /// D E B U G
-        let start = DispatchTime.now()
-
-        var y: CGFloat = 0
-        for renderer in renderers {
-            y += renderer.measure(y: y, width: width)
-        }
+        /// Anzahl der Renderer ermitteln und das Array für die Höhen anlegen
+        let count = renderers.count
+        var heights = [CGFloat](repeating: 0, count: count)
         
-        /// D E B U G
-        let end = DispatchTime.now()
-        let nano = end.uptimeNanoseconds - start.uptimeNanoseconds
-        let seconds = Double(nano) / 1_000_000_000
-        print("layout dauerte \(seconds) Sekunden")
+        /// Parallele Höhen-Berechnung mit dem Aufruf von y = 0 .
+        DispatchQueue.concurrentPerform(iterations: count) { i in
+            heights[i] = renderers[i].measure(y: 0, width: width)
+        }
 
+        /// Serielles Setzen der Y-Position des Frames ohne Neuberechnung
+        var y: CGFloat = 0
+        for i in 0..<count {
+            renderers[i].frame.origin.y = y
+            y += heights[i]
+        }
         return y
     }
-
+        
     ///---------------------------------------------------------------------------------------
     /// Zeichnen des Inhaltes
     ///
