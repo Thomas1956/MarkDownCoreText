@@ -64,18 +64,6 @@ struct BlockContent {
     ///-----------------------------------------------------------------------------------
     /// Initialisierung
     ///
-    init(attrText: AttributedString) {
-        self.init(attrText: NSAttributedString(attrText),
-                  block: PresentationIntent(.paragraph, identity: 1),
-                  range: attrText.startIndex..<attrText.endIndex)
-    }
-    
-    init(attrText: NSAttributedString,
-         runsBlock: AttributedString.Runs.Element,
-         range: Range<AttributedString.Index>)
-    {
-        self.init(attrText: attrText, block: runsBlock.presentationIntent, range: range)
-    }
     
     init(attrText: NSAttributedString,
          block: AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value?,
@@ -147,18 +135,6 @@ struct BlockContent {
     ///---------------------------------------------------------------------------------------
     /// Alle Block Content eines AttributedString ermittlen und aufbereiten (Indent der Listen)
     ///
-    static func allBlockContents_1(attrText: AttributedString, textSize: CGFloat) -> [BlockContent] {
-        
-        /// Blöcke ermitteln
-        var allBlocks = attrText.runs.compactMap( { block in
-            let range = block.range
-            let text = NSAttributedString( AttributedString(attrText[range]))
-            return BlockContent(attrText: text, runsBlock: block, range: range)
-        } )
-        prepareBlocks(allBlocks: &allBlocks, attrText: attrText, textSize: textSize)
-        return allBlocks
-    }
-    
     static func allBlockContents(attrText: AttributedString, textSize: CGFloat) -> [BlockContent] {
         
         var allBlocks : [BlockContent] = []
@@ -525,7 +501,7 @@ struct BlockContent {
             attrText.addAttributes([.languageIdentifier: "de-DE"])
             
             /// DEBUG
-            print(AttributedString(attrText).debugStringLong)
+//            print(AttributedString(attrText).debugStringLong)
             assert(ps.tabStops.map(\.ctTab) == tabulators.map(\.ctTab) )
             
             allBlocks[index].attrText = attrText
