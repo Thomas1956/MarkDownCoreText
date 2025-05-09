@@ -18,9 +18,10 @@ class MarkdownContentView: UIView {
     func apply(_ renderers: [BlockRenderer]) {
         self.renderers = renderers
         invalidateIntrinsicContentSize()
-        setNeedsDisplay()
+        setNeedsLayout()
     }
 
+    ///---------------------------------------------------------------------------------------
     /// Berechnet Breite und Höhe, ohne direkt das Frame zu setzen.
     override func sizeThatFits(_ size: CGSize) -> CGSize {
         let width = size.width
@@ -41,21 +42,22 @@ class MarkdownContentView: UIView {
         
         self.setNeedsDisplay()
     }
-
  
     ///---------------------------------------------------------------------------------------
     /// Frames zuweisen & Gesamthöhe liefern
     ///
     @discardableResult
     func layout(width: CGFloat) -> CGFloat {
+
+        /// D E B U G
         let start = DispatchTime.now()
 
         var y: CGFloat = 0
         for renderer in renderers {
-            let h = renderer.measure(y: y, width: width)
-            y += h
+            y += renderer.measure(y: y, width: width)
         }
         
+        /// D E B U G
         let end = DispatchTime.now()
         let nano = end.uptimeNanoseconds - start.uptimeNanoseconds
         let seconds = Double(nano) / 1_000_000_000
@@ -69,51 +71,51 @@ class MarkdownContentView: UIView {
     ///
     override func draw(_ rect: CGRect) {
         guard let ctx = UIGraphicsGetCurrentContext() else { return }
-       
+
+        /// D E B U G
         let start = DispatchTime.now()
 
-        self.backgroundColor = .white
-        
+        ///-----------------------------------------------------------------------------------
+        /// Ermitteln des sichtbaren Rechtecks
+        ///
         var visibleRect = rect
         if let scrollView = superview as? MarkdownScrollView {
-            visibleRect.origin = scrollView.contentOffset;
-            visibleRect.size = scrollView.frame.size;
-         }
-        
-        // Annahme: renderers ist nach frame.origin.y aufsteigend sortiert
+            visibleRect.origin = scrollView.contentOffset
+            visibleRect.size   = scrollView.frame.size
+        }
         let minY = visibleRect.minY
         let maxY = visibleRect.maxY
 
-        // 1) Binary Search: erstes Element, dessen maxY > minY
+        ///-----------------------------------------------------------------------------------
+        /// StartIndex mit Binärer Suche ist möglich, weil Renderer sortiert sind.
+        ///
         var lo = 0, hi = renderers.count
         while lo < hi {
             let mid = (lo + hi) / 2
-            if renderers[mid].frame.maxY < minY {
-                lo = mid + 1
-            } else {
-                hi = mid
-            }
+            if renderers[mid].frame.maxY < minY  { lo = mid + 1 }
+            else                                 { hi = mid     }
         }
         let startIndex = lo
 
-        // 2) Durchlaufen bis zum ersten, dessen minY > maxY
+        ///-----------------------------------------------------------------------------------
+        /// Zeichnen bis zum ersten Renderer, dessen oberer Rand außerhalb des sichtbaren Bereiches liegt.
+        ///
         for i in startIndex..<renderers.count {
             let renderer = renderers[i]
-            if renderer.frame.minY > maxY { break }
+            let frame = renderer.frame
+            
+            if frame.minY > maxY { break }  /// Abbruch, wenn der Renderer außerhalb liegt
 
-            let f = renderer.frame
             ctx.saveGState()
-            // 1) Ursprung an die Block‑Ecke
-            ctx.translateBy(x: f.minX, y: f.minY)
-            // 2) Clipping auf Block‑Rect
-            ctx.clip(to: CGRect(origin: .zero, size: f.size))
-            // 3) lokal flippen → Core‑Text will (0,0) unten links
-            ctx.translateBy(x: 0, y: f.height)
+            ctx.translateBy(x: frame.minX, y: frame.minY)         /// Ursprung an die Block‑Ecke
+            ctx.clip(to: CGRect(origin: .zero, size: frame.size)) /// Clipping auf Block‑Rect
+            ctx.translateBy(x: 0, y: frame.height)                /// lokal flippen → Core‑Text will (0,0) unten links
             ctx.scaleBy(x: 1, y: -1)
-            renderer.draw(in: ctx)
+            renderer.draw(in: ctx)                                /// Zeichnen
             ctx.restoreGState()
         }
         
+        /// D E B U G
         let end = DispatchTime.now()
         let nano = end.uptimeNanoseconds - start.uptimeNanoseconds
         let seconds = Double(nano) / 1_000_000_000
