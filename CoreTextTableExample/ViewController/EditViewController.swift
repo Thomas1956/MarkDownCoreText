@@ -9,28 +9,33 @@ import UIKit
 import UniformTypeIdentifiers
 import UsefulExtensions
 
+
 extension UTType {
     /// Eigener Markdown-Typ (fallback auf plainText, wenn’s schiefgeht)
-    static var markdown: UTType {
-        UTType(filenameExtension: "md") ?? .plainText
-    }
+    static var markdown: UTType { UTType(filenameExtension: "md") ?? .plainText }
 }
+
+
+//--------------------------------------------------------------------------------------------
+// MARK: EditViewController
 
 class EditViewController: UIViewController {
 
     @IBOutlet weak var textView: UITextView!
     private let defaultsKey = "EditViewController.savedText"
     
-    ///---------------------------------------------------------------------------------------
+    var start : DispatchTime?
+
     /// Zugehöriger Detail View Contoller
-    public lazy var detailViewController: CoreTextViewController? = {
-        return splitViewController?.viewController(for: .secondary) as? CoreTextViewController
+    public lazy var detailViewController: MarkdownViewController? = {
+        return splitViewController?.viewController(for: .secondary) as? MarkdownViewController
     }()
 
-     
+    //----------------------------------------------------------------------------------------
+    // MARK: - Initialisierung
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-//        self.view.backgroundColor = .clear
         textView.backgroundColor = .systemGray6
         
         self.extendedLayoutIncludesOpaqueBars = true
@@ -44,66 +49,107 @@ class EditViewController: UIViewController {
         textView.textContainerInset.right = 8
         textView.delegate = self
         
-        let addButton    = ImageBarButtonItem(systemName: "plus",  action: didPressImportButton(_:))
+        let importButton = ImageBarButtonItem(systemName: "square.and.arrow.down", bottomOffset: 3, action: didPressImportButton(_:))
+        let exportButton = ImageBarButtonItem(systemName: "square.and.arrow.up", bottomOffset: 3, action: didPressExportButton(_:))
         let deleteButton = ImageBarButtonItem(systemName: "trash", action: didPressDeleteButton(_:))
         
-        navigationItem.rightBarButtonItems = [deleteButton, addButton]
+        navigationItem.rightBarButtonItems = [deleteButton, exportButton, importButton]
         
-        // 2) Gespeicherten Text laden
+        /// Gespeicherten Text laden
         loadSavedText()
         
-        // 3) Auf Hintergrund / Terminate achten und speichern
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(saveTextToDefaults),
-            name: UIApplication.willResignActiveNotification,
-            object: nil
-        )
+        /// Auf Hintergrund / Terminate achten und speichern
+        NotificationCenter.default.addObserver(self, selector: #selector(saveTextToDefaults),
+                                               name: UIApplication.willResignActiveNotification,
+                                               object: nil )
     }
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
 
     
+    //----------------------------------------------------------------------------------------
+    // MARK: - Bedienfunktionen
+    
+    /// Import Markdown Datei
     @objc func didPressImportButton(_ sender: Any) {
-        // Erlaubte Dateitypen: Plain-Text und Markdown
-        let allowedTypes: [UTType] = [.plainText, .markdown]
+        let allowedTypes: [UTType] = [.markdown]
         let picker = UIDocumentPickerViewController(forOpeningContentTypes: allowedTypes, asCopy: true)
         picker.delegate = self
         picker.allowsMultipleSelection = false
         present(picker, animated: true)
     }
     
+    /// Export Markdown Datei
+    @objc func didPressExportButton(_ sender: Any) {
+        /// Text aus dem UITextView holen
+        let text = textView.text ?? ""
+        
+        /// Temp-URL für die Export-Datei anlegen
+        let fileName = "TempMarkdown.md"
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        
+        do {
+            /// Text in die Datei schreiben
+            try text.write(to: tempURL, atomically: true, encoding: .utf8)
+            
+            /// Document Picker zum Exportieren öffnen
+            let picker = UIDocumentPickerViewController(
+                forExporting: [tempURL],
+                asCopy: true
+            )
+            present(picker, animated: true)
+            
+        } catch {
+            /// Im Fehlerfall einen Alert anzeigen
+            let alert = UIAlertController(
+                title: "Export fehlgeschlagen",
+                message: error.localizedDescription,
+                preferredStyle: .alert
+            )
+            alert.addAction(.init(title: "OK", style: .default))
+            present(alert, animated: true)
+        }
+    }
+    
+    /// Löschen des Text View
     @objc func didPressDeleteButton(_ sender: Any) {
         textView.text.removeAll()
+        detailViewController?.markdown(text: textView.text)
     }
-
 }
 
 
+//--------------------------------------------------------------------------------------------
+// MARK: Extension EditViewController
+
 private extension EditViewController {
     
+    /// Aktuellen MD-Text in den User-Defaults speichern
     func loadSavedText() {
         if let saved = UserDefaults.standard.string(forKey: defaultsKey) {
             textView.text = saved
             detailViewController?.markdown(text: textView.text)
         }
     }
-    
+    /// Aktuellen Text aus den User-Defaults lesen
     @objc func saveTextToDefaults() {
         UserDefaults.standard.set(textView.text, forKey: defaultsKey)
     }
 }
 
 
-// MARK: – UIDocumentPickerDelegate
+//--------------------------------------------------------------------------------------------
+// MARK: UIDocumentPickerDelegate
+
 extension EditViewController: UIDocumentPickerDelegate {
     
+    /// Notwendig für das Einlesen einer MD-Datei
     func documentPicker(_ controller: UIDocumentPickerViewController,
                         didPickDocumentsAt urls: [URL]) {
         guard let url = urls.first else { return }
         
-        // Falls Sandbox-Scoped: Zugriff anfordern
+        /// Falls Sandbox-Scoped: Zugriff anfordern
         let didStart = url.startAccessingSecurityScopedResource()
         defer {
             if didStart {
@@ -113,7 +159,7 @@ extension EditViewController: UIDocumentPickerDelegate {
         
         do {
             let data = try Data(contentsOf: url)
-            // Versuche UTF-8, fallback auf String(decoding:)
+            /// Versuche UTF-8, fallback auf String(decoding:)
             if let str = String(data: data, encoding: .utf8) {
                 textView.text = str
             } else {
@@ -122,7 +168,7 @@ extension EditViewController: UIDocumentPickerDelegate {
             detailViewController?.markdown(text: textView.text)
             
         } catch {
-            // Fehler anzeigen
+            /// Fehler anzeigen
             let alert = UIAlertController(
                 title: "Import-Fehler",
                 message: "Datei konnte nicht geladen werden:\n\(error.localizedDescription)",
@@ -138,16 +184,16 @@ extension EditViewController: UIDocumentPickerDelegate {
     }
 }
 
+
+//--------------------------------------------------------------------------------------------
+// MARK: UITextViewDelegate
+
 extension EditViewController: UITextViewDelegate {
     
-    ///---------------------------------------------------------------------------------------
     /// Änderungen im Text zur Anzeige im Core Text
-    ///
     func textViewDidChange(_ textView: UITextView) {
         
         guard let text = textView.text else { return }
         detailViewController?.markdown(text: text)
     }
-    
-
 }
