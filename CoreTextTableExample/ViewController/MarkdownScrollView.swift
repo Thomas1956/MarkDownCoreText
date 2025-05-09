@@ -11,10 +11,8 @@ import CoreText
 import PDFKit
 
 
-// MARK: - ---------------------------------------------------------
-// MARK: MarkdownScrollView (Öffentliche API)
-// --------------------------------------------------------------
-//
+//--------------------------------------------------------------------------------------------
+// MARK: MarkdownScrollView 
 
 class MarkdownScrollView: UIScrollView {
  
@@ -32,50 +30,54 @@ class MarkdownScrollView: UIScrollView {
         showsHorizontalScrollIndicator = false
     }
     
+    ///---------------------------------------------------------------------------------------
+    /// Asynchrones Rendern des Markdown Textes
+    ///
     private var renderTask: Task<Void, Never>?
-    private let debounceNanoseconds = 100 * 1_000_000  // 100 ms
+    private let debounceNanoseconds = 50 * 1_000_000  // 50 ms
 
     func markdown(string: String, size: CGFloat, weight: UIFont.Weight, textColor: UIColor) {
-        // 1) Alte Aufgabe abbrechen
+        /// Alte Aufgabe abbrechen
         renderTask?.cancel()
         
         renderTask = Task.detached(priority: .userInitiated) { [weak self] in
-            // Zieh dir sofort ein starkes Alias und beende, falls nil:
+            /// Zieh dir sofort ein starkes Alias und beende, falls nil:
             guard let strongSelf = self else { return }
 
-            // 1) Debounce
+            /// Debounce, um schnelle Folgen des Taskes zu verhindern
             try? await Task.sleep(nanoseconds: UInt64(strongSelf.debounceNanoseconds))
             if Task.isCancelled { return }
 
-            // 2) Heavy-Lifting
-            let renderers = MarkdownParser.markdown(
-                string: string,
-                size: size,
-                weight: weight,
-                textColor: textColor
-            )
+            /// Bearbeiten des Rendern des Makdown Textes
+            let renderers = MarkdownParser.markdown(string: string, size: size,
+                                                    weight: weight, textColor: textColor)
             if Task.isCancelled { return }
 
-            // 3) UI-Update auf MainActor, Capture nur strongSelf
+            /// UI-Update über den MainActor
             await MainActor.run { [strongSelf] in
                 guard !Task.isCancelled,
                       let contentView = strongSelf.subviews.first as? MarkdownContentView
                 else { return }
                 
+                /// Renderer an den Content View übergeben
                 contentView.apply(renderers)
+                /// Aktualisieren
                 strongSelf.setNeedsLayout()
                 strongSelf.layoutIfNeeded()
             }
         }
     }
     
+    ///---------------------------------------------------------------------------------------
+    /// Aktualisieren der SubViews (contentSize setzen!)
+    ///
     override func layoutSubviews() {
         super.layoutSubviews()
         guard let contentView = subviews.first as? MarkdownContentView else { return }
-        let width       = bounds.width - 20
-        let totalHeight = contentView.layout(width: width)
-        contentView.frame       = CGRect(x: 10, y: 0, width: width, height: totalHeight)
-        contentSize             = CGSize(width: bounds.width, height: totalHeight)
+        let width             = bounds.width - 20
+        let totalHeight       = contentView.layout(width: width)
+        contentView.frame     = CGRect(x: 10, y: 0, width: width, height: totalHeight)
+        contentSize           = CGSize(width: bounds.width, height: totalHeight)
     }
  }
 
