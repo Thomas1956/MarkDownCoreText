@@ -344,7 +344,7 @@ extension String {
     /// Fügt Soft‑Hyphens (`U+00AD`) nach den deutschen Trennregeln ein,
     /// lässt jedoch alle Markdown‑Attribute in runden Klammern
     /// (z. B. `(color:'blue')`) unangetastet.
-    func stringWithHyphens(lang: String = "de-DE") -> String {
+    func stringWithHyphens2(lang: String = "de-DE") -> String {
     
         // -------- 0) Locale prüfen --------
         let cfLoc = CFLocaleCreate(nil, CFLocaleIdentifier(rawValue: lang as CFString))
@@ -392,5 +392,110 @@ extension String {
             result.insert(contentsOf: shy, at: strIdx)
         }
         return result
+    }
+}
+
+
+extension String {
+    /// Einmalig kompilierter Regex für Markdown-Attribute
+    private static let markdownAttrRegex: NSRegularExpression = {
+        try! NSRegularExpression(
+          pattern: #"(\([^\)]*:[^\)]*\))"#,
+          options: []
+        )
+    }()
+
+    /// Cache für CFLocale-Objekte
+    private static var cfLocaleCache = [String: CFLocale]()
+
+    /// Fügt Soft-Hyphens gemäß deutscher Trennregeln ein, ignoriert Markdown-Attribute.
+    func stringWithHyphens(lang: String = "de-DE") -> String {
+        // ---- 0) Locale holen/anfertigen ----
+        let cfLoc: CFLocale
+        if let cached = Self.cfLocaleCache[lang] {
+            cfLoc = cached
+        } else {
+            let newLoc = CFLocaleCreate(
+              nil,
+              CFLocaleIdentifier(rawValue: lang as CFString)
+            )
+            Self.cfLocaleCache[lang] = newLoc
+            cfLoc = newLoc!
+        }
+        guard CFStringIsHyphenationAvailableForLocale(cfLoc) else {
+            return self
+        }
+
+        let shy = "\u{00AD}"
+        let ns   = self as NSString
+        let fullCFRange = CFRange(location: 0, length: ns.length)
+
+        // ---- 1) Markdown-Attribute finden ----
+        let matches = Self.markdownAttrRegex.matches(
+          in: self,
+          range: NSRange(location: 0, length: ns.length)
+        )
+        let attrRanges = matches.map { $0.range }
+        // Wir wandeln in ein swift IndexSet um für O(log n)-contains:
+        var indexSet = IndexSet()
+        for r in attrRanges {
+            indexSet.insert(integersIn: r.location ..< (r.location + r.length))
+        }
+
+        // ---- 2) Hyphen-Positionen sammeln ----
+        var hyphenPositions = Set<Int>()
+        ns.enumerateSubstrings(
+          in: NSRange(location: 0, length: ns.length),
+          options: [.byWords, .substringNotRequired]
+        ) { _, wordRange, _, _ in
+            var probe = wordRange.location + wordRange.length
+            while true {
+                let pos = CFStringGetHyphenationLocationBeforeIndex(
+                  ns, probe, fullCFRange, 0, cfLoc, nil
+                )
+                guard pos != kCFNotFound && pos > wordRange.location else {
+                    break
+                }
+                if !indexSet.contains(pos) {
+                    hyphenPositions.insert(pos)
+                }
+                probe = pos - 1
+            }
+        }
+
+        // ---- 3) Neuen String in O(n) aufbauen ----
+        let sortedPositions = hyphenPositions.sorted()
+        // Reserve: Original-Länge + Anzahl Soft-Hyphens
+        var result = String()
+        result.reserveCapacity(self.count + sortedPositions.count)
+
+        var lastUtf16Offset = 0
+        for pos in sortedPositions {
+            // Grenzen prüfen
+            guard pos > lastUtf16Offset, pos <= ns.length else { continue }
+            // Vom letzten Offset bis zur aktuellen Position kopieren
+            let startIdx = index(atUtf16Offset: lastUtf16Offset)
+            let endIdx   = index(atUtf16Offset: pos)
+            result.append(contentsOf: self[startIdx..<endIdx])
+            // Soft-Hyphen anhängen
+            result.append(shy)
+            lastUtf16Offset = pos
+        }
+        // Rest anhängen
+        if lastUtf16Offset < ns.length {
+            let startIdx = index(atUtf16Offset: lastUtf16Offset)
+            result.append(contentsOf: self[startIdx...])
+        }
+
+        return result
+    }
+
+    /// Hilfs-Methode: konvertiert einen UTF-16-Offset in einen String.Index
+    private func index(atUtf16Offset offset: Int) -> String.Index {
+        let utf16View = self.utf16
+        let idx = utf16View.index(utf16View.startIndex,
+                                  offsetBy: offset,
+                                  limitedBy: utf16View.endIndex) ?? utf16View.endIndex
+        return String.Index(idx, within: self)!
     }
 }
