@@ -97,6 +97,12 @@ extension BlockRenderer {
     /// Größe des Inhaltes berechnen und den Frame setzen
     ///
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
+        /// Wenn keine Änderung erfolgt ist, dann die alte Höhe zurückgeben und den Y-Wert setzen
+        if width == self.frame.width {
+            self.frame.origin.y = y
+            return self.frame.height
+        }
+        
         /// Eingestellte Abstände des Absatzes
         let (before, after) = blockContent.attrText.paragraphSpacings
         
