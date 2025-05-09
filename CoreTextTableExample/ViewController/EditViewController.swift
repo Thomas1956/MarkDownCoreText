@@ -22,8 +22,9 @@ extension UTType {
 class EditViewController: UIViewController {
 
     @IBOutlet weak var textView: UITextView!
-    private let defaultsKey = "EditViewController.savedText"
-    
+    private let keySavedText   = "EditViewController.savedText"
+    private let keyColumnWidth = "EditViewController.columnWidth"
+
     var start : DispatchTime?
 
     /// Zugehöriger Detail View Contoller
@@ -127,14 +128,19 @@ private extension EditViewController {
     
     /// Aktuellen MD-Text in den User-Defaults speichern
     func loadSavedText() {
-        if let saved = UserDefaults.standard.string(forKey: defaultsKey) {
-            textView.text = saved
+        if let savedText = UserDefaults.standard.string(forKey: keySavedText) {
+            textView.text = savedText
             detailViewController?.markdown(text: textView.text)
         }
+        if let columnWidth = UserDefaults.standard.object(forKey: keyColumnWidth) as? CGFloat {
+            splitViewController?.preferredPrimaryColumnWidth = columnWidth
+        }
     }
+    
     /// Aktuellen Text aus den User-Defaults lesen
     @objc func saveTextToDefaults() {
-        UserDefaults.standard.set(textView.text, forKey: defaultsKey)
+        UserDefaults.standard.set(textView.text, forKey: keySavedText)
+        UserDefaults.standard.set(splitViewController?.primaryColumnWidth, forKey: keyColumnWidth)
     }
 }
 
