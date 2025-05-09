@@ -89,9 +89,9 @@ public extension AttributedString {
                 let text = AttributedString(self[block.range]).debugStringLong
                 print("<\(text)>")
                 
-            case .presentationIntent:
-                let text = NSAttributedString( AttributedString(self[block.range]))
-                let content = BlockContent(attrText: text, runsBlock: block, range: block.range)
+            case .presentationIntent: ()
+//                let text = NSAttributedString( AttributedString(self[block.range]))
+//                let content = BlockContent(attrText: text, runsBlock: block, range: block.range)
 //                if let cblock = content.block, let paragraphStyle
 //                {
 //                    let listString = (!cblock.hasList ? "" :
