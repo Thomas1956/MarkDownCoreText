@@ -31,64 +31,52 @@ class MarkdownScrollView: UIScrollView {
         showsVerticalScrollIndicator = true
         showsHorizontalScrollIndicator = false
     }
-
-    ///---------------------------------------------------------------------------------------
-    /// Queue für das Berechnen / Rendern des Attributed-Strings
-    private let renderQueue = DispatchQueue(
-        label: "app.markdown.render",
-        qos: .userInitiated
-    )
-    /// Aktueller, noch nicht abgeschlossener Render-Task
-    private var pendingRender: DispatchWorkItem?
-
-    ///---------------------------------------------------------------------------------------
-    /// Main entry: parse Markdown string, build renderers, trigger layout
-    ///
-    func markdown(string: String, size: CGFloat, weight: UIFont.Weight, textColor: UIColor) {
-        print("markdown \(string.count)")
     
-        guard let contentView = subviews.first as? MarkdownContentView else { return }
+    private var renderTask: Task<Void, Never>?
+    private let debounceNanoseconds = 100 * 1_000_000  // 100 ms
+
+    func markdown(string: String, size: CGFloat, weight: UIFont.Weight, textColor: UIColor) {
+        // 1) Alte Aufgabe abbrechen
+        renderTask?.cancel()
         
-        /// Abbrechen aller noch laufenden Render-Jobs
-        pendingRender?.cancel()
-        let deadline = DispatchTime.now() + .milliseconds(100)
+        renderTask = Task.detached(priority: .userInitiated) { [weak self] in
+            // Zieh dir sofort ein starkes Alias und beende, falls nil:
+            guard let strongSelf = self else { return }
 
-        /// Neuen Work-Item erzeugen
-        var workItem: DispatchWorkItem!
-        workItem = DispatchWorkItem(qos: .userInitiated) { [weak self] in
-            guard let self = self, !workItem.isCancelled else { return }
+            // 1) Debounce
+            try? await Task.sleep(nanoseconds: UInt64(strongSelf.debounceNanoseconds))
+            if Task.isCancelled { return }
 
-            /// Generieren der Block Renderer
-            let renderers = MarkdownParser.markdown(string: string, size: size, weight: weight, textColor: textColor)
+            // 2) Heavy-Lifting
+            let renderers = MarkdownParser.markdown(
+                string: string,
+                size: size,
+                weight: weight,
+                textColor: textColor
+            )
+            if Task.isCancelled { return }
 
-            /// Falls der Task nicht abgebrochen wurde, Updaten wir die UI
-            DispatchQueue.main.async {
-                guard !workItem.isCancelled else { return }
-                /// Block Renderer an den Content View übergeben
+            // 3) UI-Update auf MainActor, Capture nur strongSelf
+            await MainActor.run { [strongSelf] in
+                guard !Task.isCancelled,
+                      let contentView = strongSelf.subviews.first as? MarkdownContentView
+                else { return }
+                
                 contentView.apply(renderers)
-                self.layoutSubviews()
+                strongSelf.setNeedsLayout()
+                strongSelf.layoutIfNeeded()
             }
         }
-        pendingRender = workItem
-
-        /// Auf der Hintergrund-Queue starten
-        renderQueue.asyncAfter(deadline: deadline, execute: workItem)
-     }
-    
-    // MARK: Layout
-    override func layoutSubviews() {
-        print("layoutSubViews \(bounds.width)")
-
-        guard let contentView = subviews.first as? MarkdownContentView else { return }
-        super.layoutSubviews()
-        
-        let width = bounds.width
-        let totalHeight = contentView.layout(width: width - 20)
-        contentView.frame = CGRect(x: 5, y: 0, width: width - 20, height: totalHeight)
-        self.contentSize = CGSize(width: width, height: totalHeight)
-        
-        contentView.setNeedsDisplay()
     }
-}
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard let contentView = subviews.first as? MarkdownContentView else { return }
+        let width       = bounds.width - 20
+        let totalHeight = contentView.layout(width: width)
+        contentView.frame       = CGRect(x: 10, y: 0, width: width, height: totalHeight)
+        contentSize             = CGSize(width: bounds.width, height: totalHeight)
+    }
+ }
 
 
