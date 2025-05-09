@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  MarkdownViewController.swift
 //  CoreTextTableExample
 //
 //  Created by Thomas on 24.04.25.
@@ -8,33 +8,45 @@
 import UIKit
 import UsefulExtensions
 
-class CoreTextViewController: UIViewController, UIDocumentPickerDelegate {
 
-    @IBOutlet weak var scrollView: MarkdownScrollView!
+//--------------------------------------------------------------------------------------------
+// MARK: MarkdownViewController
 
-    var textSize:CGFloat = 17
-    var textColor = UIColor.label
+class MarkdownViewController: UIViewController, UIDocumentPickerDelegate {
 
-    var textMarkdown: String = ""
+    // MARK: - Views
+    private let scrollView = MarkdownScrollView()
+    private let contentView = MarkdownContentView()
+
+    /// Parameter
+    var textSizeView : CGFloat = 17
+    var textSizePDF  : CGFloat = 12
+    var textColor    : UIColor = .label
+    var textMarkdown : String  = ""
     
     //----------------------------------------------------------------------------------------
     // MARK: - Initialisierung
     
     override func viewDidLoad() {
-        print("CoreTextViewController \(self)")
-        
         super.viewDidLoad()
-        self.view.backgroundColor = .systemGray6.highlight
+        
         self.extendedLayoutIncludesOpaqueBars = true
 //        self.navigationController?.navigationBar.prefersLargeTitles = true
 
-        if #available(iOS 16, *) {
-            navigationItem.style = .navigator
-        }
-        
+        /// Farbe setzen
+        self.view  .backgroundColor = .systemGray6.highlight
+        contentView.backgroundColor = .systemBackground
+
+        /// Setup der untergeordneten Views
+        setupScrollView()
+        setupContentView()
+       
+        /// Button einfügen
         let importButton = ImageBarButtonItem(systemName: "square.and.arrow.up", bottomOffset: 3, action: didPressExportButton(_:))
-        navigationItem.rightBarButtonItems = [importButton]
- 
+        self.navigationItem.rightBarButtonItems = [importButton]
+        self.navigationItem.style = .navigator
+
+        /// Initialen Text anzeigen
         self.markdown(text: self.textMarkdown)
     }
     
@@ -43,7 +55,35 @@ class CoreTextViewController: UIViewController, UIDocumentPickerDelegate {
     ///
     func markdown(text: String) {
         self.textMarkdown = text
-        scrollView?.markdown(string: text, size: textSize, weight: .regular, textColor: textColor )
+        scrollView.markdown(string: text, size: textSizeView, weight: .regular, textColor: textColor )
+    }
+    
+    //----------------------------------------------------------------------------------------
+    // MARK: - Setup
+    
+    private func setupScrollView() {
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+
+    private func setupContentView() {
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(contentView)
+        NSLayoutConstraint.activate([
+            // Festpinnen an Content-Layout-Guide
+            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            // Breite und horizontale Position über Frame-Layout-Guide
+            contentView.leadingAnchor.constraint(equalTo: scrollView.frameLayoutGuide.leadingAnchor, constant: 10),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.frameLayoutGuide.trailingAnchor, constant: -10),
+            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -20)
+        ])
     }
     
     ///---------------------------------------------------------------------------------------
@@ -53,7 +93,7 @@ class CoreTextViewController: UIViewController, UIDocumentPickerDelegate {
 
     @objc func didPressExportButton(_ sender: Any) {
 
-        let renderers = MarkdownParser.markdown(string: self.textMarkdown, size: 12, textColor: textColor )
+        let renderers = MarkdownParser.markdown(string: self.textMarkdown, size: textSizePDF, textColor: textColor )
         
         // 1) PDF erzeugen → tmpURL zurückgeben
         MarkdownParser.exportPDF(renderers: renderers) { [unowned self] in

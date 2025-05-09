@@ -30,7 +30,7 @@
 		E9A940812DC4ECA6004501E6 /* MarkdownScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406B2DC4ECA6004501E6 /* MarkdownScrollView.swift */; };
 		E9A940832DC4ECA6004501E6 /* MarkdownParser+NSAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406D2DC4ECA6004501E6 /* MarkdownParser+NSAttributedString.swift */; };
 		E9A940842DC4ECA6004501E6 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406E2DC4ECA6004501E6 /* SceneDelegate.swift */; };
-		E9A940852DC4ECA6004501E6 /* CoreTextViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406F2DC4ECA6004501E6 /* CoreTextViewController.swift */; };
+		E9A940852DC4ECA6004501E6 /* MarkdownViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406F2DC4ECA6004501E6 /* MarkdownViewController.swift */; };
 		E9A940882DC4EE4D004501E6 /* MarkdownParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */; };
 /* End PBXBuildFile section */
 
@@ -70,7 +70,7 @@
 		E9A9406B2DC4ECA6004501E6 /* MarkdownScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownScrollView.swift; sourceTree = "<group>"; };
 		E9A9406D2DC4ECA6004501E6 /* MarkdownParser+NSAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MarkdownParser+NSAttributedString.swift"; sourceTree = "<group>"; };
 		E9A9406E2DC4ECA6004501E6 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		E9A9406F2DC4ECA6004501E6 /* CoreTextViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreTextViewController.swift; sourceTree = "<group>"; };
+		E9A9406F2DC4ECA6004501E6 /* MarkdownViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownViewController.swift; sourceTree = "<group>"; };
 		E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownParser.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -124,7 +124,7 @@
 			children = (
 				E949008B2DCCB49B00DD7880 /* CommonSplitViewController.swift */,
 				E949008D2DCCBAAC00DD7880 /* EditViewController.swift */,
-				E9A9406F2DC4ECA6004501E6 /* CoreTextViewController.swift */,
+				E9A9406F2DC4ECA6004501E6 /* MarkdownViewController.swift */,
 				E9A9406B2DC4ECA6004501E6 /* MarkdownScrollView.swift */,
 				E9A940632DC4ECA6004501E6 /* MarkdownContentView.swift */,
 			);
@@ -307,7 +307,7 @@
 				E9A940842DC4ECA6004501E6 /* SceneDelegate.swift in Sources */,
 				E949006E2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift in Sources */,
 				E949008C2DCCB49B00DD7880 /* CommonSplitViewController.swift in Sources */,
-				E9A940852DC4ECA6004501E6 /* CoreTextViewController.swift in Sources */,
+				E9A940852DC4ECA6004501E6 /* MarkdownViewController.swift in Sources */,
 				E949008E2DCCBAAC00DD7880 /* EditViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
