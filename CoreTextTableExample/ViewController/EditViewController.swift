@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 import UniformTypeIdentifiers
 import UsefulExtensions
 
@@ -50,11 +51,12 @@ class EditViewController: UIViewController {
         textView.textContainerInset.right = 8
         textView.delegate = self
         
-        let importButton = ImageBarButtonItem(systemName: "square.and.arrow.down", bottomOffset: 3, action: didPressImportButton(_:))
-        let exportButton = ImageBarButtonItem(systemName: "square.and.arrow.up", bottomOffset: 3, action: didPressExportButton(_:))
-        let deleteButton = ImageBarButtonItem(systemName: "trash", action: didPressDeleteButton(_:))
-        
-        navigationItem.rightBarButtonItems = [deleteButton, exportButton, importButton]
+        let importButton  = ImageBarButtonItem(systemName: "square.and.arrow.down", bottomOffset: 3, action: didPressImportButton(_:))
+        let exportButton  = ImageBarButtonItem(systemName: "square.and.arrow.up", bottomOffset: 3, action: didPressExportButton(_:))
+        let deleteButton  = ImageBarButtonItem(systemName: "trash", action: didPressDeleteButton(_:))
+        let settingButton = ImageBarButtonItem(systemName: "gearshape", action: didPressSettingButton(_:))
+
+        navigationItem.rightBarButtonItems = [settingButton, deleteButton, exportButton, importButton]
         
         /// Gespeicherten Text laden
         loadSavedText()
@@ -117,6 +119,46 @@ class EditViewController: UIViewController {
     @objc func didPressDeleteButton(_ sender: Any) {
         textView.text.removeAll()
         detailViewController?.markdown(text: textView.text)
+    }
+    
+    ///---------------------------------------------------------------------------------------
+    /// Parameter bearbeiten
+    ///
+    @objc private func didPressSettingButton(_ sender: Any) {
+            
+        let childContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        childContext.parent = viewContext
+        
+        /// Bei den Settings gibt es nur einen Eintrag. Den ersten Eintrag ermitteln und dem View Controller übergeben
+        let settings = Settings.fetch(context: viewContext).first ?? Settings(context: childContext)
+
+        let viewController = SettingViewController(object: settings, title: "Parameter") { shouldSave in
+            /// Neue Entity wird gespeichert, wenn der Name nicht leer ist.
+            if shouldSave {
+                do {
+                    /// Permanente ID zuweisen lassen und zuerst im ChildContext speichern, danach im ViewContext
+                    try childContext.obtainPermanentIDs(for: [settings])
+                    try childContext.save()
+                    self.saveContext()
+   
+                    self.detailViewController?.markdown(text: self.textView.text)
+                }
+                catch {
+                    let nserror = error as NSError
+                    fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+                }
+            }
+            self.dismiss(animated: true)
+        }
+        
+        viewController.navigationItem.title = NSLocalizedString("Parameter zufügen",
+                                              comment: "Parameter zufügen als Überschrift")
+        
+        let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.modalTransitionStyle = .coverVertical
+        navigationController.modalPresentationStyle = .automatic
+
+        present(navigationController, animated: true)
     }
 }
 
