@@ -15,13 +15,10 @@ import UsefulExtensions
 class MarkdownViewController: UIViewController, UIDocumentPickerDelegate {
 
     // MARK: - Views
-    private let scrollView = MarkdownScrollView()
+    private let scrollView  = MarkdownScrollView()
     private let contentView = MarkdownContentView()
 
     /// Parameter
-    var textSizeView : CGFloat = 17
-    var textSizePDF  : CGFloat = 12
-    var textColor    : UIColor = .label
     var textMarkdown : String  = ""
     
     //----------------------------------------------------------------------------------------
@@ -54,8 +51,9 @@ class MarkdownViewController: UIViewController, UIDocumentPickerDelegate {
     /// Markdown-Text darstellen
     ///
     func markdown(text: String) {
+        typealias M = Markdown
         self.textMarkdown = text
-        scrollView.markdown(string: text, size: textSizeView, weight: .regular, textColor: textColor )
+        scrollView.markdown(string: text, size: M.textSize, weight: .regular, textColor: M.textColor )
     }
     
     //----------------------------------------------------------------------------------------
@@ -92,8 +90,10 @@ class MarkdownViewController: UIViewController, UIDocumentPickerDelegate {
     private var tmpPDF: URL?            // <– merken, um später zu löschen
 
     @objc func didPressExportButton(_ sender: Any) {
-
-        let renderers = MarkdownParser.markdown(string: self.textMarkdown, size: textSizePDF, textColor: textColor )
+        typealias MP = Markdown.PDF
+        
+        let renderers = MarkdownParser.markdown(string: self.textMarkdown, size: MP.textSize,
+                                                textColor: MP.textColor )
         
         // 1) PDF erzeugen → tmpURL zurückgeben
         MarkdownParser.exportPDF(renderers: renderers) { [unowned self] in

@@ -12,63 +12,80 @@ import UIKit
 
 public struct Markdown {
     
-    static let _1cm          : CGFloat = 1 / 2.54 * 72       /// 1cm in Zoll umrechnen und 72dpi Standard
-    static var useSoftBreaks : Bool = true                   /// Soft Breaks aktivieren / deaktivieren
+    /// Konstanten
+    static let _1cm                   : CGFloat = 1/2.54 * 72   /// 1cm in Zoll umrechnen und 72dpi Standard
+
+    /// Globale Parameter
+    static var textSize               : CGFloat = 17            /// Eingestellte Fontgröße für View
+    static var textColor              : UIColor = .label        /// Eingestellte Textfarbe
+
+    static var headIndent             : CGFloat = 0.0
+    static var tailIndent             : CGFloat = 0.0
+    static var useSoftBreaks          : Bool    = true          /// Soft Breaks aktivieren / deaktivieren
+
     
     /// Abstände und Einzüge in 'em' als Multiplikator zum Text Size
     static var lineHeightMultiple     : CGFloat = 1.1
     static var paragraphSpacing       : CGFloat = 0.5
-    static var paragraphSpacingBefore : CGFloat = 1.2        /// Abstand vor einem Header
+    static var paragraphSpacingBefore : CGFloat = 1.2           /// Abstand vor einem Header
     static var paddingHorz            : CGFloat = 0.5
     static var paddingBefore          : CGFloat = 0.3
     static var paddingAfter           : CGFloat = 0.3
 
+    /// Konstanten für den Edit View Controller
+    struct Edit {
+        static var textSize     : CGFloat = 17                  /// Eingestellte Fontgröße für View
+        static var textColor    : UIColor = .label              /// Eingestellte Textfarbe
+    }
+    
     /// Konstanten für die PDF-Ausgabe
-    struct PDF {                                             /// Seitengröße A4
+    struct PDF {                                                /// Seitengröße A4
         static var pageRect     = CGRect(x: 0, y: 0, width: 21 * _1cm, height: 29.7 * _1cm)
-        static var leftMargin   : CGFloat = 2 * _1cm         /// Seitenränder definieren
+        static var leftMargin   : CGFloat = 2 * _1cm            /// Seitenränder definieren
         static var topMargin    : CGFloat = 2 * _1cm
         static var rightMargin  : CGFloat = 2 * _1cm
         static var bottomMargin : CGFloat = 2 * _1cm
+        static var textSize     : CGFloat = 12                  /// Eingestellte Fontgröße für PDF
+        static var textColor    : UIColor = .label              /// Eingestellte Textfarbe
     }
     
     /// Konstanten für die Tabelle
     struct Table {
-        static var weightText  : UIFont.Weight = .regular    /// Stil des Textes in der Tabelle
-        static var weightHeader: UIFont.Weight = .bold       /// Stil der Überschrift in der Tabelle
-        static var weightBox   : UIFont.Weight = .ultraLight /// Stil der Balken in der Tabelle
-        static var colorBox    : UIColor?      = nil         /// Farbe der Balken der Tabelle
+        static var weightText   : UIFont.Weight = .regular      /// Stil des Textes in der Tabelle
+        static var weightHeader : UIFont.Weight = .bold         /// Stil der Überschrift in der Tabelle
+        static var weightBox    : UIFont.Weight = .ultraLight   /// Stil der Balken in der Tabelle
+        static var colorBox     : UIColor?      = nil           /// Farbe der Balken der Tabelle
     }
     
     /// Konstanten für die Liste (Anführungszeichen der Liste in der Hierarchie)
     struct List {
         static var bulletPoint      : [String] = [.listBullet_1, .listBullet_2, .listBullet_3]
-        static var leftIndent       : CGFloat = 10           /// Linker Rand der untersten Hierarchie
+        static var leftIndent       : CGFloat = 10              /// Linker Rand der untersten Hierarchie
     }
     
     /// Konstanten für den vertikalen Trennstrich (Ruler)
     struct Ruler {
-        static var rightIndent      : CGFloat = 5            /// rechter Rand der Trennlinie
-        static var height           : CGFloat = 20           /// Höhe des Hintergrundes der Trennlinie
-        static var lineHeight       : CGFloat = 4            /// Strichdicke der Trennlinie
-        static var colorHighLight   : Bool    = true         /// Die Farbe der Trennlinie wird etwas heller
-    }                                                        /// als die Textfarbe dargestellt
+        static var rightIndent      : CGFloat = 5               /// rechter Rand der Trennlinie
+        static var height           : CGFloat = 20              /// Höhe des Hintergrundes der Trennlinie
+        static var lineHeight       : CGFloat = 4               /// Strichdicke der Trennlinie
+        static var colorHighLight   : Bool    = true            /// Die Farbe der Trennlinie wird etwas heller
+    }                                                           /// als die Textfarbe dargestellt
     
     /// Konstanten für den Hintergrund des Block Quote
     struct BlockQuote {
-        static var contentIndent    : CGFloat = 30           /// Abstand des Inhaltes vom Rand des Block Quote
-        static var horizontalIndent : CGFloat = 0            /// Ränder Hintergrund links und rechts
-        static var verticalOffset   : CGFloat = 5            /// Verschiebung des  Hintergrunds nach unten
-        static var backgroundColor  : UIColor = .systemGray6 /// Farbe für den Hintergrund
-        
-        static var barIndent        : CGFloat = 5            /// Linker Rand des Balkens
-        static var barWidth         : CGFloat = 10           /// Breite des Balkens
-        static var barColor         : UIColor = .systemGray4 /// Farbe für den Balken
+        static var contentIndent    : CGFloat = 30              /// Abstand des Inhaltes vom Rand des Block Quote
+        static var horizontalIndent : CGFloat = 0               /// Ränder Hintergrund links und rechts
+        static var verticalOffset   : CGFloat = 5               /// Verschiebung des  Hintergrunds nach unten
+        static var backgroundColor  : UIColor = .systemGray6    /// Farbe für den Hintergrund
+            
+        static var barIndent        : CGFloat = 5               /// Linker Rand des Balkens
+        static var barWidth         : CGFloat = 10              /// Breite des Balkens
+        static var barColor         : UIColor = .systemGray4    /// Farbe für den Balken
     }
     
     /// Konstanten für den Code Block
     struct CodeBlock {
-        static var textsize         : CGFloat = 14           /// Größe des Textfonts im Code Block
+        static var textsize         : CGFloat = 14              /// Größe des Textfonts im Code Block
     }
 }
 
@@ -77,20 +94,20 @@ public struct Markdown {
 // MARK: - Definition für spezielle Zeichen
 
 public extension String {
-    static var tabulator:    String = "ⓣ"            /// Anzeige des Tabulators ⓣ   \u{2186}
-    static var lineBreak:    String = "⬇"             /// Anzeige von Line Break ↆ  \u{2b07}
-    static var objReplace:   String = "￼"             /// Objekt-Ersatz (Attachment) \u{fffc}
-    static var punctuation:  String = "⸻"          /// Supplemental Punctuation \u{2eb3}
+    static var tabulator:    String = "ⓣ"               /// Anzeige des Tabulators ⓣ   \u{2186}
+    static var lineBreak:    String = "⬇"               /// Anzeige von Line Break ↆ  \u{2b07}
+    static var objReplace:   String = "￼"               /// Objekt-Ersatz (Attachment) \u{fffc}
+    static var punctuation:  String = "⸻"            /// Supplemental Punctuation \u{2eb3}
 
-    static var listBullet_1: String = "•"             /// Bullet 1   \u{2022}   Standard Bullet
-    static var listBullet_2: String = "⚬"             /// Bullet 2   \u{26ac}   Medium Small White Circle
-    static var listBullet_3: String = "⁃"             /// Bullet 3   \u{2043}  Hyphen Bullett
+    static var listBullet_1: String = "•"               /// Bullet 1   \u{2022}   Standard Bullet
+    static var listBullet_2: String = "⚬"               /// Bullet 2   \u{26ac}   Medium Small White Circle
+    static var listBullet_3: String = "⁃"               /// Bullet 3   \u{2043}  Hyphen Bullett
 
-    static var listBullet_4: String = "◦"             /// Bullet 4   \u{25e6}   White Bullet (sehr klein)
-    static var listBullet_5: String = "◆"             /// Bullet 5   \u{25c6}   Black Diamond (groß)
-    static var listBullet_6: String = "◇"             /// Bullet 6   \u{25c7}   White Diamond (groß)
-    static var listBullet_7: String = "○"             /// Bullet 7   \u{25cb}   White Circle (groß)
-    static var listBullet_8: String = "●"             /// Bullet 8   \u{25cf}   Black Circle (groß)
+    static var listBullet_4: String = "◦"               /// Bullet 4   \u{25e6}   White Bullet (sehr klein)
+    static var listBullet_5: String = "◆"               /// Bullet 5   \u{25c6}   Black Diamond (groß)
+    static var listBullet_6: String = "◇"               /// Bullet 6   \u{25c7}   White Diamond (groß)
+    static var listBullet_7: String = "○"               /// Bullet 7   \u{25cb}   White Circle (groß)
+    static var listBullet_8: String = "●"               /// Bullet 8   \u{25cf}   Black Circle (groß)
     
     static var lineSeparator: String      = "\u{2028}"
     static var paragraphSeparator: String = "\u{2029}"

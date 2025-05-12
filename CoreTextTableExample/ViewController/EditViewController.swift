@@ -39,6 +39,8 @@ class EditViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         textView.backgroundColor = .systemGray6
+        textView.font            = .systemFont(ofSize: Markdown.Edit.textSize)
+        textView.textColor       = Markdown.Edit.textColor
         
         self.extendedLayoutIncludesOpaqueBars = true
 //        self.navigationController?.navigationBar.prefersLargeTitles = true
