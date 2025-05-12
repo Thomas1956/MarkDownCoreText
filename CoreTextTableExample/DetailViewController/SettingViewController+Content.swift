@@ -19,12 +19,13 @@ extension SettingViewController  {
     // MARK: - Definition der Sektionen
     
     enum SectionContent: Int, BasicSection, CaseIterable {
-        case setting, print
+        case setting, message, print
         
         var title : String {
             switch self {
-            case .setting: "Settings"
-            case .print: "Drucken oder Teilen"
+            case .setting: "Zeilenparameter"
+            case .message: "Meldung"
+            case .print:   "Drucken oder Teilen"
             }
         }
         
@@ -64,23 +65,22 @@ extension SettingViewController  {
         var key: String { return self.rawValue }
 
         /// Die Strings sollen den Namen der Properties entsprechen
-        case kommentar, infotext
+        case headIndent, tailIndent, lineHeightMultiple, infotext
         
         var title: AnyHashable? {
             switch self {
-            case .kommentar : "Kommentar"
-            case .infotext  : """
-                              Der Name des Lagerortes darf nicht leer sein. \
-                              Die Kombination aus **einem** oder **zwei** Buchstaben und einer Zahl sind \
-                              optimal (z.B. ^[G2](style: 'dark') für große Box Nummer 2). \
-                              Ein Lager kann nur gelöscht werden, wenn mit ihm noch keine Produkte verknüpft sind.
-                              """.markdown()
+            case .headIndent:         "Linker Einzug"
+            case .tailIndent:         "Rechter Einzug"
+            case .lineHeightMultiple: "Zeilenhöhe"
+            case .infotext:
+              """
+              Die Parameter können gedruckt oder geteilt werden.
+              """.markdown()
             }
         }
         
         var placeholder: String? {
             switch self {
-            case .kommentar : "Kommentar eingeben"
             default: nil
             }
         }
@@ -89,14 +89,26 @@ extension SettingViewController  {
 
         var parameter: ContentEditType? {
             switch self {
-            default: return .editClear
-            }
+            case .headIndent:           .einsNachkomma
+            case .tailIndent:           .einsNachkomma
+            case .lineHeightMultiple:   .einsNachkomma
+            default: nil
+          }
         }
         
         ///-----------------------------------------------------------------------------------
         /// Zugewiesene Konfiguration entsprechend des Datentyps
         ///
-        var contentViewType      : ContentViewType         { .text }
+        var contentViewType: ContentViewType
+        {
+            switch self {
+            case .headIndent:           .number
+            case .tailIndent:           .number
+            case .lineHeightMultiple:   .number
+            default: .text
+            }
+        }
+        
         var configurationWidth   : CGFloat?                {  nil  }
         var configurationHeight  : CGFloat?                {  nil  }
         var configurationMargins : NSDirectionalEdgeInsets { .zero }
@@ -107,41 +119,6 @@ extension SettingViewController  {
         var presentation: ContentPresentation? { nil }      /// Defaultmäßig wird TITLE verwendet
         var widthUsage  : WidthUsage?          { nil }      /// Defaultmäßig wirkt die Breite auf LABEL
 
-        
-        ///-----------------------------------------------------------------------------------
-        /// Drucken (vordefniert, falls es benötigt wird)
-        ///
-        var attributes : [NSAttributedString.Key: Any] {
-            String.attributes(fontsize: 10, textcolor: .black)
-        }
-        
-        /// Fontgröße des Inhaltes (Druck)
-        var fontsize: CGFloat? { 10 }
-        
-        /// Vertikaler Abstand nach dem Eintrag (Druck)
-        var verticalDistance: CGFloat {
-            switch self {
-            case .kommentar: 1.2
-            default:         0.8
-            }
-        }
-        
-        /// Titel für den Druck erzeugen
-        var printTitle : String {
-            self.title is String ? self.title as! String : "-"
-        }
-        
-        /// Datensatz für den Druck erzeugen
-        func printData(_ setting: Settings) -> String
-        {
-            switch self {
-                /// Standard-Attribute
-            default:
-                let content = setting.value(forKey: self.rawValue)
-                if let text = content as? String { return text }
-                return "-"
-            }
-        }
-    }
+      }
 }
 

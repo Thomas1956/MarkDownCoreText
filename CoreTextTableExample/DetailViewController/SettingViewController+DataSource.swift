@@ -20,37 +20,20 @@ extension SettingViewController  {
     ///
     func sectionSettings(_ setting: Settings, forEditing: Bool) {
         typealias Content = DetailContent
-        let rwo : ContentRWType = forEditing ? .rw : .ro
-        let rwf : ContentRWType = forEditing ? (isAddingEntity ? .rwf : .rw) : .ro
 
         ///-----------------------------------------------------------------------------------
         /// items anlegen
         var items = [BasicType]()
         
-        /// Kommentarfeld anlegen. Dem Kommentar ist KEIN Attribut aus Core Data zugeordnet.
-        items.append(.basic(Content.kommentar.data(nil, rwo)))
-
-        /*
-        items.append(.basic([Content.familyName.data(person, rwf),
-                                   Content.givenName .data(person, rwo)] ))
+        items.append(.basic([Content.headIndent        .data(setting),
+                             Content.tailIndent        .data(setting),
+                             Content.lineHeightMultiple.data(setting),
+                            ]))
         
-        items.append(.basic([Content.datum.data(person, rwo, presentation: .line)]))
-         */
+        items.append(.basic(.lineSpace(height: 8, color: .secondarySystemBackground)))
         
-        /// Zusammenstellen der Einträge für die Anzeige im Dialog (Editierbar / Readonly, Inhalt vorhanden / leer)
-        /*
-        
-        if forEditing || !(person.postalCode).isEmptyOrNil || !(person.city).isEmptyOrNil {
-            items.append(.basic([Content.postalCode.data(person, rwo),
-                                 Content.city      .data(person, rwo)]))
-        }
-        if forEditing || !(person.street).isEmptyOrNil {
-            items.append(.basic([Content.street.data(person, rwo)]))
-        }
-        if forEditing || !(person.address).isEmptyOrNil {
-            items.append(BasicType.basic([Content.address.data(person, .ro)]))
-        }
-         */
+        /// Item für die Anzeige variabler Meldungen
+        items.append(.source(key: "CODE1"))
         
         ///-----------------------------------------------------------------------------------
         /// Snapshot erzeugen und der DataSource zuweisen
@@ -63,16 +46,26 @@ extension SettingViewController  {
     ///---------------------------------------------------------------------------------------
     /// Inhalt der Section für das Drucken zusammenstellen
     ///
+    func sectionMessage() {
+
+        var sectionSnapshot = SectionSnapshot()
+        sectionSnapshot.append(SectionContent.message, items: [SectionContent.message.title.itemType])
+        dataSource.apply(sectionSnapshot, to: SectionContent.message.title, animatingDifferences: true)
+    }
+    
+    ///---------------------------------------------------------------------------------------
+    /// Inhalt der Section für das Drucken zusammenstellen
+    ///
     func sectionPrint() {
         typealias Content = DetailContent
 
         /// items anlegen
         var items = [BasicType]()
-        items.append(.infoText(Content.infotext.title))
-        
-        self.linkPrint = .linkPrint("Drucken oder Teilen")
+        items.append(.stdItem(Content.infotext.title))
+        /// Nur über das Setzen des Textes über ContentData wird der Stil für einen Link gesetzt.
+        self.linkPrint = BasicType.stdItem(ContentData(text: "Drucken oder Teilen"), image: "square.and.arrow.up")
         items.append(linkPrint)
-        
+
         var sectionSnapshot = SectionSnapshot()
         sectionSnapshot.append(SectionContent.print, items: items.itemType)
         dataSource.apply(sectionSnapshot, to: SectionContent.print.title, animatingDifferences: true)

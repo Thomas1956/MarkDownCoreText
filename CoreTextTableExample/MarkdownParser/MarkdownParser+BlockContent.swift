@@ -409,9 +409,9 @@ struct BlockContent {
             
             var attrText = NSMutableAttributedString(attributedString: blockContent.attrText)
             var tabulators         : [NSTextTab]  =  []
-            var firstLineHeadIndent    : CGFloat  =  block.hasBlockQuote ? MB.contentIndent : 0
-            var headIndent             : CGFloat  =  block.hasBlockQuote ? MB.contentIndent : 0
-            let tailIndent             : CGFloat  =  -20
+            var firstLineHeadIndent    : CGFloat  =  block.hasBlockQuote ? MB.contentIndent : M.headIndent
+            var headIndent             : CGFloat  =  block.hasBlockQuote ? MB.contentIndent : M.headIndent
+            let tailIndent             : CGFloat  =  M.tailIndent
             var paragraphSpacing       : CGFloat  =  fontSize * M.paragraphSpacing
             var paragraphSpacingBefore : CGFloat  =  0
             let alignment      : NSTextAlignment  =  .natural

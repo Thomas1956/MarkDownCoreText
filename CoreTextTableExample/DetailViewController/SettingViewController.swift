@@ -35,12 +35,9 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             return
         }
         
-/* Beispiel für eine Property, die nicht leer sein darf
- 
-        /// Der Ort darf nicht leer sein
-        let ort = lager.property(forKey: "ort") as? String
-        navigationItem.rightBarButtonItem?.isEnabled = lager.isChanged && !ort.isEmptyOrNil
-*/
+        /// Aktualisierung der Meldung veranlassen
+        BasicType.source(key: "CODE1").reloadIfNeeded(on: self.dataSource)
+        
         navigationItem.rightBarButtonItem?.isEnabled = setting.isChanged
     }
     
@@ -49,6 +46,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .white
         
         /// Kann nicht in der Basisklasse definiert werden
         collectionView.delegate = self
@@ -58,52 +56,69 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     /// Konfiguration von Zellen, die nicht vom BasicType abgedeckt sind (z.B. Summen, Statistik, Liste von Objekten)
     /// Der Aufruf der Funktion erfolgt NICHT im Registration Handler sondern in 'dequeueConfiguredReusableCell'
     ///
-    override func cellConfiguration(cell: CommonCollectionViewCell, itemIdentifier: ItemType, indexPath: IndexPath) {
-        guard let itemIdentifier = itemIdentifier.item else {
+    override func cellConfiguration(cell: CommonCollectionViewCell, itemIdentifier: ItemType,
+                                    indexPath: IndexPath)
+    {
+        guard let item = itemIdentifier.item else { return }
+        
+        ///---------------------------------------------------------------------------------------
+        /// Die Aktualisierung des Source Code Teiles erkennen
+        ///
+        if BasicType.isSource(item, key: "CODE1"), let settings = entity
+        {
+            /// Meldung, die überprüft, ob die eingegebenen Daten gültig sind
+            var text = """
+          Für die Einzüge sind nur Werte größer gleich Null zulässing. Der rechte Rand wird
+          intern in einen negativen Wert umgerechnet. Die Zeilenhöhe darf nicht kleiner als 1 sein.
+          """
+            var isOk = true
+            
+            if  let headIndent = settings.property(forKey: "headIndent") as? CGFloat,
+                let tailIndent = settings.property(forKey: "tailIndent") as? CGFloat,
+                let lineHeight = settings.property(forKey: "lineHeightMultiple") as? CGFloat
+            {
+                if headIndent > 100.0 {
+                    text = "Der linke Einzug darf **nicht größer** als 100 sein."
+                    isOk = false
+                }
+                if tailIndent > 100.0 {
+                    text = "Der rechte Einzug darf **nicht größer** als 100 sein."
+                    isOk = false
+                }
+                if lineHeight < 1.0 {
+                    text = "Die Zeilenhöhe darf **nicht kleiner** als 1,0 sein."
+                    isOk = false
+                }
+            }
+            /// Content View für die Anzeige konfigurieren
+            var configuration = cell.defaultContentConfiguration()
+            configuration.attributedText = text.markdown(size: 15, textcolor: (isOk ? .label : .systemRed) )
+            if !isOk {
+                configuration.textProperties.color = .systemRed
+                configuration.image = UIImage(systemName: "exclamationmark.triangle.fill")
+                configuration.imageProperties.tintColor = .systemRed
+            }
+            /// Erweiterung des UIListViewContent für FESTE Höhen
+            let fixed = FixedHeightListContentView.defaultConfiguration(configuration, height: 80)
+            cell.contentConfiguration = fixed
             return
         }
-
-        self.cellConfiguration(cell: cell, itemIdentifier: itemIdentifier, onChange: self.onEditChange, onUpdateData: self.onUpdateData)
-
-/* Beispiel für eine Liste von Produkten
- 
-        /// Zellen für die Anzeige der Produkte, die dem Stueck zugeordnet sind
-        if let objectID = itemIdentifier as? NSManagedObjectID, let context = self.objectContext,
-           let produkt = context.object(with: objectID) as? Produkt {
-            
-            var configuration = StueckDetailViewContent.Configuration()
-            configuration.produkt     = produkt
-            configuration.isEditing   = self.isEditing
-            cell.contentConfiguration = configuration
-        }
-*/
+        
+        self.cellConfiguration(cell: cell, itemIdentifier: item, onChange:     self.onEditChange,
+                                                                 onUpdateData: self.onUpdateData)
     }
-
+    
     ///---------------------------------------------------------------------------------------
     /// CLOSURE - Funktion für die Rückmeldung von Änderungen
     ///
     override func onEditChange(value: Any, key: String?) {
         guard let key, let setting = self.entity else { return }
         
-        /// Änderungen im Directory merken (Die Beispiele zeigen das Konverieren in verschiedene Datentypen)
-        if key == "birthday" {
-            /// 'birthday' ist als Optional(String) definiert
-            let text = (value as? DateComponents)?.strDatum
-            setting.pushProperty(value: text as Any, key: key)
-            print("Änderungen (birthday)", setting.isChanged, key, text as Any)
-        }
-        else if key == "datum" {
-            /// 'datum' ist als Optional(Date) definiert
-            let date = (value as? DateComponents)?.date
-            setting.pushProperty(value: date as Any, key: key)
-            print("Änderungen (datum)", setting.isChanged, key, date as Any)
-        }
-        else {
-            /// alle anderen Attribute werden in ihren normalen Datentypen gespeichert
-            setting.pushProperty(value: value, key: key)
-            print("Änderungen", setting.isChanged, key, value)
-             }
-
+        let vv = value as? CGFloat ?? 0.0
+        /// alle anderen Attribute werden in ihren normalen Datentypen gespeichert
+        setting.pushProperty(value: vv, key: key)
+        print("Änderungen", setting.isChanged, key, value)
+        
         saveButtonState()
     }
     
@@ -113,7 +128,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     override func onUpdateData(value: Any, key: String?) -> AnyHashable? {
         return nil
     }
-
+    
     ///---------------------------------------------------------------------------------------
     /// Änderungen der Daten verarbeiten
     ///

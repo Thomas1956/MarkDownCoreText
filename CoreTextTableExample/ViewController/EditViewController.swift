@@ -143,6 +143,10 @@ class EditViewController: UIViewController {
                     try childContext.save()
                     self.saveContext()
    
+                    Markdown.headIndent         = settings.headIndent
+                    Markdown.tailIndent         = settings.tailIndent * -1.0
+                    Markdown.lineHeightMultiple = settings.lineHeightMultiple
+
                     self.detailViewController?.markdown(text: self.textView.text)
                 }
                 catch {
