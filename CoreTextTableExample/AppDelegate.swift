@@ -6,14 +6,48 @@
 //
 
 import UIKit
+import CoreData
+import CommonCollection
+
+var applicationName      : String = ""
+var applicationVersion   : String = ""
+let applicationCopyright : String = "© Ingenieurbüro Halbritter 2025"
+
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+
+        /// App-Informationen auslesen
+        let dictionary = Bundle.main.infoDictionary!
+        applicationName    = dictionary["CFBundleName"] as! String
+        applicationVersion = dictionary["CFBundleShortVersionString"] as! String
+        
+        /// Textfarben der Controls werden über die Appearance gesetzt.
+        UITextField .appearance().textColor = .systemBlue
+        UITextView  .appearance().textColor = .label
+        UIDatePicker.appearance().tintColor = .systemBlue
+        
+        /// PersistentContainer laden. Der Name der Applikation MUSS mit dem Namen des Models übereinstimmen!
+        Persistence.shared = Persistence(appName: applicationName, appVersion: applicationVersion,
+                                         appCopyright: applicationCopyright, inMemory: false, useUndo: false)
+        _ = Persistence.shared.persistentContainer
+        
+        /// In einem neuen Projekt macht es Sinn, eine Reihe von Entities zu Testzwecken anzulegen.
+        if Settings.fetch(context: Persistence.shared.persistentContainer.viewContext).isEmpty {
+            typealias M = Markdown
+            
+            let settings = Settings(context: Persistence.shared.persistentContainer.viewContext)
+            settings.textSizeView       = M.textSize
+            settings.textSizePDF        = M.PDF.textSize
+            settings.headIndent         = M.headIndent
+            settings.tailIndent         = M.tailIndent
+            settings.lineHeightMultiple = M.lineHeightMultiple
+            
+            Persistence.shared.saveContext()
+        }
+        
         return true
     }
 
