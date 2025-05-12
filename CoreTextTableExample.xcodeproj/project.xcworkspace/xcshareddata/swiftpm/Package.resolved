@@ -1,13 +1,22 @@
 {
-  "originHash" : "0a92e20915ff305abc8fcb7bb39c3c91bcdb47a28f58937cef34b2665bdaf93e",
+  "originHash" : "715001b6b6ad0d2c6603f64b0721acd782ecc3bc873acc7d710f5ebf33130361",
   "pins" : [
+    {
+      "identity" : "commoncollection",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Thomas1956/CommonCollection",
+      "state" : {
+        "branch" : "main",
+        "revision" : "e06ce512e457388c2cd938aac93cb538e6db66df"
+      }
+    },
     {
       "identity" : "usefulextensions",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Thomas1956/UsefulExtensions",
+      "location" : "https://github.com/Thomas1956/UsefulExtensions.git",
       "state" : {
-        "revision" : "fe234b3cfef621b847c38087acff425696b9aff8",
-        "version" : "1.2.4"
+        "branch" : "main",
+        "revision" : "25c552e574f2fff2b2cb56c45704ebcc5e645e14"
       }
     }
   ],
