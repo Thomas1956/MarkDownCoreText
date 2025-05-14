@@ -65,10 +65,11 @@ extension SettingViewController  {
         var key: String { return self.rawValue }
 
         /// Die Strings sollen den Namen der Properties entsprechen
-        case headIndent, tailIndent, lineHeightMultiple, infotext
+        case message, headIndent, tailIndent, lineHeightMultiple, infotext
         
         var title: AnyHashable? {
             switch self {
+            case .message:            "Nachricht"
             case .headIndent:         "Linker Einzug"
             case .tailIndent:         "Rechter Einzug"
             case .lineHeightMultiple: "Zeilenhöhe"

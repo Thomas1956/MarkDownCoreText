@@ -37,7 +37,8 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         
         /// Aktualisierung der Meldung veranlassen
         BasicType.source(key: "CODE1").reloadIfNeeded(on: self.dataSource)
-        
+        BasicType.stdItem(ContentData(nil, nil, DetailContent.message.key)).reloadIfNeeded(on: self.dataSource)
+
         navigationItem.rightBarButtonItem?.isEnabled = setting.isChanged
     }
     
@@ -115,7 +116,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         guard let key, let setting = self.entity else { return }
         
         let vv = value as? CGFloat ?? 0.0
-        /// alle anderen Attribute werden in ihren normalen Datentypen gespeichert
+        /// Die Attribute werden als ihre ursprünglichen Datentypen gespeichert
         setting.pushProperty(value: vv, key: key)
         print("Änderungen", setting.isChanged, key, value)
         
@@ -126,6 +127,40 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     /// CLOSURE - Funktion für die Aktualisierung von Attributen (Standardfunktion tut nichts)
     ///
     override func onUpdateData(value: Any, key: String?) -> AnyHashable? {
+        if key == DetailContent.message.key, let settings = entity {
+            
+            /// Meldung, die überprüft, ob die eingegebenen Daten gültig sind
+            var text = """
+              Für die Einzüge sind nur Werte größer gleich Null zulässing. Der rechte Rand wird
+              intern in einen negativen Wert umgerechnet. Die Zeilenhöhe darf nicht kleiner als 1 sein.
+              """
+            var isOk = true
+            
+            if  let headIndent = settings.property(forKey: "headIndent") as? CGFloat,
+                let tailIndent = settings.property(forKey: "tailIndent") as? CGFloat,
+                let lineHeight = settings.property(forKey: "lineHeightMultiple") as? CGFloat
+            {
+                if headIndent > 100.0 {
+                    text = "Der linke Einzug darf **nicht größer** als 100 sein."
+                    isOk = false
+                }
+                if tailIndent > 100.0 {
+                    text = "Der rechte Einzug darf **nicht größer** als 100 sein."
+                    isOk = false
+                }
+                if lineHeight < 1.0 {
+                    text = "Die Zeilenhöhe darf **nicht kleiner** als 1,0 sein."
+                    isOk = false
+                }
+            }
+            
+            var ktxt = KeyText(value: nil, attrText: text.markdown(size: 15, textcolor: (isOk ? .label : .systemRed) ) )
+            if !isOk {
+                ktxt.color = .systemRed
+                ktxt.imageName = "exclamationmark.triangle.fill"
+            }
+            return ktxt
+        }
         return nil
     }
     

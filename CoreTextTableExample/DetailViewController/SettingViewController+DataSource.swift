@@ -32,6 +32,8 @@ extension SettingViewController  {
         
         items.append(.basic(.lineSpace(height: 8, color: .secondarySystemBackground)))
         
+        items.append(.stdItem(ContentData(nil, nil, Content.message.key)))
+        
         /// Item für die Anzeige variabler Meldungen
         items.append(.source(key: "CODE1"))
         
