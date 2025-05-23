@@ -6,13 +6,21 @@
          contextName = "ParagraphRenderer.init(blockContent:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
-         contextName = "closure #1 in MarkdownScrollView.markdown(string:size:weight:textColor:):MarkdownScrollView.swift">
-      </ContextState>
-      <ContextState
          contextName = "ParagraphRenderer.init(blockContent:):MarkdownParser+BlockRenderer.swift">
       </ContextState>
       <ContextState
+         contextName = "closure #1 in MarkdownScrollView.markdown(string:size:weight:textColor:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
          contextName = "BlockRenderer.contentRect.getter:MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "AppDelegate.application(_:didFinishLaunchingWithOptions:):AppDelegate.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "Markdown">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "flushBuilder #1 (block:) in static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
@@ -27,16 +35,16 @@
          contextName = "HorizontalRuleRenderer.draw(in:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
-         contextName = "HeadingRenderer.init(level:attributed:):MarkdownScrollView.swift">
+         contextName = "static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
-         contextName = "static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
+         contextName = "MarkdownContentView.layout(width:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
          contextName = "MarkdownScrollView.markdown(string:size:weight:textColor:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
-         contextName = "MarkdownContentView.layout(width:):MarkdownScrollView.swift">
+         contextName = "HeadingRenderer.init(level:attributed:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
          contextName = "flushBuilder #1 (blockContent:) in static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">

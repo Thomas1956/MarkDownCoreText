@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import UIKit
 import CommonCollection
 import UsefulExtensions
 
@@ -55,4 +56,58 @@ extension Settings: PropertyReminder, GenericEntity {
         return String(familyname.prefix(1))
     }
     */    
+}
+
+
+// MARK: – Entity-Extension für einfache Predicates
+extension Settings {
+    public enum Kind: String {
+        case `default`
+        case active
+    }
+    
+    @nonobjc public class func fetchRequest(kind: Kind) -> NSFetchRequest<Settings> {
+        let req = NSFetchRequest<Settings>(entityName: "Settings")
+        req.predicate = NSPredicate(format: "kind == %@", kind.rawValue)
+        req.fetchLimit = 1
+        return req
+    }
+    
+    ///---------------------------------------------------------------------------------------
+    /// Farbe für den PDF-Text
+    @objc dynamic public var pdfColor: UIColor? {
+        get {  pdfRawColor as? UIColor }
+        set {  pdfRawColor = newValue  }
+    }
+
+    /// Farbe für den View-Text
+    @objc dynamic public var viewColor: UIColor? {
+        get { viewRawColor as? UIColor }
+        set { viewRawColor = newValue  }
+    }
+    
+    /// Farbe für den Edit-Text
+    @objc dynamic public var editColor: UIColor? {
+        get { editRawColor as? UIColor }
+        set { editRawColor = newValue  }
+    }
+
+    /// Farbe für die Box der Tabelle
+    @objc dynamic public var tableBoxColor: UIColor? {
+        get { tableRawBoxColor as? UIColor }
+        set { tableRawBoxColor = newValue  }
+    }
+    
+    /// Farbe für die Balken im BlockQuote
+    @objc dynamic public var blockBarColor: UIColor? {
+        get { blockRawBarColor as? UIColor }
+        set { blockRawBarColor = newValue  }
+    }
+
+    /// Farbe für die Hintergrund im BlockQuote
+    @objc dynamic public var blockBackColor: UIColor? {
+        get { blockRawBackColor as? UIColor }
+        set { blockRawBackColor = newValue  }
+    }
+
 }

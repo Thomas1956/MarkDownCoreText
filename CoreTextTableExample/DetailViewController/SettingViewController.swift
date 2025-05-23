@@ -25,7 +25,21 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
 
     /// Liste der Links, die für Aktionen benötigt werden.
     var linkPrint: BasicType!
+    var linkDefaults: BasicType!
     
+    let colorSelectContent = [
+        (nil                    , "-"      , .black                 ),
+        (UIColor.lightGray      , "Weiss"  , UIColor.lightGray      ),
+        (UIColor.gray           , "Grau"   , UIColor.gray           ),
+        (UIColor.yellow.lowlight, "Gelb"   , UIColor.yellow.lowlight),
+        (UIColor.red            , "Rot"    , UIColor.red            ),
+        (UIColor.blue           , "Blau"   , UIColor.blue           ),
+        (UIColor.green.darklight, "Grün"   , UIColor.green.darklight),
+        (UIColor.brown          , "Braun"  , UIColor.brown          ),
+        (UIColor.black          , "Schwarz", UIColor.black          ),
+    ].keyTextArray
+
+
     ///---------------------------------------------------------------------------------------
     /// Den Zustand des SAVE-Button aktualisieren (Methode ist so wie hier in der Basisklasse definiert)
     ///
@@ -36,9 +50,8 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         }
         
         /// Aktualisierung der Meldung veranlassen
-        BasicType.source(key: "CODE1").reloadIfNeeded(on: self.dataSource)
-        BasicType.stdItem(ContentData(nil, nil, DetailContent.message.key)).reloadIfNeeded(on: self.dataSource)
-
+        ItemType.reloadIfNeeded(on: self.dataSource, ViewSettings.message.key)
+ 
         navigationItem.rightBarButtonItem?.isEnabled = setting.isChanged
     }
     
@@ -61,50 +74,6 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
                                     indexPath: IndexPath)
     {
         guard let item = itemIdentifier.item else { return }
-        
-        ///---------------------------------------------------------------------------------------
-        /// Die Aktualisierung des Source Code Teiles erkennen
-        ///
-        if BasicType.isSource(item, key: "CODE1"), let settings = entity
-        {
-            /// Meldung, die überprüft, ob die eingegebenen Daten gültig sind
-            var text = """
-          Für die Einzüge sind nur Werte größer gleich Null zulässing. Der rechte Rand wird
-          intern in einen negativen Wert umgerechnet. Die Zeilenhöhe darf nicht kleiner als 1 sein.
-          """
-            var isOk = true
-            
-            if  let headIndent = settings.property(forKey: "headIndent") as? CGFloat,
-                let tailIndent = settings.property(forKey: "tailIndent") as? CGFloat,
-                let lineHeight = settings.property(forKey: "lineHeightMultiple") as? CGFloat
-            {
-                if headIndent > 100.0 {
-                    text = "Der linke Einzug darf **nicht größer** als 100 sein."
-                    isOk = false
-                }
-                if tailIndent > 100.0 {
-                    text = "Der rechte Einzug darf **nicht größer** als 100 sein."
-                    isOk = false
-                }
-                if lineHeight < 1.0 {
-                    text = "Die Zeilenhöhe darf **nicht kleiner** als 1,0 sein."
-                    isOk = false
-                }
-            }
-            /// Content View für die Anzeige konfigurieren
-            var configuration = cell.defaultContentConfiguration()
-            configuration.attributedText = text.markdown(size: 15, textcolor: (isOk ? .label : .systemRed) )
-            if !isOk {
-                configuration.textProperties.color = .systemRed
-                configuration.image = UIImage(systemName: "exclamationmark.triangle.fill")
-                configuration.imageProperties.tintColor = .systemRed
-            }
-            /// Erweiterung des UIListViewContent für FESTE Höhen
-            let fixed = FixedHeightListContentView.defaultConfiguration(configuration, height: 80)
-            cell.contentConfiguration = fixed
-            return
-        }
-        
         self.cellConfiguration(cell: cell, itemIdentifier: item, onChange:     self.onEditChange,
                                                                  onUpdateData: self.onUpdateData)
     }
@@ -115,11 +84,22 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     override func onEditChange(value: Any, key: String?) {
         guard let key, let setting = self.entity else { return }
         
-        let vv = value as? CGFloat ?? 0.0
-        /// Die Attribute werden als ihre ursprünglichen Datentypen gespeichert
-        setting.pushProperty(value: vv, key: key)
-        print("Änderungen", setting.isChanged, key, value)
-        
+        if key == ViewSettings.viewColor.key {
+            setting.pushProperty(value: value, key: key)
+            ItemType.reloadIfNeeded(on: self.dataSource, ViewSettings.viewColorSelect.key)
+            print("Color", setting.isChanged, key, value)
+        }
+        else if key == PdfSettings.pdfColor.key {
+            setting.pushProperty(value: value, key: key)
+            ItemType.reloadIfNeeded(on: self.dataSource, PdfSettings.pdfColorSelect.key)
+            print("Color", setting.isChanged, key, value)
+        }
+       else {
+            let vv = value as? CGFloat ?? 0.0
+            /// Die Attribute werden als ihre ursprünglichen Datentypen gespeichert
+            setting.pushProperty(value: vv, key: key)
+            print("Änderungen", setting.isChanged, key, value)
+        }
         saveButtonState()
     }
     
@@ -127,7 +107,37 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     /// CLOSURE - Funktion für die Aktualisierung von Attributen (Standardfunktion tut nichts)
     ///
     override func onUpdateData(value: Any, key: String?) -> AnyHashable? {
-        if key == DetailContent.message.key, let settings = entity {
+        
+        typealias C = ViewSettings
+        typealias P = PdfSettings
+
+        if key == C.viewColorSelect.key {
+            /// Das Image aus der Entity heraus ermitteln und in einen Image-Namen umwandeln.
+            if let color = entity?.property(forKey: C.viewColor.key) as? UIColor
+            {
+                /// Die Liste aller auswählbaren Images holen und den aktuellen Eintrag suchen.
+                guard var select = colorSelectContent.first(where: {$0.value as? UIColor == color} )
+                else { return nil }
+                
+                select.value = nil
+                return select
+            }
+        }
+        
+        if key == P.pdfColorSelect.key {
+            /// Das Image aus der Entity heraus ermitteln und in einen Image-Namen umwandeln.
+            if let color = entity?.property(forKey: P.pdfColor.key) as? UIColor
+            {
+                /// Die Liste aller auswählbaren Images holen und den aktuellen Eintrag suchen.
+                guard var select = colorSelectContent.first(where: {$0.value as? UIColor == color} )
+                else { return nil }
+                
+                select.value = nil
+                return select
+            }
+        }
+
+        if key == C.message.key, let settings = entity {
             
             /// Meldung, die überprüft, ob die eingegebenen Daten gültig sind
             var text = """
@@ -136,9 +146,9 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
               """
             var isOk = true
             
-            if  let headIndent = settings.property(forKey: "headIndent") as? CGFloat,
-                let tailIndent = settings.property(forKey: "tailIndent") as? CGFloat,
-                let lineHeight = settings.property(forKey: "lineHeightMultiple") as? CGFloat
+            if  let headIndent = settings.property(forKey: C.viewHeadIndent.key) as? CGFloat,
+                let tailIndent = settings.property(forKey: C.viewTailIndent.key) as? CGFloat,
+                let lineHeight = settings.property(forKey: C.viewLineHeight.key) as? CGFloat
             {
                 if headIndent > 100.0 {
                     text = "Der linke Einzug darf **nicht größer** als 100 sein."
@@ -182,22 +192,22 @@ extension SettingViewController: UICollectionViewDelegate {
     /// Ausführen einer Aktion bei Auswahl einer Zelle
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        
+        guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
+
         /// Beispiel für Aufruf des Druckens
-        if indexPath == dataSource.indexPath(for: linkPrint.itemType) {
-            actionShare(linkPrint)
-        }
+        if item == linkPrint   .itemType { actionShare(linkPrint) }
+        if item == linkDefaults.itemType { actionSetDefaults()    }
     }
     
     /// Abfrage, ob eine Zelle ausgewählt werden kann
     /// Diese Funktion MUSS auch implementiert werden, wenn keine Auswahl erfolgt. Defaultmäßig ist der Rückgabewert TRUE !
     func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-        
+        guard let item = dataSource.itemIdentifier(for: indexPath) else { return false }
+
         /// Beispiel für Aufruf des Druckens
-        if indexPath == dataSource.indexPath(for: linkPrint.itemType) {
-            return true
-        }
-        
+        if item == linkPrint   .itemType  { return true }
+        if item == linkDefaults.itemType  { return true }
+
         collectionView.deselectItem(at: indexPath, animated: false)
         return false
     }

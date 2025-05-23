@@ -130,23 +130,19 @@ class EditViewController: UIViewController {
             
         let childContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
         childContext.parent = viewContext
+        childContext.automaticallyMergesChangesFromParent = true
         
-        /// Bei den Settings gibt es nur einen Eintrag. Den ersten Eintrag ermitteln und dem View Controller übergeben
-        let settings = Settings.fetch(context: viewContext).first ?? Settings(context: childContext)
+        /// Bei den Settings den  Eintrag 'active' ermitteln und dem View Controller übergeben
+        let objectID = SettingsController.shared.activeObjectID
+        guard let settings = childContext.object(with: objectID) as? Settings else { return }
 
         let viewController = SettingViewController(object: settings, title: "Parameter") { shouldSave in
-            /// Neue Entity wird gespeichert, wenn der Name nicht leer ist.
             if shouldSave {
                 do {
-                    /// Permanente ID zuweisen lassen und zuerst im ChildContext speichern, danach im ViewContext
-                    try childContext.obtainPermanentIDs(for: [settings])
-                    try childContext.save()
-                    self.saveContext()
-   
-                    Markdown.headIndent         = settings.headIndent
-                    Markdown.tailIndent         = settings.tailIndent * -1.0
-                    Markdown.lineHeightMultiple = settings.lineHeightMultiple
-
+                    /// Zuerst im ChildContext speichern, danach im ViewContext
+                    try SettingsController.shared.save(settings, in: childContext)
+                    /// Zurückschreiben der Settings in Markdown
+                    SettingsController.shared.apply(settings)
                     self.detailViewController?.markdown(text: self.textView.text)
                 }
                 catch {

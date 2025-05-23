@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 import CommonCollection
 import UsefulExtensions
 
@@ -39,5 +40,30 @@ extension SettingViewController  {
         shareContent(view, pageSupport: pageSupport)
          */
 
+    }
+    
+    ///---------------------------------------------------------------------------------------
+    /// Action - Setzen der Defaultwerte
+    ///
+    @objc func actionSetDefaults() {
+        guard let setting = self.entity else { return }
+        
+        let settingDefault = SettingsController.shared.default
+        
+        DetailContent.allCases.forEach { keyName in
+            let key = keyName.key
+            guard setting.entity.attributesByName[key] != nil else { return }
+
+            let value = settingDefault.value(forKey: key)
+            setting.pushProperty(value: value, key: key)
+        
+            print("Key: \(key) \t \(value ?? "nil") ")
+        }
+        
+        navigationItem.rightBarButtonItem?.isEnabled = setting.isChanged
+
+        var snapshot = self.dataSource.snapshot()
+        snapshot.reloadItems(snapshot.itemIdentifiers)
+        self.dataSource.apply(snapshot, animatingDifferences: true)
     }
 }

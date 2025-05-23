@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E92C9B142DDF1FD800750AB4 /* SettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B132DDF1FD800750AB4 /* SettingsController.swift */; };
+		E92C9B162DDF4B4C00750AB4 /* SettingViewController+PDF.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */; };
 		E949006C2DC90E0200DD7880 /* UsefulExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = E949006B2DC90E0200DD7880 /* UsefulExtensions */; };
 		E949006E2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */; };
 		E94900892DCB99F600DD7880 /* NSTextTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94900882DCB99F000DD7880 /* NSTextTab.swift */; };
@@ -19,6 +21,7 @@
 		E94900AF2DCE5DAB00DD7880 /* CommonCollection in Frameworks */ = {isa = PBXBuildFile; productRef = E94900AE2DCE5DAB00DD7880 /* CommonCollection */; };
 		E94900B12DCE5E0400DD7880 /* Settings+PropertyReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94900B02DCE5E0400DD7880 /* Settings+PropertyReminder.swift */; };
 		E94900B42DCE62BB00DD7880 /* CoreTextTableExample.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E94900B22DCE62BB00DD7880 /* CoreTextTableExample.xcdatamodeld */; };
+		E952F0882DE0FA7A00F097EF /* SectionViewController+View.swift in Sources */ = {isa = PBXBuildFile; fileRef = E952F0872DE0FA7A00F097EF /* SectionViewController+View.swift */; };
 		E9A940712DC4ECA6004501E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E9A9405C2DC4ECA6004501E6 /* Assets.xcassets */; };
 		E9A940732DC4ECA6004501E6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9A940602DC4ECA6004501E6 /* LaunchScreen.storyboard */; };
 		E9A940742DC4ECA6004501E6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9A940622DC4ECA6004501E6 /* Main.storyboard */; };
@@ -53,6 +56,8 @@
 
 /* Begin PBXFileReference section */
 		E928C3912DBA315C006D071D /* CoreTextTableExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoreTextTableExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E92C9B132DDF1FD800750AB4 /* SettingsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsController.swift; sourceTree = "<group>"; };
+		E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+PDF.swift"; sourceTree = "<group>"; };
 		E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Markdown+Hyphenation.swift"; sourceTree = "<group>"; };
 		E94900792DCB7ECA00DD7880 /* HyphenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HyphenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E94900882DCB99F000DD7880 /* NSTextTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSTextTab.swift; sourceTree = "<group>"; };
@@ -66,6 +71,7 @@
 		E94900B32DCE62BB00DD7880 /* CoreTextTableExample.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreTextTableExample.xcdatamodel; sourceTree = "<group>"; };
 		E94900B52DCE7D9200DD7880 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		E94900B62DCE7D9200DD7880 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Main.strings; sourceTree = "<group>"; };
+		E952F0872DE0FA7A00F097EF /* SectionViewController+View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SectionViewController+View.swift"; sourceTree = "<group>"; };
 		E9A940582DC4ECA6004501E6 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		E9A940592DC4ECA6004501E6 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		E9A9405B2DC4ECA6004501E6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -152,6 +158,7 @@
 			isa = PBXGroup;
 			children = (
 				E94900B02DCE5E0400DD7880 /* Settings+PropertyReminder.swift */,
+				E92C9B132DDF1FD800750AB4 /* SettingsController.swift */,
 				E94900B22DCE62BB00DD7880 /* CoreTextTableExample.xcdatamodeld */,
 			);
 			path = DataModel;
@@ -161,8 +168,10 @@
 			isa = PBXGroup;
 			children = (
 				E94900A42DCE5C0E00DD7880 /* SettingViewController.swift */,
+				E952F0872DE0FA7A00F097EF /* SectionViewController+View.swift */,
 				E94900A52DCE5C0E00DD7880 /* SettingViewController+Action.swift */,
 				E94900A62DCE5C0E00DD7880 /* SettingViewController+Content.swift */,
+				E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */,
 				E94900A72DCE5C0E00DD7880 /* SettingViewController+DataSource.swift */,
 			);
 			path = DetailViewController;
@@ -356,13 +365,16 @@
 				E94900AA2DCE5C0E00DD7880 /* SettingViewController.swift in Sources */,
 				E94900AB2DCE5C0E00DD7880 /* SettingViewController+Content.swift in Sources */,
 				E9A940802DC4ECA6004501E6 /* MarkdownParser+Statics.swift in Sources */,
+				E952F0882DE0FA7A00F097EF /* SectionViewController+View.swift in Sources */,
 				E9A940812DC4ECA6004501E6 /* MarkdownScrollView.swift in Sources */,
 				E9A940832DC4ECA6004501E6 /* MarkdownParser+NSAttributedString.swift in Sources */,
 				E9A940842DC4ECA6004501E6 /* SceneDelegate.swift in Sources */,
 				E949006E2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift in Sources */,
+				E92C9B142DDF1FD800750AB4 /* SettingsController.swift in Sources */,
 				E949008C2DCCB49B00DD7880 /* CommonSplitViewController.swift in Sources */,
 				E9A940852DC4ECA6004501E6 /* MarkdownViewController.swift in Sources */,
 				E949008E2DCCBAAC00DD7880 /* EditViewController.swift in Sources */,
+				E92C9B162DDF4B4C00750AB4 /* SettingViewController+PDF.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

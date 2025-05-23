@@ -19,13 +19,13 @@ extension SettingViewController  {
     // MARK: - Definition der Sektionen
     
     enum SectionContent: Int, BasicSection, CaseIterable {
-        case setting, message, print
+        case ViewSettings, pdfSettings, print
         
         var title : String {
             switch self {
-            case .setting: "Zeilenparameter"
-            case .message: "Meldung"
-            case .print:   "Drucken oder Teilen"
+            case .ViewSettings: "Anzeige-Parameter"
+            case .pdfSettings:  "PDF-Parameter"
+            case .print:        "Drucken und Teilen"
             }
         }
         
@@ -62,20 +62,15 @@ extension SettingViewController  {
     /// standardmäßig genutzten, nicht benötigten Attribute aus dem ENUM gelöscht werden.
     ///
     enum DetailContent: String, BasicDetail, Hashable, CaseIterable {
-        var key: String { return self.rawValue }
-
+   
         /// Die Strings sollen den Namen der Properties entsprechen
-        case message, headIndent, tailIndent, lineHeightMultiple, infotext
+        case textDefaults
         
         var title: AnyHashable? {
             switch self {
-            case .message:            "Nachricht"
-            case .headIndent:         "Linker Einzug"
-            case .tailIndent:         "Rechter Einzug"
-            case .lineHeightMultiple: "Zeilenhöhe"
-            case .infotext:
+            case .textDefaults:
               """
-              Die Parameter können gedruckt oder geteilt werden.
+              Die **Standardeinstellungen** wiederherstellen. Alle Einstellungen werden überschrieben.
               """.markdown()
             }
         }
@@ -90,9 +85,6 @@ extension SettingViewController  {
 
         var parameter: ContentEditType? {
             switch self {
-            case .headIndent:           .einsNachkomma
-            case .tailIndent:           .einsNachkomma
-            case .lineHeightMultiple:   .einsNachkomma
             default: nil
           }
         }
@@ -103,10 +95,7 @@ extension SettingViewController  {
         var contentViewType: ContentViewType
         {
             switch self {
-            case .headIndent:           .number
-            case .tailIndent:           .number
-            case .lineHeightMultiple:   .number
-            default: .text
+            default: .number
             }
         }
         
