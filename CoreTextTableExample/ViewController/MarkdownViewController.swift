@@ -90,10 +90,9 @@ class MarkdownViewController: UIViewController, UIDocumentPickerDelegate {
     private var tmpPDF: URL?            // <– merken, um später zu löschen
 
     @objc func didPressExportButton(_ sender: Any) {
-        typealias MP = Markdown.PDF
         
-        let renderers = MarkdownParser.markdown(string: self.textMarkdown, size: MP.textSize,
-                                                textColor: MP.textColor )
+        let renderers = MarkdownParser.markdown(string: self.textMarkdown, size: Markdown.PDF.textSize,
+                                                textColor: Markdown.PDF.textColor )
         
         // 1) PDF erzeugen → tmpURL zurückgeben
         MarkdownParser.exportPDF(renderers: renderers) { [unowned self] in

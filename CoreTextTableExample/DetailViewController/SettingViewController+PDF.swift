@@ -22,14 +22,14 @@ extension SettingViewController  {
     /// standardmäßig genutzten, nicht benötigten Attribute aus dem ENUM gelöscht werden.
     ///
     enum PdfSettings: String, BasicDetail, CaseIterable {
-        case  pdfTextSize, pdfColor,
+        case  pdfTextSize, pdfTextColor,
               pdfColorSelect
         
         /// Titel des Items
         var title: AnyHashable? {
             switch self {
             case .pdfTextSize:   "Textgröße"
-            case .pdfColor:      "Textfarbe"
+            case .pdfTextColor:      "Textfarbe"
              default: nil
             }
         }
@@ -103,7 +103,7 @@ extension SettingViewController  {
         /// SelectionContentView parametrieren
         let parameter = ContentEditType(style: nil, list: self.colorSelectContent)
         
-        let selectionData = ContentData(viewType: .selection, rwo, setting, Content.pdfColor.key, parameter: parameter)
+        let selectionData = ContentData(viewType: .selection, rwo, setting, Content.pdfTextColor.key, parameter: parameter)
         let selectColor = BasicType.basic(ContentDataLayout(selectionData, presentation: .plain))
 
         

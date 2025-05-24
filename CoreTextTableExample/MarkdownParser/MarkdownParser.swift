@@ -294,17 +294,19 @@ extension MarkdownParser {
     
     static func exportPDF(renderers: [BlockRenderer], presentSavePanel: () -> URL?) {
 
+        typealias MP = Markdown.PDF
+        
         // -------- PDF-Seiten-Geometrie ------------------------------------
         
-        var pageRect = M.PDF.pageRect      /// Standard-Maße A4:  21 cm x 29,7 cm (Rand 2 cm)
-        let printableWidth = pageRect.width - M.PDF.leftMargin - M.PDF.rightMargin
+        var pageRect = MP.pageRect      /// Standard-Maße A4:  21 cm x 29,7 cm (Rand 2 cm)
+        let printableWidth = pageRect.width - MP.marginLeft - MP.marginRight
 
         // -------- Renderer zuerst layouten --------------------------------
         let pageCount = layoutForPDF(renderers:    renderers,
                                      pageWidth:    printableWidth,
                                      pageHeight:   pageRect.height,
-                                     topMargin:    M.PDF.topMargin,
-                                     bottomMargin: M.PDF.bottomMargin)
+                                     topMargin:    MP.marginTop,
+                                     bottomMargin: MP.marginBottom)
 
         // -------- Ziel-URL vom User holen ---------------------------------
         guard let url = presentSavePanel() else { return }
@@ -323,7 +325,7 @@ extension MarkdownParser {
             ctx.scaleBy(x: 1, y: -1)
 
             // (1) linke / obere Margin
-            ctx.translateBy(x: M.PDF.leftMargin, y: M.PDF.topMargin)
+            ctx.translateBy(x: MP.marginLeft, y: MP.marginTop)
 
             // (2) alle Blöcke dieser Seite
             for r in renderers where r.pageIndex == p {

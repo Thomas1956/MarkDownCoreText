@@ -142,7 +142,7 @@ class EditViewController: UIViewController {
                     /// Zuerst im ChildContext speichern, danach im ViewContext
                     try SettingsController.shared.save(settings, in: childContext)
                     /// Zurückschreiben der Settings in Markdown
-                    SettingsController.shared.apply(settings)
+                    SettingsController.apply(settings)
                     self.detailViewController?.markdown(text: self.textView.text)
                 }
                 catch {

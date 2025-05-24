@@ -48,19 +48,10 @@ extension SettingViewController  {
     @objc func actionSetDefaults() {
         guard let setting = self.entity else { return }
         
-        let settingDefault = SettingsController.shared.default
+        /// Defaultwerte zurückspeichern
+        SettingsController.shared.restoreDefaults(to: setting)
         
-        DetailContent.allCases.forEach { keyName in
-            let key = keyName.key
-            guard setting.entity.attributesByName[key] != nil else { return }
-
-            let value = settingDefault.value(forKey: key)
-            setting.pushProperty(value: value, key: key)
-        
-            print("Key: \(key) \t \(value ?? "nil") ")
-        }
-        
-        navigationItem.rightBarButtonItem?.isEnabled = setting.isChanged
+        navigationItem.rightBarButtonItem?.isEnabled = setting.hasPersistentChangedValues
 
         var snapshot = self.dataSource.snapshot()
         snapshot.reloadItems(snapshot.itemIdentifiers)

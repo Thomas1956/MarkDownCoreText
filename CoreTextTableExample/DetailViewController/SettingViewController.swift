@@ -52,7 +52,11 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         /// Aktualisierung der Meldung veranlassen
         ItemType.reloadIfNeeded(on: self.dataSource, ViewSettings.message.key)
  
-        navigationItem.rightBarButtonItem?.isEnabled = setting.isChanged
+        
+        let changed = setting.changedValues()
+        changed.forEach( { print($0.key, $0.value) } )
+        
+        navigationItem.rightBarButtonItem?.isEnabled = setting.hasPersistentChangedValues
     }
     
     //----------------------------------------------------------------------------------------
@@ -85,19 +89,20 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         guard let key, let setting = self.entity else { return }
         
         if key == ViewSettings.viewColor.key {
-            setting.pushProperty(value: value, key: key)
+            let color = value as? UIColor ?? .label
+            setting.pushProperty(value: color, key: key)
             ItemType.reloadIfNeeded(on: self.dataSource, ViewSettings.viewColorSelect.key)
             print("Color", setting.isChanged, key, value)
         }
-        else if key == PdfSettings.pdfColor.key {
-            setting.pushProperty(value: value, key: key)
+        else if key == PdfSettings.pdfTextColor.key {
+            let color = value as? UIColor ?? .label
+            setting.pushProperty(value: color, key: key)
             ItemType.reloadIfNeeded(on: self.dataSource, PdfSettings.pdfColorSelect.key)
             print("Color", setting.isChanged, key, value)
         }
        else {
-            let vv = value as? CGFloat ?? 0.0
             /// Die Attribute werden als ihre ursprünglichen Datentypen gespeichert
-            setting.pushProperty(value: vv, key: key)
+            setting.pushProperty(value: value, key: key)
             print("Änderungen", setting.isChanged, key, value)
         }
         saveButtonState()
@@ -126,7 +131,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         
         if key == P.pdfColorSelect.key {
             /// Das Image aus der Entity heraus ermitteln und in einen Image-Namen umwandeln.
-            if let color = entity?.property(forKey: P.pdfColor.key) as? UIColor
+            if let color = entity?.property(forKey: P.pdfTextColor.key) as? UIColor
             {
                 /// Die Liste aller auswählbaren Images holen und den aktuellen Eintrag suchen.
                 guard var select = colorSelectContent.first(where: {$0.value as? UIColor == color} )

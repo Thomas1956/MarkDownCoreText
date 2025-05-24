@@ -6,7 +6,9 @@
 //
 
 import CoreData
+import UIKit
 import CommonCollection
+
 
 
 // MARK: – SettingsController für Loading, Saving & Restoring
@@ -18,120 +20,219 @@ final class SettingsController {
     var activeObjectID: NSManagedObjectID { active.objectID }
 
     private(set) var `default`: Settings
-    private(set) var active: Settings
+    private(set) var   active : Settings
     
     private init() {
-        // --- Default instanziieren oder laden ---
+        
         let defaultSettings: Settings
         if let def = try? ctx.fetch(Settings.fetchRequest(kind: .default)).first {
             defaultSettings = def
         } else {
-            let def = Settings(context: ctx)
-            def.kind            = Settings.Kind.default.rawValue
-            def.viewTextSize    = Markdown.textSize
-            def.viewHeadIndent  = Markdown.headIndent
-            def.viewTailIndent  = -Markdown.tailIndent
-            def.viewLineHeight  = Markdown.lineHeightMultiple
-            
-            def.pdfTextSize     = Markdown.PDF.textSize
-            def.pdfColor        = Markdown.PDF.textColor
-
-            try! ctx.save()
-            defaultSettings = def
+            defaultSettings = Settings(context: ctx)
+            defaultSettings.kind = Settings.Kind.default.rawValue
         }
+
+        // -> Nur speichern, wenn sich beim Kopieren etwas geändert hat
+        if Self.copyMarkdown(to: defaultSettings) {
+            try? ctx.save()
+        }
+        self.default = defaultSettings
+          
         
         // --- Active instanziieren oder laden (Kopie des Default) ---
         let activeSettings: Settings
         if let act = try? ctx.fetch(Settings.fetchRequest(kind: .active)).first {
             activeSettings = act
         } else {
-            let act = Settings(context: ctx)
-            act.kind = Settings.Kind.active.rawValue
-            // Hier rufen wir eine statische copy-Methode auf
-            SettingsController.copy(from: defaultSettings, to: act)
-            try! ctx.save()
-            activeSettings = act
+            activeSettings = Settings(context: ctx)
+            activeSettings.kind = Settings.Kind.active.rawValue
+            // Erstbefüllung: direkt kopieren (egal ob sich etwas ändert)
+            _ = Self.copyMarkdown(to: activeSettings)
+            try? ctx.save()
         }
+        self.active = activeSettings
+        
         
         // Nun sind erst alle Stored Properties initialisiert …
         self.`default` = defaultSettings
         self.active    = activeSettings
         
         // … und jetzt dürfen wir Instanz-Methoden aufrufen
-        apply(self.active)
+        Self.apply(self.active)
     }
     
     func save(_ s: Settings, in context: NSManagedObjectContext) throws {
-       try context.save()
-       // sicherstellen, dass Main-Context die Änderung bekommt
-       try ctx.save()
-     }
-
-    // MARK: – Private Factory
-    private static func fetchOrCreate(kind: Settings.Kind,
-                                      in context: NSManagedObjectContext) -> Settings
-    {
-        let req = Settings.fetchRequest(kind: kind)
-        if let obj = (try? context.fetch(req))?.first { return obj }
-        
-        let new = Settings(context: context)
-        new.kind               = kind.rawValue
-        // Default befüllen nur beim Default-Objekt
-        if kind == .default {
-            new.viewTextSize       = Markdown.textSize
-            new.viewHeadIndent     = Markdown.headIndent
-            new.viewTailIndent     = -Markdown.tailIndent
-            new.viewLineHeight     = Markdown.lineHeightMultiple
-            new.viewColor          = Markdown.textColor
-            
-            new.pdfTextSize        = Markdown.PDF.textSize
-            new.pdfColor           = Markdown.PDF.textColor
+        do {
+            // sicherstellen, dass Main-Context die Änderung bekommt
+            try context.save()
+            try ctx.save()
         }
-        try? context.save()
-        return new
+        catch {
+            assertionFailure("Settings-Save failed: \(error)")
+        }
     }
-    
-    // Ty­p-Methode, greift nicht auf `self` zu
+
     private static func copy(from src: Settings, to dst: Settings) {
-        dst.viewTextSize    = src.viewTextSize
-        dst.viewHeadIndent  = src.viewHeadIndent
-        dst.viewTailIndent  = src.viewTailIndent
-        dst.viewLineHeight  = src.viewLineHeight
-        dst.viewColor       = src.viewColor
-        
-        dst.pdfTextSize     = src.pdfTextSize
-        dst.pdfColor        = src.pdfColor
+        for (name, _) in src.entity.attributesByName {
+            guard name != #keyPath(Settings.kind)            // ausschließen
+               else { continue }
+
+            // Relationen werden hier ohnehin nicht erfasst
+            dst.setValue(src.value(forKey: name), forKey: name)
+        }
     }
-    
-    func apply(_ s: Settings) {
-        Markdown.textSize           =  s.viewTextSize
-        Markdown.headIndent         =  s.viewHeadIndent
-        Markdown.tailIndent         = -s.viewTailIndent
-        Markdown.lineHeightMultiple =  s.viewLineHeight
-        Markdown.textColor          =  s.viewColor ?? .label
-        
-        Markdown.PDF.textSize       =  s.pdfTextSize
-        Markdown.PDF.textColor      =  s.pdfColor ?? .label
-    }
-    
-    // … Deine saveActive() und restoreDefaults() bleiben unverändert …
-    
-    func saveActive() {
-        // Werte aus Markdown zurück in active schreiben
-        active.viewTextSize    = Markdown.textSize
-        active.viewHeadIndent  = Markdown.headIndent
-        active.viewTailIndent  = -Markdown.tailIndent
-        active.viewLineHeight  = Markdown.lineHeightMultiple
-        
-        active.pdfTextSize     = Markdown.PDF.textSize
-        active.pdfColor        = Markdown.PDF.textColor
-        try? ctx.save()
-    }
-    
-    func restoreDefaults() {
+ 
+    func restoreDefaults(to dst: Settings) {
         // Default → Active kopieren, anwenden und speichern
-        Self.copy(from: `default`, to: active)
-        apply(active)
-        try? ctx.save()
+        Self.copy(from: `default`, to: dst)
+    }
+    
+    
+    
+    private static func assignDefaults(to s: Settings) -> Bool {
+        var didChange = false
+
+        func set<V: Equatable>(_ keyPath: ReferenceWritableKeyPath<Settings,V>, _ new: V) {
+            if s[keyPath: keyPath] != new {
+                s[keyPath: keyPath] = new
+                didChange = true
+            }
+        }
+
+        set(\.viewTextSize,   17)
+        set(\.viewHeadIndent, 0)
+        // ...
+        return didChange
+    }
+/*
+    if assignDefaults(to: defaultSettings) {
+        try? ctx.save()   // nur wenn wirklich etwas anders war
+    }
+ */
+}
+
+// MARK: - Settings ⇆ Markdown Synchronisation
+extension SettingsController {
+
+    // ------------------------------------------------------------
+    //  1)  Generischer Feld-Mapper  (Closure-basiert, typ-sicher)
+    // ------------------------------------------------------------
+    struct FieldMap<Value> {
+        // Core-Data-Seite
+        let settingsKey : ReferenceWritableKeyPath<Settings, Value>
+
+        // Markdown-Seite – als Getter/Setter-Closures
+        let getMarkdown : () -> Value
+        let setMarkdown : (Value) -> Void
+
+        // optionale Konvertierung (Identität = Standard)
+        var toMarkdown  : (Value) -> Value = { $0 }   // Settings ➜ Markdown
+        var toSettings  : (Value) -> Value = { $0 }   // Markdown ➜ Settings
+    }
+
+    // ------------------------------------------------------------
+    //  2)  Zuordnungen (3 Listen = 3 Typen)
+    // ------------------------------------------------------------
+    // Double-Felder  (Markdown & Markdown.PDF)
+    private static let doubleMaps: [FieldMap<Double>] = [
+
+        // ── Markdown ────────────────────────────────────────────
+        FieldMap(settingsKey: \Settings.viewTextSize,
+                 getMarkdown: { Markdown.textSize },
+                 setMarkdown: { Markdown.textSize = $0 }),
+
+        FieldMap(settingsKey: \Settings.viewHeadIndent,
+                 getMarkdown: { Markdown.headIndent },
+                 setMarkdown: { Markdown.headIndent = $0 }),
+
+        FieldMap(settingsKey: \Settings.viewTailIndent,
+                 getMarkdown: { Markdown.tailIndent },
+                 setMarkdown: { Markdown.tailIndent = $0 },
+                 toMarkdown: { -$0 },   // Vorzeichenwechsel beachten
+                 toSettings: { -$0 }),
+
+        FieldMap(settingsKey: \Settings.viewLineHeight,
+                 getMarkdown: { Markdown.lineHeightMultiple },
+                 setMarkdown: { Markdown.lineHeightMultiple = $0 }),
+
+        // ── Markdown.PDF ────────────────────────────────────────
+        FieldMap(settingsKey: \Settings.pdfTextSize,
+                 getMarkdown: { Markdown.PDF.textSize },
+                 setMarkdown: { Markdown.PDF.textSize = $0 })
+    ]
+
+    // Bool-Felder
+    private static let boolMaps: [FieldMap<Bool>] = [
+        FieldMap(settingsKey: \Settings.viewSoftBreaks,
+                 getMarkdown: { Markdown.useSoftBreaks },
+                 setMarkdown: { Markdown.useSoftBreaks = $0 })
+    ]
+
+    // Farb-Felder
+    private static let colorMaps: [FieldMap<UIColor>] = [
+
+        FieldMap(settingsKey: \Settings.viewColor,
+                 getMarkdown: { Markdown.textColor },
+                 setMarkdown: { Markdown.textColor = $0 }),
+
+        FieldMap(settingsKey: \Settings.pdfTextColor,
+                 getMarkdown: { Markdown.PDF.textColor },
+                 setMarkdown: { Markdown.PDF.textColor = $0 })
+    ]
+
+    // ------------------------------------------------------------
+    //  3)  Settings ➜ Markdown   (beim App-Start / nach Save)
+    // ------------------------------------------------------------
+    static func apply(_ s: Settings) {
+        
+        for m in Self.doubleMaps { m.setMarkdown( m.toMarkdown( s[keyPath: m.settingsKey] ) ) }
+        for m in Self.boolMaps   { m.setMarkdown( m.toMarkdown( s[keyPath: m.settingsKey] ) ) }
+        for m in Self.colorMaps  { m.setMarkdown( m.toMarkdown( s[keyPath: m.settingsKey] ) ) }
+    }
+
+    // ------------------------------------------------------------
+    //  4)  Markdown ➜ Settings   (Seed, Restore-Defaults, Save)
+    // ------------------------------------------------------------
+//    private static func copyFromMarkdown(to s: Settings) {
+//
+//        for m in Self.doubleMaps { s[keyPath: m.settingsKey] = m.toSettings( m.getMarkdown() ) }
+//        for m in Self.boolMaps   { s[keyPath: m.settingsKey] = m.toSettings( m.getMarkdown() ) }
+//        for m in Self.colorMaps  { s[keyPath: m.settingsKey] = m.toSettings( m.getMarkdown() ) }
+//    }
+    
+    
+    /// Kopiert alle Felder aus Markdown in das übergebene Settings-Objekt
+    /// und gibt `true` zurück, sobald mindestens ein Wert geändert wurde.
+    private static func copyMarkdown(to target: Settings) -> Bool {
+
+        var didChange = false
+
+        // ------- Double -----------
+        for m in Self.doubleMaps {
+            let newVal = m.toSettings(m.getMarkdown())
+            if target[keyPath: m.settingsKey] != newVal {
+                target[keyPath: m.settingsKey] = newVal
+                didChange = true
+            }
+        }
+
+        // ------- Bool -------------
+        for m in Self.boolMaps {
+            let newVal = m.toSettings(m.getMarkdown())
+            if target[keyPath: m.settingsKey] != newVal {
+                target[keyPath: m.settingsKey] = newVal
+                didChange = true
+            }
+        }
+
+        // ------- UIColor ----------
+        for m in Self.colorMaps {
+            let newVal = m.toSettings(m.getMarkdown())
+            if !(target[keyPath: m.settingsKey] != newVal) {
+                target[keyPath: m.settingsKey] = newVal
+                didChange = true
+            }
+        }
+        return didChange
     }
 }

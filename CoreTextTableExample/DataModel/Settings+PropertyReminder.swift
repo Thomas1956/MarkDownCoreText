@@ -75,14 +75,14 @@ extension Settings {
     
     ///---------------------------------------------------------------------------------------
     /// Farbe für den PDF-Text
-    @objc dynamic public var pdfColor: UIColor? {
-        get {  pdfRawColor as? UIColor }
+    @objc dynamic public var pdfTextColor: UIColor {
+        get {  pdfRawColor as? UIColor ?? .label}
         set {  pdfRawColor = newValue  }
     }
 
     /// Farbe für den View-Text
-    @objc dynamic public var viewColor: UIColor? {
-        get { viewRawColor as? UIColor }
+    @objc dynamic public var viewColor: UIColor {
+        get { viewRawColor as? UIColor ?? .label }
         set { viewRawColor = newValue  }
     }
     
@@ -111,3 +111,32 @@ extension Settings {
     }
 
 }
+
+@objc(ColorTransformer)
+final class ColorTransformer: ValueTransformer {
+
+    override class func transformedValueClass() -> AnyClass { NSData.self }
+    override class func allowsReverseTransformation() -> Bool { true }
+
+    override func transformedValue(_ value: Any?) -> Any? {
+        guard let color = value as? UIColor else { return nil }
+        return try? NSKeyedArchiver.archivedData(
+            withRootObject: color,
+            requiringSecureCoding: true
+        )
+    }
+
+    override func reverseTransformedValue(_ value: Any?) -> Any? {
+        guard let data = value as? Data else { return nil }
+        return try? NSKeyedUnarchiver.unarchivedObject(
+            ofClass: UIColor.self,
+            from: data
+        )
+    }
+}
+
+// Registrierung z. B. im AppDelegate
+//ValueTransformer.setValueTransformer(
+//    ColorTransformer(),
+//    forName: NSValueTransformerName("ColorTransformer")
+//)
