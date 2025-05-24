@@ -158,7 +158,32 @@ extension SettingsController {
         // ── Markdown.PDF ────────────────────────────────────────
         FieldMap(settingsKey: \Settings.pdfTextSize,
                  getMarkdown: { Markdown.PDF.textSize },
-                 setMarkdown: { Markdown.PDF.textSize = $0 })
+                 setMarkdown: { Markdown.PDF.textSize = $0 }),
+        
+        FieldMap(settingsKey: \Settings.pdfMarginLeft,
+                 getMarkdown: { Markdown.PDF.marginLeft },
+                 setMarkdown: { Markdown.PDF.marginLeft = $0 },
+                 toMarkdown: { $0 * Markdown._1cm },
+                 toSettings: { $0 / Markdown._1cm }),
+
+        FieldMap(settingsKey: \Settings.pdfMarginRight,
+                 getMarkdown: { Markdown.PDF.marginRight },
+                 setMarkdown: { Markdown.PDF.marginRight = $0 },
+                 toMarkdown: { $0 * Markdown._1cm },
+                 toSettings: { $0 / Markdown._1cm }),
+
+        FieldMap(settingsKey: \Settings.pdfMarginTop,
+                 getMarkdown: { Markdown.PDF.marginTop },
+                 setMarkdown: { Markdown.PDF.marginTop = $0 },
+                 toMarkdown: { $0 * Markdown._1cm },
+                 toSettings: { $0 / Markdown._1cm }),
+
+        FieldMap(settingsKey: \Settings.pdfMarginBottom,
+                 getMarkdown: { Markdown.PDF.marginBottom },
+                 setMarkdown: { Markdown.PDF.marginBottom = $0 },
+                 toMarkdown: { $0 * Markdown._1cm },
+                 toSettings: { $0 / Markdown._1cm }),
+
     ]
 
     // Bool-Felder
