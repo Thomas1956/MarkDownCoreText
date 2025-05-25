@@ -25,12 +25,12 @@ public struct Markdown {
 
     
     /// Abstände und Einzüge in 'em' als Multiplikator zum Text Size
-    static var lineHeightMultiple     : Double = 1.1
-    static var paragraphSpacing       : Double = 0.5
-    static var paragraphSpacingBefore : Double = 1.2           /// Abstand vor einem Header
-    static var paddingHorz            : Double = 0.5
-    static var paddingBefore          : Double = 0.3
-    static var paddingAfter           : Double = 0.3
+    static var lineHeightMultiple     : Double = 1.1            /// Zeilenabstand Multiplikator
+    static var paragraphSpacing       : Double = 0.5            /// Absatzabstand
+    static var paragraphSpacingBefore : Double = 1.2            /// Absatzabstand vor einem Header
+//    static var paddingHorz            : Double = 0.5          /// blockQouteSpacings
+//    static var paddingBefore          : Double = 0.3
+//    static var paddingAfter           : Double = 0.3
 
     /// Konstanten für den Edit View Controller
     struct Edit {

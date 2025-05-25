@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		E92C9B142DDF1FD800750AB4 /* SettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B132DDF1FD800750AB4 /* SettingsController.swift */; };
 		E92C9B162DDF4B4C00750AB4 /* SettingViewController+PDF.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */; };
+		E93B3BAB2DE246A9007436C5 /* SettingViewController+BlockQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = E93B3BAA2DE246A9007436C5 /* SettingViewController+BlockQuote.swift */; };
 		E949006C2DC90E0200DD7880 /* UsefulExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = E949006B2DC90E0200DD7880 /* UsefulExtensions */; };
 		E949006E2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */; };
 		E94900892DCB99F600DD7880 /* NSTextTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94900882DCB99F000DD7880 /* NSTextTab.swift */; };
@@ -58,6 +59,7 @@
 		E928C3912DBA315C006D071D /* CoreTextTableExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoreTextTableExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E92C9B132DDF1FD800750AB4 /* SettingsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsController.swift; sourceTree = "<group>"; };
 		E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+PDF.swift"; sourceTree = "<group>"; };
+		E93B3BAA2DE246A9007436C5 /* SettingViewController+BlockQuote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+BlockQuote.swift"; sourceTree = "<group>"; };
 		E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Markdown+Hyphenation.swift"; sourceTree = "<group>"; };
 		E94900792DCB7ECA00DD7880 /* HyphenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HyphenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E94900882DCB99F000DD7880 /* NSTextTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSTextTab.swift; sourceTree = "<group>"; };
@@ -169,6 +171,7 @@
 			children = (
 				E94900A42DCE5C0E00DD7880 /* SettingViewController.swift */,
 				E952F0872DE0FA7A00F097EF /* SectionViewController+View.swift */,
+				E93B3BAA2DE246A9007436C5 /* SettingViewController+BlockQuote.swift */,
 				E94900A52DCE5C0E00DD7880 /* SettingViewController+Action.swift */,
 				E94900A62DCE5C0E00DD7880 /* SettingViewController+Content.swift */,
 				E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */,
@@ -361,6 +364,7 @@
 				E9A9407F2DC4ECA6004501E6 /* MarkdownParser+PresentationIntent.swift in Sources */,
 				E94900A82DCE5C0E00DD7880 /* SettingViewController+Action.swift in Sources */,
 				E94900B42DCE62BB00DD7880 /* CoreTextTableExample.xcdatamodeld in Sources */,
+				E93B3BAB2DE246A9007436C5 /* SettingViewController+BlockQuote.swift in Sources */,
 				E94900A92DCE5C0E00DD7880 /* SettingViewController+DataSource.swift in Sources */,
 				E94900AA2DCE5C0E00DD7880 /* SettingViewController.swift in Sources */,
 				E94900AB2DCE5C0E00DD7880 /* SettingViewController+Content.swift in Sources */,

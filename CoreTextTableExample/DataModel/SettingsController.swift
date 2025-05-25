@@ -155,6 +155,35 @@ extension SettingsController {
                  getMarkdown: { Markdown.lineHeightMultiple },
                  setMarkdown: { Markdown.lineHeightMultiple = $0 }),
 
+        FieldMap(settingsKey: \Settings.viewSpacing,
+                 getMarkdown: { Markdown.paragraphSpacing },
+                 setMarkdown: { Markdown.paragraphSpacing = $0 }),
+
+        FieldMap(settingsKey: \Settings.viewSpacingBefore,
+                 getMarkdown: { Markdown.paragraphSpacingBefore },
+                 setMarkdown: { Markdown.paragraphSpacingBefore = $0 }),
+
+        // ── Markdown.BlockQuote ────────────────────────────────────────
+        FieldMap(settingsKey: \Settings.blockHorizIndent,
+                 getMarkdown: { Markdown.BlockQuote.horizontalIndent },
+                 setMarkdown: { Markdown.BlockQuote.horizontalIndent = $0 }),
+        
+        FieldMap(settingsKey: \Settings.blockBarIndent,
+                 getMarkdown: { Markdown.BlockQuote.barIndent },
+                 setMarkdown: { Markdown.BlockQuote.barIndent = $0 }),
+
+        FieldMap(settingsKey: \Settings.blockContentIndent,
+                 getMarkdown: { Markdown.BlockQuote.contentIndent },
+                 setMarkdown: { Markdown.BlockQuote.contentIndent = $0 }),
+
+        FieldMap(settingsKey: \Settings.blockBarWidth,
+                 getMarkdown: { Markdown.BlockQuote.barWidth },
+                 setMarkdown: { Markdown.BlockQuote.barWidth = $0 }),
+
+        FieldMap(settingsKey: \Settings.blockVerticalOffset,
+                 getMarkdown: { Markdown.BlockQuote.verticalOffset },
+                 setMarkdown: { Markdown.BlockQuote.verticalOffset = $0 }),
+
         // ── Markdown.PDF ────────────────────────────────────────
         FieldMap(settingsKey: \Settings.pdfTextSize,
                  getMarkdown: { Markdown.PDF.textSize },

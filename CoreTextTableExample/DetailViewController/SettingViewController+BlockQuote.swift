@@ -1,8 +1,8 @@
 //
-//  SettingViewController+PDF.swift
+//  SettingViewController+BlockQuote.swift
 //  CoreTextTableExample
 //
-//  Created by Thomas on 22.05.25.
+//  Created by Thomas on 24.05.25.
 //
 
 import UIKit
@@ -21,27 +21,26 @@ extension SettingViewController  {
     /// Alle Attribute von BasicDetail sind in der Extension des Protokolls mit Defaultwerten vorbelegt. Demzufolge können alle
     /// standardmäßig genutzten, nicht benötigten Attribute aus dem ENUM gelöscht werden.
     ///
-    enum PdfSettings: String, BasicDetail, CaseIterable {
-        case  pdfTextSize, pdfTextColor, pdfMarginLeft, pdfMarginRight, pdfMarginTop, pdfMarginBottom,
-              pdfColorSelect
+    enum BlockQuoteSetting: String, BasicDetail, CaseIterable {
+
+        case blockHorizIndent, blockBarIndent, blockContentIndent, blockBarWidth,
+             blockVerticalOffset, blockBarColor, blockBackColor
         
         /// Titel des Items
         var title: AnyHashable? {
             switch self {
-            case .pdfTextSize:     "Textgröße"
-            case .pdfTextColor:    "Textfarbe"
-            case .pdfMarginLeft:   "Linker Rand"
-            case .pdfMarginRight:  "Rechter Rand"
-            case .pdfMarginTop:    "Oberer Rand"
-            case .pdfMarginBottom: "Unterer Rand"
-             default: nil
+            case .blockHorizIndent:    "Horizontale Einzüge"
+            case .blockBarIndent:      "Abstand zum Balken"
+            case .blockContentIndent:  "Abstand zum Inhalt"
+            case .blockBarWidth:       "Balkenbreite"
+            case .blockVerticalOffset: "Vertikaler Offset"
+            default: nil
             }
         }
         
         /// Platzhalter bei Texteingaben
         var placeholder: String? {
-            switch self {
-            case .pdfColorSelect: "Textfarbe auswählen"
+            switch self {            
             default: nil
             }
         }
@@ -49,17 +48,13 @@ extension SettingViewController  {
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
         var parameter: ContentEditType? {
             switch self {
-            case .pdfMarginLeft, .pdfMarginRight, .pdfMarginTop, .pdfMarginBottom:
-                     .einsNachkomma
-            default: .editClear
+            default: .einsNachkomma
             }
         }
         
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType {
             switch self {
-            case .pdfMarginLeft, .pdfMarginRight, .pdfMarginTop, .pdfMarginBottom:
-                     .zentimeter
             default: .number
             }
         }
@@ -77,14 +72,12 @@ extension SettingViewController  {
         ///
         var image: ImageSourceConvertible? {
             switch self {
-            case .pdfColorSelect: "paintpalette.fill"
             default: nil
             }
         }
         
         var presentation: ContentPresentation? {       /// Defaultmäßig wird TITLE verwendet
             switch self {
-            case .pdfColorSelect: .outlineDisclosure
             default: nil
             }
         }
@@ -96,38 +89,26 @@ extension SettingViewController  {
     // MARK: - Den Inhalt der Section zusammenstellen
     
     /// Der Name der Sektion MUSS manuell im SectionContent definiert werden
-    func sectionPdfSettings(_ setting: Settings, forEditing: Bool) {
-        typealias C = PdfSettings
+    func sectionBlockQuoteSetting(_ settings: Settings, forEditing: Bool) {
+        typealias Content = BlockQuoteSetting
         let rwo : ContentRWType = forEditing ? .rw : .ro
 
         ///-----------------------------------------------------------------------------------
         /// items als BasicType anlegen
         var items = [BasicType]()
-//        items.append(.basic(C.pdfTextSize.data(setting)))
-        
-        items.append(.basic([C.pdfTextSize.data(setting),
-                            [C.pdfMarginLeft  .data(setting),
-                             C.pdfMarginRight .data(setting)],
-                            [ C.pdfMarginTop   .data(setting),
-                             C.pdfMarginBottom.data(setting)],
+        items.append(.basic([Content.blockHorizIndent  .data(settings),
+                             Content.blockBarIndent    .data(settings),
+                             Content.blockContentIndent.data(settings),
                             ]))
         
-        let linkColorSelect = BasicType.stdLink(C.pdfColorSelect, type: rwo)
-        items.append(linkColorSelect)
-        
-        
-        /// SelectionContentView parametrieren
-        let parameter = ContentEditType(style: nil, list: self.colorSelectContent)
-        
-        let selectionData = ContentData(viewType: .selection, rwo, setting, C.pdfTextColor.key, parameter: parameter)
-        let selectColor = BasicType.basic(ContentDataLayout(selectionData, presentation: .plain))
+        items.append(.basic([Content.blockBarWidth      .data(settings),
+                             Content.blockVerticalOffset.data(settings),
+                            ]))
 
-        
         ///-----------------------------------------------------------------------------------
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen
         var sectionSnapshot = SectionSnapshot()
-        sectionSnapshot.append(SectionContent.PdfSettings, items: items.itemType)
-        sectionSnapshot.append([selectColor.itemType], to: linkColorSelect.itemType)
-        dataSource.apply(sectionSnapshot, to: SectionContent.PdfSettings.title, animatingDifferences: true)
+        sectionSnapshot.append(SectionContent.BlockQuoteSetting, items: items.itemType)
+        dataSource.apply(sectionSnapshot, to: SectionContent.BlockQuoteSetting.title, animatingDifferences: true)
     }
 }

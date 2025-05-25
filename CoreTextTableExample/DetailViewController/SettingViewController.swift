@@ -39,7 +39,19 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         (UIColor.black          , "Schwarz", UIColor.black          ),
     ].keyTextArray
 
+    ///---------------------------------------------------------------------------------------
 
+    static var activeSection: [SectionContent : Bool]!
+    
+    /// Sichtbarkeit der Sektionen initialisieren
+    static func initSection() {
+        var dir = SectionContent.allCases.reduce(into: [SectionContent: Bool]()) { result, property in
+            result[property] = false
+        }
+//        dir[.links] = true
+        activeSection = dir
+    }
+    
     ///---------------------------------------------------------------------------------------
     /// Den Zustand des SAVE-Button aktualisieren (Methode ist so wie hier in der Basisklasse definiert)
     ///
@@ -88,6 +100,14 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     override func onEditChange(value: Any, key: String?) {
         guard let key, let setting = self.entity else { return }
         
+        /// Änderung der Button für die Auswahl der Sektionen
+        if let item = SectionContent.allCases.first(where: {$0.rawValue == key}) {
+            Self.activeSection[item]?.toggle()
+            applySnapshot(forEditing: isEditing)
+            return
+        }
+
+        
         if key == ViewSettings.viewColor.key {
             let color = value as? UIColor ?? .label
             setting.pushProperty(value: color, key: key)
@@ -112,6 +132,10 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     /// CLOSURE - Funktion für die Aktualisierung von Attributen (Standardfunktion tut nichts)
     ///
     override func onUpdateData(value: Any, key: String?) -> AnyHashable? {
+
+        if let item = SectionContent.allCases.first(where: {$0.rawValue == key}) {
+            return Self.activeSection[item]
+        }
         
         typealias C = ViewSettings
         typealias P = PdfSettings

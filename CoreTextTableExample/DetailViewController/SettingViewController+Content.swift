@@ -18,14 +18,16 @@ extension SettingViewController  {
     //----------------------------------------------------------------------------------------
     // MARK: - Definition der Sektionen
     
-    enum SectionContent: Int, BasicSection, CaseIterable {
-        case ViewSettings, pdfSettings, print
+    enum SectionContent: String, BasicSection, CaseIterable {
+        case auswahl, ViewSettings, PdfSettings, BlockQuoteSetting, print
         
         var title : String {
             switch self {
-            case .ViewSettings: "Anzeige-Parameter"
-            case .pdfSettings:  "PDF-Parameter"
-            case .print:        "Drucken und Teilen"
+            case .ViewSettings:      "Anzeige-Parameter"
+            case .BlockQuoteSetting: "Blockzitate-Parameter"
+            case .PdfSettings:       "PDF-Parameter"
+            case .print:             "Drucken und Teilen"
+            case .auswahl:           "Auswahl"
             }
         }
         
@@ -37,6 +39,7 @@ extension SettingViewController  {
         
         var headerMode: UICollectionLayoutListConfiguration.HeaderMode {
             switch self {
+            case .auswahl: .none
             case .print: .none
             default: .firstItemInSection
             }

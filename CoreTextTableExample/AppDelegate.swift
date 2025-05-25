@@ -40,6 +40,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         /// Verwalten der Settings (Datenbank bei Bedarf initialisieren).
         _ = SettingsController.shared
          
+        SettingViewController.initSection()
+
         return true
     }
 

@@ -25,16 +25,20 @@ extension SettingViewController  {
  
         /// Die Strings sollen den Namen der Properties entsprechen (Beispiel löschen und EIGENE Case's ergänzen)
         case viewHeadIndent, viewTailIndent, viewLineHeight, viewTextSize, viewColor,
+             viewSoftBreaks, viewSpacing, viewSpacingBefore,
              viewColorSelect,
              message
 
         /// Titel des Items
         var title: AnyHashable? {
             switch self {
-            case .viewHeadIndent: "Linker Einzug"
-            case .viewTailIndent: "Rechter Einzug"
-            case .viewLineHeight: "Zeilenhöhe"
-            case .viewTextSize:   "Größe Editor"
+            case .viewHeadIndent:    "Linker Einzug"
+            case .viewTailIndent:    "Rechter Einzug"
+            case .viewLineHeight:    "Zeilenhöhe"
+            case .viewTextSize:      "Größe Editor"
+            case .viewSoftBreaks:    "Soft-Breaks nutzen"
+            case .viewSpacing:       "Abstand nach Absatz"
+            case .viewSpacingBefore: "Abstand vor Absatz"
             default: nil
             }
         }
@@ -50,6 +54,7 @@ extension SettingViewController  {
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
         var parameter: ContentEditType? {
             switch self {
+            case .viewSoftBreaks: .alignmentLeading
             default: .einsNachkomma
             }
         }
@@ -57,6 +62,7 @@ extension SettingViewController  {
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType {
             switch self {
+            case .viewSoftBreaks: .button
             default: .number
             }
         }
@@ -65,7 +71,12 @@ extension SettingViewController  {
         /// Textstil und Größen für die Positionierung
         ///
         var textstyle            : UIFont.TextStyle?       { .body }
-        var configurationWidth   : CGFloat?                {  nil  }
+        var configurationWidth   : CGFloat?                {
+            switch self {
+            case .viewSoftBreaks : 62.0
+            default: nil
+            }
+        }
         var configurationHeight  : CGFloat?                {  nil  }
         var configurationMargins : NSDirectionalEdgeInsets { .zero }
         
@@ -86,7 +97,12 @@ extension SettingViewController  {
             }
         }
 
-        var widthUsage: WidthUsage?  { nil }           /// Defaultmäßig wirkt die Breite auf LABEL
+        var widthUsage: WidthUsage?  {
+            switch self {
+            case .viewSoftBreaks: .content
+            default: nil
+            }
+        }           /// Defaultmäßig wirkt die Breite auf LABEL
     }
     
     //----------------------------------------------------------------------------------------
@@ -106,8 +122,13 @@ extension SettingViewController  {
                              Content.viewLineHeight.data(setting),
                             ]))
         
-        items.append(.basic([Content.viewTextSize.data(setting)]))
+        items.append(.basic([Content.viewSpacing.data(setting),
+                             Content.viewSpacingBefore.data(setting),
+                            ]))
         
+        items.append(.basic([Content.viewTextSize.data(setting)]))
+        items.append(.basic([Content.viewSoftBreaks.data(setting, presentation: .line)]))
+
         let linkColorSelect = BasicType.stdLink(Content.viewColorSelect, type: rwo)
         items.append(linkColorSelect)
         
