@@ -12,6 +12,37 @@ import CommonCollection
 
 
 //--------------------------------------------------------------------------------------------
+
+final class ScopeView: UICollectionReusableView {
+
+    private lazy var segmented: UISegmentedControl = {
+        let sc = UISegmentedControl(items: ["Anzeige","PDF","Block","Drucken"])
+//        sc.selectedSegmentIndex = ...
+        sc.addTarget(self, action:#selector(change(_:)), for:.valueChanged)
+        sc.translatesAutoresizingMaskIntoConstraints = false
+        return sc
+    }()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(segmented)
+        NSLayoutConstraint.activate([
+            segmented.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            segmented.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            segmented.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            segmented.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
+        ])
+    }
+    required init?(coder: NSCoder) { fatalError() }
+
+    @objc private func change(_ sender: UISegmentedControl) {
+//        NotificationCenter.default.post(name: .scopeChanged,
+//                                        object: sender.selectedSegmentIndex)
+    }
+}
+
+
+//--------------------------------------------------------------------------------------------
 // MARK: - SettingViewController
 
 class SettingViewController: CommonDetailViewController<Settings, ItemType> {
@@ -193,7 +224,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
                 }
             }
             
-            var ktxt = KeyText(value: nil, attrText: text.markdown(size: 15, textcolor: (isOk ? .label : .systemRed) ) )
+            var ktxt = KeyText(value: nil, text: text.markdown(size: 15, textcolor: (isOk ? .label : .systemRed) ) )
             if !isOk {
                 ktxt.color = .systemRed
                 ktxt.imageName = "exclamationmark.triangle.fill"

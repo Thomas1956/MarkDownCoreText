@@ -30,7 +30,7 @@ extension SettingViewController  {
              message
 
         /// Titel des Items
-        var title: AnyHashable? {
+        var title: TextSourceConvertible? {
             switch self {
             case .viewHeadIndent:    "Linker Einzug"
             case .viewTailIndent:    "Rechter Einzug"
@@ -52,9 +52,9 @@ extension SettingViewController  {
         }
                 
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
-        var parameter: ContentEditType? {
+        var parameter: [KeyText]? {
             switch self {
-            case .viewSoftBreaks: .alignmentLeading
+            case .viewSoftBreaks: .alignLeading
             default: .einsNachkomma
             }
         }
@@ -134,13 +134,13 @@ extension SettingViewController  {
         
         
         /// SelectionContentView parametrieren
-        let parameter = ContentEditType(style: nil, list: self.colorSelectContent)
+        let parameter = self.colorSelectContent
         
         let selectionData = ContentData(viewType: .selection, rwo, setting, Content.viewColor.key, parameter: parameter)
         let selectColor = BasicType.basic(ContentDataLayout(selectionData, presentation: .plain))
 
         items.append(.basic(.lineSpace(height: 8, color: .secondarySystemBackground)))
-        items.append(.stdItem(ContentData(nil, nil, Content.message.key), height: 80))
+        items.append(.stdItem(ContentData(key: Content.message.key), height: 80))
          
         ///-----------------------------------------------------------------------------------
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen

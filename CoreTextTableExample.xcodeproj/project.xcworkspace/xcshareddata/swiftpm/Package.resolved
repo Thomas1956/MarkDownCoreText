@@ -7,7 +7,7 @@
       "location" : "https://github.com/Thomas1956/CommonCollection",
       "state" : {
         "branch" : "main",
-        "revision" : "7062a069d36abccc64f1def9e8989d6a59789c29"
+        "revision" : "33d650d80fbb4299d9d65a90753ae3e7534c8b9d"
       }
     },
     {
@@ -16,7 +16,7 @@
       "location" : "https://github.com/Thomas1956/UsefulExtensions.git",
       "state" : {
         "branch" : "main",
-        "revision" : "25c552e574f2fff2b2cb56c45704ebcc5e645e14"
+        "revision" : "f328ddd2e031986acac4cbe32a55621a439e6251"
       }
     }
   ],

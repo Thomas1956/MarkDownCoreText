@@ -27,7 +27,7 @@ extension SettingViewController  {
              blockVerticalOffset, blockBarColor, blockBackColor
         
         /// Titel des Items
-        var title: AnyHashable? {
+        var title: TextSourceConvertible? {
             switch self {
             case .blockHorizIndent:    "Horizontale Einzüge"
             case .blockBarIndent:      "Abstand zum Balken"
@@ -46,7 +46,7 @@ extension SettingViewController  {
         }
                 
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
-        var parameter: ContentEditType? {
+        var parameter: [KeyText]? {
             switch self {
             default: .einsNachkomma
             }

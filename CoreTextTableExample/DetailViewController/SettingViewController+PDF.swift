@@ -26,7 +26,7 @@ extension SettingViewController  {
               pdfColorSelect
         
         /// Titel des Items
-        var title: AnyHashable? {
+        var title: TextSourceConvertible? {
             switch self {
             case .pdfTextSize:     "Textgröße"
             case .pdfTextColor:    "Textfarbe"
@@ -47,7 +47,7 @@ extension SettingViewController  {
         }
                 
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
-        var parameter: ContentEditType? {
+        var parameter: [KeyText]? {
             switch self {
             case .pdfMarginLeft, .pdfMarginRight, .pdfMarginTop, .pdfMarginBottom:
                      .einsNachkomma
@@ -117,7 +117,7 @@ extension SettingViewController  {
         
         
         /// SelectionContentView parametrieren
-        let parameter = ContentEditType(style: nil, list: self.colorSelectContent)
+        let parameter = self.colorSelectContent
         
         let selectionData = ContentData(viewType: .selection, rwo, setting, C.pdfTextColor.key, parameter: parameter)
         let selectColor = BasicType.basic(ContentDataLayout(selectionData, presentation: .plain))

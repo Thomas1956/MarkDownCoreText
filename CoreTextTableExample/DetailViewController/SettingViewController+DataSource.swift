@@ -19,31 +19,19 @@ extension SettingViewController  {
     /// A U S W A H L  zur Aktivierung der Sektionen
     ///
     func sectionAuswahl() {
-        var itemsActivate = [ItemType]()
+        var itemsActivate = [BasicType]()
         let itemsSection = SectionContent.allCases.filter( {$0 != .auswahl} )
-        
-        var index = 0
-        while index < itemsSection.count {
-            let title = itemsSection[index].title.attrString(fontsize: 15, textcolor: .defaultLineTitleColor, alignment: .right)
-            let contentLeft  = ContentData(viewType: .button, .rw, nil, itemsSection[index].rawValue,
-                                           title: title, parameter: .alignmentTrailing)
-            let layoutLeft = ContentDataLayout(contentLeft, presentation: .line, width: 30, widthUsage: .content)
-            index += 1
 
-            var contentRight = ContentData(viewType: .label)
-            if index < itemsSection.count {
-                let title = itemsSection[index].title
-                contentRight = ContentData(viewType: .button, .rw, nil, itemsSection[index].rawValue,
-                                           title: title, parameter: .alignmentLeading)
-            }
-            let layoutRight = ContentDataLayout(contentRight, presentation: .line, width: 30, widthUsage: .content)
-            index += 1
-
-            itemsActivate.append(BasicType.basic([layoutLeft, layoutRight]).itemType)
+        let layout = itemsSection.map { section in
+            let content = ContentData(viewType: .button, .rw, nil, section.rawValue,
+                                      title: section.title, parameter: .alignLeading)
+            return ContentDataLayout(content)
         }
-        
+
+        itemsActivate.append(.basic(ContentDataLayout(subLayouts: layout)))
+
         var sectionSnapshot = SectionSnapshot()
-        sectionSnapshot.append(SectionContent.auswahl, items: itemsActivate)
+        sectionSnapshot.append(SectionContent.auswahl, items: itemsActivate.itemType)
         dataSource.apply(sectionSnapshot, to: SectionContent.auswahl.title, animatingDifferences: true)
     }
 

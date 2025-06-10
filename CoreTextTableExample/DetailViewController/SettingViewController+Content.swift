@@ -23,10 +23,10 @@ extension SettingViewController  {
         
         var title : String {
             switch self {
-            case .ViewSettings:      "Anzeige-Parameter"
-            case .BlockQuoteSetting: "Blockzitate-Parameter"
-            case .PdfSettings:       "PDF-Parameter"
-            case .print:             "Drucken und Teilen"
+            case .ViewSettings:      "Anzeige"
+            case .BlockQuoteSetting: "Block"
+            case .PdfSettings:       "PDF"
+            case .print:             "Drucken"
             case .auswahl:           "Auswahl"
             }
         }
@@ -69,7 +69,7 @@ extension SettingViewController  {
         /// Die Strings sollen den Namen der Properties entsprechen
         case textDefaults
         
-        var title: AnyHashable? {
+        var title: TextSourceConvertible? {
             switch self {
             case .textDefaults:
               """
@@ -86,7 +86,7 @@ extension SettingViewController  {
         
         var textstyle: UIFont.TextStyle? { .callout }
 
-        var parameter: ContentEditType? {
+        var parameter: [KeyText]? {
             switch self {
             default: nil
           }
