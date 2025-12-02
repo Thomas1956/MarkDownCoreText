@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E90395422EDDE360001E660F /* SwiftParser in Frameworks */ = {isa = PBXBuildFile; productRef = E90395412EDDE360001E660F /* SwiftParser */; };
+		E90395442EDDE360001E660F /* SwiftSyntax in Frameworks */ = {isa = PBXBuildFile; productRef = E90395432EDDE360001E660F /* SwiftSyntax */; };
+		E90395462EDDE3B9001E660F /* MarkdownParser+Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90395452EDDE3B9001E660F /* MarkdownParser+Highlight.swift */; };
+		E90395482EDDE8BC001E660F /* IdentifierPalette.json in Resources */ = {isa = PBXBuildFile; fileRef = E90395472EDDE8BC001E660F /* IdentifierPalette.json */; };
 		E92C9B142DDF1FD800750AB4 /* SettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B132DDF1FD800750AB4 /* SettingsController.swift */; };
 		E92C9B162DDF4B4C00750AB4 /* SettingViewController+PDF.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */; };
 		E93B3BAB2DE246A9007436C5 /* SettingViewController+BlockQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = E93B3BAA2DE246A9007436C5 /* SettingViewController+BlockQuote.swift */; };
@@ -56,6 +60,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E90395452EDDE3B9001E660F /* MarkdownParser+Highlight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MarkdownParser+Highlight.swift"; sourceTree = "<group>"; };
+		E90395472EDDE8BC001E660F /* IdentifierPalette.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = IdentifierPalette.json; sourceTree = "<group>"; };
 		E928C3912DBA315C006D071D /* CoreTextTableExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoreTextTableExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E92C9B132DDF1FD800750AB4 /* SettingsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsController.swift; sourceTree = "<group>"; };
 		E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+PDF.swift"; sourceTree = "<group>"; };
@@ -111,7 +117,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				E949006C2DC90E0200DD7880 /* UsefulExtensions in Frameworks */,
+				E90395422EDDE360001E660F /* SwiftParser in Frameworks */,
 				E94900AF2DCE5DAB00DD7880 /* CommonCollection in Frameworks */,
+				E90395442EDDE360001E660F /* SwiftSyntax in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +217,7 @@
 				E9A9405B2DC4ECA6004501E6 /* AppDelegate.swift */,
 				E9A9405D2DC4ECA6004501E6 /* CoreTextTableView.swift */,
 				E9A9405E2DC4ECA6004501E6 /* Info.plist */,
+				E90395472EDDE8BC001E660F /* IdentifierPalette.json */,
 				E9A9405C2DC4ECA6004501E6 /* Assets.xcassets */,
 				E9A940602DC4ECA6004501E6 /* LaunchScreen.storyboard */,
 				E9A940622DC4ECA6004501E6 /* Main.storyboard */,
@@ -224,6 +233,7 @@
 				E9A940642DC4ECA6004501E6 /* MarkdownParser+AttributedString.swift */,
 				E9A940652DC4ECA6004501E6 /* MarkdownParser+BlockContent.swift */,
 				E9A940662DC4ECA6004501E6 /* MarkdownParser+BlockRenderer.swift */,
+				E90395452EDDE3B9001E660F /* MarkdownParser+Highlight.swift */,
 				E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */,
 				E9A940672DC4ECA6004501E6 /* MarkdownParser+Font.swift */,
 				E9A940682DC4ECA6004501E6 /* MarkdownParser+ImageAttachment.swift */,
@@ -252,6 +262,8 @@
 			packageProductDependencies = (
 				E949006B2DC90E0200DD7880 /* UsefulExtensions */,
 				E94900AE2DCE5DAB00DD7880 /* CommonCollection */,
+				E90395412EDDE360001E660F /* SwiftParser */,
+				E90395432EDDE360001E660F /* SwiftSyntax */,
 			);
 			productName = CoreTextTableExample;
 			productReference = E928C3912DBA315C006D071D /* CoreTextTableExample.app */;
@@ -311,6 +323,7 @@
 			packageReferences = (
 				E949006A2DC90E0200DD7880 /* XCRemoteSwiftPackageReference "UsefulExtensions" */,
 				E94900AC2DCE5CFA00DD7880 /* XCRemoteSwiftPackageReference "CommonCollection" */,
+				E90395402EDDE360001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E928C3922DBA315C006D071D /* Products */;
@@ -328,6 +341,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E90395482EDDE8BC001E660F /* IdentifierPalette.json in Resources */,
 				E9A940712DC4ECA6004501E6 /* Assets.xcassets in Resources */,
 				E9A940732DC4ECA6004501E6 /* LaunchScreen.storyboard in Resources */,
 				E9A940742DC4ECA6004501E6 /* Main.storyboard in Resources */,
@@ -363,6 +377,7 @@
 				E94900892DCB99F600DD7880 /* NSTextTab.swift in Sources */,
 				E9A9407F2DC4ECA6004501E6 /* MarkdownParser+PresentationIntent.swift in Sources */,
 				E94900A82DCE5C0E00DD7880 /* SettingViewController+Action.swift in Sources */,
+				E90395462EDDE3B9001E660F /* MarkdownParser+Highlight.swift in Sources */,
 				E94900B42DCE62BB00DD7880 /* CoreTextTableExample.xcdatamodeld in Sources */,
 				E93B3BAB2DE246A9007436C5 /* SettingViewController+BlockQuote.swift in Sources */,
 				E94900A92DCE5C0E00DD7880 /* SettingViewController+DataSource.swift in Sources */,
@@ -443,6 +458,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = tw.CoreTextTableExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -471,6 +488,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = tw.CoreTextTableExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -669,6 +688,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		E90395402EDDE360001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swiftlang/swift-syntax.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 602.0.0;
+			};
+		};
 		E949006A2DC90E0200DD7880 /* XCRemoteSwiftPackageReference "UsefulExtensions" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Thomas1956/UsefulExtensions";
@@ -688,6 +715,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		E90395412EDDE360001E660F /* SwiftParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E90395402EDDE360001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */;
+			productName = SwiftParser;
+		};
+		E90395432EDDE360001E660F /* SwiftSyntax */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E90395402EDDE360001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */;
+			productName = SwiftSyntax;
+		};
 		E949006B2DC90E0200DD7880 /* UsefulExtensions */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E949006A2DC90E0200DD7880 /* XCRemoteSwiftPackageReference "UsefulExtensions" */;

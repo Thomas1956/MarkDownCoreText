@@ -13,10 +13,10 @@ import UIKit
 public struct Markdown {
     
     /// Konstanten
-    static let _1cm                   : Double = 1/2.54 * 72   /// 1cm in Zoll umrechnen und 72dpi Standard
+    static let _1cm                   : Double = 1/2.54 * 72    /// 1cm in Zoll umrechnen und 72dpi Standard
 
     /// Globale Parameter
-    static var textSize               : Double = 17            /// Eingestellte Fontgröße für View
+    static var textSize               : Double = 17             /// Eingestellte Fontgröße für View
     static var textColor              : UIColor = .label        /// Eingestellte Textfarbe
 
     static var headIndent             : Double = 0.0
@@ -34,18 +34,18 @@ public struct Markdown {
 
     /// Konstanten für den Edit View Controller
     struct Edit {
-        static var textSize     : Double = 17                  /// Eingestellte Fontgröße für View
+        static var textSize     : Double = 17                   /// Eingestellte Fontgröße für View
         static var textColor    : UIColor = .label              /// Eingestellte Textfarbe
     }
     
     /// Konstanten für die PDF-Ausgabe
     struct PDF {                                                /// Seitengröße A4
         static var pageRect     = CGRect(x: 0, y: 0, width: 21 * _1cm, height: 29.7 * _1cm)
-        static var marginLeft   : Double = 2 * _1cm            /// Seitenränder definieren
+        static var marginLeft   : Double = 2 * _1cm             /// Seitenränder definieren
         static var marginTop    : Double = 2 * _1cm
         static var marginRight  : Double = 2 * _1cm
         static var marginBottom : Double = 2 * _1cm
-        static var textSize     : Double = 12                  /// Eingestellte Fontgröße für PDF
+        static var textSize     : Double = 12                   /// Eingestellte Fontgröße für PDF
         static var textColor    : UIColor = .label              /// Eingestellte Textfarbe
     }
     
@@ -60,32 +60,33 @@ public struct Markdown {
     /// Konstanten für die Liste (Anführungszeichen der Liste in der Hierarchie)
     struct List {
         static var bulletPoint      : [String] = [.listBullet_1, .listBullet_2, .listBullet_3]
-        static var leftIndent       : Double = 10              /// Linker Rand der untersten Hierarchie
+        static var leftIndent       : Double = 10               /// Linker Rand der untersten Hierarchie
     }
     
     /// Konstanten für den vertikalen Trennstrich (Ruler)
     struct Ruler {
-        static var rightIndent      : Double = 5               /// rechter Rand der Trennlinie
-        static var height           : Double = 20              /// Höhe des Hintergrundes der Trennlinie
-        static var lineHeight       : Double = 4               /// Strichdicke der Trennlinie
-        static var colorHighLight   : Bool    = true            /// Die Farbe der Trennlinie wird etwas heller
+        static var rightIndent      : Double = 5                /// rechter Rand der Trennlinie
+        static var height           : Double = 20               /// Höhe des Hintergrundes der Trennlinie
+        static var lineHeight       : Double = 4                /// Strichdicke der Trennlinie
+        static var colorHighLight   : Bool   = true             /// Die Farbe der Trennlinie wird etwas heller
     }                                                           /// als die Textfarbe dargestellt
     
     /// Konstanten für den Hintergrund des Block Quote
     struct BlockQuote {
-        static var contentIndent    : Double = 30              /// Abstand des Inhaltes vom Rand des Block Quote
-        static var horizontalIndent : Double = 0               /// Ränder Hintergrund links und rechts
-        static var verticalOffset   : Double = 5               /// Verschiebung des  Hintergrunds nach unten
+        static var contentIndent    : Double = 30               /// Abstand des Inhaltes vom Rand des Block Quote
+        static var horizontalIndent : Double = 0                /// Ränder Hintergrund links und rechts
+        static var verticalOffset   : Double = 5                /// Verschiebung des  Hintergrunds nach unten
         static var backgroundColor  : UIColor = .systemGray6    /// Farbe für den Hintergrund
             
-        static var barIndent        : Double = 5               /// Linker Rand des Balkens
-        static var barWidth         : Double = 10              /// Breite des Balkens
+        static var barIndent        : Double = 5                /// Linker Rand des Balkens
+        static var barWidth         : Double = 10               /// Breite des Balkens
         static var barColor         : UIColor = .systemGray4    /// Farbe für den Balken
     }
     
     /// Konstanten für den Code Block
     struct CodeBlock {
-        static var textsize         : Double = 14              /// Größe des Textfonts im Code Block
+        static var textsize         : Double = 14               /// Größe des Textfonts im Code Block
+        static var padding          = UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
     }
 }
 

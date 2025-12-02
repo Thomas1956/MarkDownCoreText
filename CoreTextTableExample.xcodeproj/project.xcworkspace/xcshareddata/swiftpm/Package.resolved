@@ -1,5 +1,5 @@
 {
-  "originHash" : "715001b6b6ad0d2c6603f64b0721acd782ecc3bc873acc7d710f5ebf33130361",
+  "originHash" : "0d3e39bba12b543a14bd54d3440de69737594482151d4772605064c33805a1c7",
   "pins" : [
     {
       "identity" : "commoncollection",
@@ -7,7 +7,16 @@
       "location" : "https://github.com/Thomas1956/CommonCollection",
       "state" : {
         "branch" : "main",
-        "revision" : "33d650d80fbb4299d9d65a90753ae3e7534c8b9d"
+        "revision" : "47b3375b11649fbad76f59354f7aef9d6bf4a8c7"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-syntax.git",
+      "state" : {
+        "revision" : "4799286537280063c85a32f09884cfbca301b1a1",
+        "version" : "602.0.0"
       }
     },
     {
