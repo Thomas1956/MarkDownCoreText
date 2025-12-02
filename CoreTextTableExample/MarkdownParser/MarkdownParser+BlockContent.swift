@@ -411,7 +411,7 @@ struct BlockContent {
             var tabulators         : [NSTextTab]  =  []
             var firstLineHeadIndent    : CGFloat  =  block.hasBlockQuote ? MB.contentIndent : M.headIndent
             var headIndent             : CGFloat  =  block.hasBlockQuote ? MB.contentIndent : M.headIndent
-            let tailIndent             : CGFloat  =  M.tailIndent
+            var tailIndent             : CGFloat  =  M.tailIndent
             var paragraphSpacing       : CGFloat  =  fontSize * M.paragraphSpacing
             var paragraphSpacingBefore : CGFloat  =  0
             let alignment      : NSTextAlignment  =  .natural
@@ -457,7 +457,10 @@ struct BlockContent {
             if block.hasCodeBlock {
                 attrText.addAttributes([.font: font])
                 paragraphSpacingBefore = 0
-                paragraphSpacing = 5
+                paragraphSpacing       = 5
+                headIndent             = 0
+                firstLineHeadIndent    = 0
+                tailIndent             = 0
             }
             
             ///-------------------------------------------------------------------------------
