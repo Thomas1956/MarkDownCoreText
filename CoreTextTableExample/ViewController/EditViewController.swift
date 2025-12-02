@@ -60,9 +60,6 @@ class EditViewController: UIViewController {
 
         navigationItem.rightBarButtonItems = [settingButton, deleteButton, exportButton, importButton]
         
-        /// Gespeicherten Text laden
-        loadSavedText()
-        
         /// Auf Hintergrund / Terminate achten und speichern
         NotificationCenter.default.addObserver(self, selector: #selector(saveTextToDefaults),
                                                name: UIApplication.willResignActiveNotification,
@@ -72,6 +69,12 @@ class EditViewController: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        /// Gespeicherten Text laden
+        loadSavedText()
+    }
     
     //----------------------------------------------------------------------------------------
     // MARK: - Bedienfunktionen
