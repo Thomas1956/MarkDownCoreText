@@ -470,6 +470,8 @@ struct BlockContent {
                     string:     blockContent.listBulletPointStr,
                     attributes: blockContent.attrText.attributes(at: 0, effectiveRange: nil))
                 
+                                                                /// Bullet muss auf den Standard-Font gesetzt werden
+                attrList.addAttributes([.font: UIFont.systemFont(ofSize: textSize, weight: .regular) ])
                 attrList.append(blockContent.attrText)          /// Original-Text anhängen
                 attrText = attrList
 
