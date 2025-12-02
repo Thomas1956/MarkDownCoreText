@@ -45,7 +45,8 @@ extension BlockRenderer {
     typealias M  = Markdown
     typealias MB = Markdown.BlockQuote
     typealias MR = Markdown.Ruler
-    
+    typealias MC = Markdown.CodeBlock
+
     ///---------------------------------------------------------------------------------------
     /// Textgröße des aktuellen Fonts
     var fontSize: CGFloat {
@@ -382,37 +383,100 @@ final class CodeBlockRenderer: BlockRenderer {
     var frame: CGRect = .zero
     var pageIndex: Int = 0                 // 0-basiert
     private let text: NSAttributedString
-
+    private let padding = MC.padding
+    
     init(blockContent: BlockContent) {
         self.blockContent = blockContent
-        self.text = blockContent.attrText
+        
+        /// Font einstellen
+        let font = UIFont.monospacedSystemFont(ofSize: MC.textsize, weight: .regular)
+
+        /// Wenn der Code Block als Language Hint 'tab4' hat, als Tabulator 4 Spaces sonst 8 Spaces verwenden.
+        let tabHint = blockContent.block?.languageHint ?? ""
+
+        /// Tabulatoren einstellen (Defaultwert 4)
+        let spacesPerTab = tabHint.contains("tab8") ? 8 : 4
+        let tabText = String(repeating: "1", count: spacesPerTab)
+        let tabWidth = tabText.size(withAttributes: [.font: font]).width
+        
+        /// Klasse des Syntax-Highlighters laden und aufrufen
+        let syntaxHighlight = SyntaxHighlight(filename: "IdentifierPalette")
+        var attrString = syntaxHighlight.makeHighlighted(code: blockContent.attrText.string,
+                                                         fontSize: MC.textsize)
+        
+        /// Den Defaultwert für die Abstände der Tabulatoren und der Einzüge setzen
+        let tabs = (1...10).map { NSTextTab(textAlignment: .left, location: CGFloat($0) * tabWidth) }
+        
+        if let paragraphStyle = blockContent.attrText.attribute(.paragraphStyle,
+                                                       at: 0,
+                                                       effectiveRange: nil) as? NSMutableParagraphStyle {
+            paragraphStyle.tabStops            = tabs
+            paragraphStyle.defaultTabInterval  = tabWidth
+            paragraphStyle.firstLineHeadIndent = 0
+            paragraphStyle.headIndent          = 0
+            paragraphStyle.tailIndent          = 0
+            paragraphStyle.lineHeightMultiple  = 1.0
+            paragraphStyle.minimumLineHeight   = 0
+            
+            /// Den Text übernehmen und die Attribute des Absatzes zufügen.
+            attrString.mergeAttributes(AttributeContainer([.paragraphStyle: paragraphStyle]))
+       }
+        self.text = NSAttributedString(attrString)
     }
     
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
-        let innerWidth = width - 16
+
+        let availableWidth = width - M.headIndent + M.tailIndent
+        let innerWidth = availableWidth - padding.left - padding.right
+
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
         let constraint = CGSize(width: innerWidth, height: .greatestFiniteMagnitude)
-        let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
-        let h = ceil(size.height) + 16
-        self.frame = CGRect(x: 0, y: y, width: width, height: h)
-        return h
+        let size = CTFramesetterSuggestFrameSizeWithConstraints(
+            fs,
+            CFRange(location: 0, length: text.length),
+            nil,
+            constraint,
+            nil
+        )
+
+        let textHeight = ceil(size.height)
+        let totalHeight = textHeight + padding.top + padding.bottom
+
+        self.frame = CGRect(x: M.headIndent,
+                            y: y,
+                            width: availableWidth,
+                            height: totalHeight)
+
+        return totalHeight
     }
-    
+
     func draw(in context: CGContext) {
+        
         // Hintergrund
-        context.setFillColor(UIColor.systemGray6.cgColor)
+        context.setFillColor(MB.backgroundColor.cgColor)
         context.setStrokeColor(MB.backgroundColor.lowlight.cgColor)
         context.setLineWidth(1)
-        
+
         let rectBackground = CGRect(origin: .zero, size: frame.size)
-        context.addPath( UIBezierPath(roundedRect: rectBackground.insetBy(dx: 2, dy: 2), cornerRadius: 8).cgPath)
-        context.strokePath()
-        
+        context.addPath(
+            UIBezierPath(
+                roundedRect: rectBackground.insetBy(dx: 2, dy: 2),
+                cornerRadius: 8
+            ).cgPath
+        )
+        context.drawPath(using: .fillStroke)
+
         // Text
+        let textRect = rectBackground.inset(by: padding)
+
         let path = CGMutablePath()
-        path.addRect(CGRect(x: 8, y: 8, width: frame.width - 16, height: frame.height - 16))
+        path.addRect(textRect)
+
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
-        let ctFrame = CTFramesetterCreateFrame(fs, CFRange(location: 0, length: text.length), path, nil)
+        let ctFrame = CTFramesetterCreateFrame(fs,
+                                               CFRange(location: 0, length: text.length),
+                                               path,
+                                               nil)
         CTFrameDraw(ctFrame, context)
     }
 }
