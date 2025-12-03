@@ -43,7 +43,6 @@ class EditViewController: UIViewController {
         textView.textColor       = Markdown.Edit.textColor
         
         self.extendedLayoutIncludesOpaqueBars = true
-//        self.navigationController?.navigationBar.prefersLargeTitles = true
 
         if #available(iOS 16, *) {
             navigationItem.style = .navigator
@@ -139,31 +138,74 @@ class EditViewController: UIViewController {
         let objectID = SettingsController.shared.activeObjectID
         guard let settings = childContext.object(with: objectID) as? Settings else { return }
 
-        let viewController = SettingViewController(object: settings, title: "Parameter") { shouldSave in
-            if shouldSave {
-                do {
-                    /// Zuerst im ChildContext speichern, danach im ViewContext
-                    try SettingsController.shared.save(settings, in: childContext)
-                    /// Zurückschreiben der Settings in Markdown
-                    SettingsController.apply(settings)
-                    self.detailViewController?.markdown(text: self.textView.text)
+        let viewController = SettingViewController(object: settings, title: "Parameter",
+            
+            ///-------------------------------------------------------------------------------
+            /// Änderungen im Live View anzeigen
+            ///
+            onLiveChange: { [weak self] draftSettings in
+                guard let self else { return }
+                // Nur LESEN aus dem Child, NICHT speichern:
+                SettingsController.apply(draftSettings)
+                self.detailViewController?.markdown(text: self.textView.text)
+            },
+                                                   
+           ///-------------------------------------------------------------------------------
+           /// OK oder CANCEL beim Abbruch
+           ///
+           onFinish: { [weak self] shouldSave in
+                guard let self else { return }
+                if shouldSave {
+                    do {
+                        /// Zuerst im ChildContext speichern, danach im ViewContext
+                        try SettingsController.shared.save(settings, in: childContext)
+                        /// Zurückschreiben der Settings in Markdown
+                        SettingsController.apply(settings)
+                        self.detailViewController?.markdown(text: self.textView.text)
+                    }
+                    catch {
+                        let nserror = error as NSError
+                        fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+                    }
                 }
-                catch {
-                    let nserror = error as NSError
-                    fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-                }
+                else {
+                    /// CANCEL: UI auf den Zustand des Parents zurücksetzen
+                      if let parentSettings = try? self.viewContext.existingObject(with: objectID) as? Settings {
+                          SettingsController.apply(parentSettings)
+                          self.detailViewController?.markdown(text: self.textView.text)
+                      }
+                 }
+                self.dismiss(animated: true)
             }
-            self.dismiss(animated: true)
-        }
+        )
         
         viewController.navigationItem.title = NSLocalizedString("Parameter zufügen",
                                               comment: "Parameter zufügen als Überschrift")
-        
-        let navigationController = UINavigationController(rootViewController: viewController)
-        navigationController.modalTransitionStyle = .coverVertical
-        navigationController.modalPresentationStyle = .automatic
+        viewController.preferredContentSize = CGSize(width: 550, height: 720)
 
-        present(navigationController, animated: true)
+        let nav = UINavigationController(rootViewController: viewController)
+
+        if traitCollection.userInterfaceIdiom == .pad {
+            /// iPad: Popover über der linken Spalte
+            nav.modalPresentationStyle = .popover
+
+            if let popover = nav.popoverPresentationController {
+                popover.sourceView = view   // deine Edit-View im Primary
+
+                /// Anker-Punkt links oben in der Primary-Spalte
+                let margin: CGFloat = 16
+                let y = view.safeAreaInsets.top    // z.B. unter der NavBar
+
+                popover.sourceRect = CGRect(x: margin, y: y, width: 1, height: 1)
+                popover.permittedArrowDirections = [.up, .down]
+            }
+        } else {
+            /// iPhone: weiter wie bisher (vollflächig)
+            nav.modalPresentationStyle = .automatic
+            nav.modalTransitionStyle = .coverVertical
+        }
+
+        present(nav, animated: true)
     }
 }
 
