@@ -387,9 +387,12 @@ final class CodeBlockRenderer: BlockRenderer {
     
     init(blockContent: BlockContent) {
         self.blockContent = blockContent
+        let fontStd  = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
+        let fontSize = fontStd?.pointSize ?? 17.0
+        let size = fontSize * MC.codeTextSizeFactor / 100.0
         
         /// Font einstellen
-        let font = UIFont.monospacedSystemFont(ofSize: MC.textsize, weight: .regular)
+        let font = UIFont.monospacedSystemFont(ofSize: size, weight: .regular)
 
         /// Wenn der Code Block als Language Hint 'tab4' hat, als Tabulator 4 Spaces sonst 8 Spaces verwenden.
         let tabHint = blockContent.block?.languageHint ?? ""
@@ -402,7 +405,7 @@ final class CodeBlockRenderer: BlockRenderer {
         /// Klasse des Syntax-Highlighters laden und aufrufen
         let syntaxHighlight = SyntaxHighlight(filename: "IdentifierPalette")
         var attrString = syntaxHighlight.makeHighlighted(code: blockContent.attrText.string,
-                                                         fontSize: MC.textsize)
+                                                         fontSize: size)
         
         /// Den Defaultwert für die Abstände der Tabulatoren und der Einzüge setzen
         let tabs = (1...10).map { NSTextTab(textAlignment: .left, location: CGFloat($0) * tabWidth) }
@@ -447,7 +450,7 @@ final class CodeBlockRenderer: BlockRenderer {
                             width: availableWidth,
                             height: totalHeight)
 
-        return totalHeight
+        return totalHeight + M.paragraphSpacing * fontSize
     }
 
     func draw(in context: CGContext) {
