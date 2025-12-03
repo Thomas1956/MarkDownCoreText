@@ -5,14 +5,6 @@
 //  Created by Thomas on 08.05.25.
 //
 
-
-//
-//  CommonSplitViewController.swift
-//  CommonCollection
-//
-//  Created by Thomas on 24.03.25.
-//
-
 import UIKit
 
 //--------------------------------------------------------------------------------------------
