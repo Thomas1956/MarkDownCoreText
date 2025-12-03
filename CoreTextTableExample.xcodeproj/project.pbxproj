@@ -7,14 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E90395422EDDE360001E660F /* SwiftParser in Frameworks */ = {isa = PBXBuildFile; productRef = E90395412EDDE360001E660F /* SwiftParser */; };
-		E90395442EDDE360001E660F /* SwiftSyntax in Frameworks */ = {isa = PBXBuildFile; productRef = E90395432EDDE360001E660F /* SwiftSyntax */; };
 		E90395462EDDE3B9001E660F /* MarkdownParser+Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90395452EDDE3B9001E660F /* MarkdownParser+Highlight.swift */; };
 		E90395482EDDE8BC001E660F /* IdentifierPalette.json in Resources */ = {isa = PBXBuildFile; fileRef = E90395472EDDE8BC001E660F /* IdentifierPalette.json */; };
+		E90395542EDF9826001E660F /* SwiftParser in Frameworks */ = {isa = PBXBuildFile; productRef = E90395532EDF9826001E660F /* SwiftParser */; };
+		E90395562EDF9826001E660F /* SwiftSyntax in Frameworks */ = {isa = PBXBuildFile; productRef = E90395552EDF9826001E660F /* SwiftSyntax */; };
+		E903956B2EE04026001E660F /* CommonCollection in Frameworks */ = {isa = PBXBuildFile; productRef = E903956A2EE04026001E660F /* CommonCollection */; };
+		E903956D2EE04037001E660F /* UsefulExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = E903956C2EE04037001E660F /* UsefulExtensions */; };
 		E92C9B142DDF1FD800750AB4 /* SettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B132DDF1FD800750AB4 /* SettingsController.swift */; };
 		E92C9B162DDF4B4C00750AB4 /* SettingViewController+PDF.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */; };
 		E93B3BAB2DE246A9007436C5 /* SettingViewController+BlockQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = E93B3BAA2DE246A9007436C5 /* SettingViewController+BlockQuote.swift */; };
-		E949006C2DC90E0200DD7880 /* UsefulExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = E949006B2DC90E0200DD7880 /* UsefulExtensions */; };
 		E949006E2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */; };
 		E94900892DCB99F600DD7880 /* NSTextTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94900882DCB99F000DD7880 /* NSTextTab.swift */; };
 		E949008C2DCCB49B00DD7880 /* CommonSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E949008B2DCCB49B00DD7880 /* CommonSplitViewController.swift */; };
@@ -23,7 +24,6 @@
 		E94900A92DCE5C0E00DD7880 /* SettingViewController+DataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94900A72DCE5C0E00DD7880 /* SettingViewController+DataSource.swift */; };
 		E94900AA2DCE5C0E00DD7880 /* SettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94900A42DCE5C0E00DD7880 /* SettingViewController.swift */; };
 		E94900AB2DCE5C0E00DD7880 /* SettingViewController+Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94900A62DCE5C0E00DD7880 /* SettingViewController+Content.swift */; };
-		E94900AF2DCE5DAB00DD7880 /* CommonCollection in Frameworks */ = {isa = PBXBuildFile; productRef = E94900AE2DCE5DAB00DD7880 /* CommonCollection */; };
 		E94900B12DCE5E0400DD7880 /* Settings+PropertyReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94900B02DCE5E0400DD7880 /* Settings+PropertyReminder.swift */; };
 		E94900B42DCE62BB00DD7880 /* CoreTextTableExample.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E94900B22DCE62BB00DD7880 /* CoreTextTableExample.xcdatamodeld */; };
 		E952F0882DE0FA7A00F097EF /* SectionViewController+View.swift in Sources */ = {isa = PBXBuildFile; fileRef = E952F0872DE0FA7A00F097EF /* SectionViewController+View.swift */; };
@@ -116,10 +116,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E949006C2DC90E0200DD7880 /* UsefulExtensions in Frameworks */,
-				E90395422EDDE360001E660F /* SwiftParser in Frameworks */,
-				E94900AF2DCE5DAB00DD7880 /* CommonCollection in Frameworks */,
-				E90395442EDDE360001E660F /* SwiftSyntax in Frameworks */,
+				E903956D2EE04037001E660F /* UsefulExtensions in Frameworks */,
+				E90395542EDF9826001E660F /* SwiftParser in Frameworks */,
+				E90395562EDF9826001E660F /* SwiftSyntax in Frameworks */,
+				E903956B2EE04026001E660F /* CommonCollection in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,13 +257,17 @@
 			buildRules = (
 			);
 			dependencies = (
+				E903955D2EDF9994001E660F /* PBXTargetDependency */,
+				E903955A2EDF9962001E660F /* PBXTargetDependency */,
+				E90395582EDF995C001E660F /* PBXTargetDependency */,
+				E903954C2EDF967E001E660F /* PBXTargetDependency */,
 			);
 			name = CoreTextTableExample;
 			packageProductDependencies = (
-				E949006B2DC90E0200DD7880 /* UsefulExtensions */,
-				E94900AE2DCE5DAB00DD7880 /* CommonCollection */,
-				E90395412EDDE360001E660F /* SwiftParser */,
-				E90395432EDDE360001E660F /* SwiftSyntax */,
+				E90395532EDF9826001E660F /* SwiftParser */,
+				E90395552EDF9826001E660F /* SwiftSyntax */,
+				E903956A2EE04026001E660F /* CommonCollection */,
+				E903956C2EE04037001E660F /* UsefulExtensions */,
 			);
 			productName = CoreTextTableExample;
 			productReference = E928C3912DBA315C006D071D /* CoreTextTableExample.app */;
@@ -321,9 +325,9 @@
 			mainGroup = E928C3882DBA315C006D071D;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				E949006A2DC90E0200DD7880 /* XCRemoteSwiftPackageReference "UsefulExtensions" */,
-				E94900AC2DCE5CFA00DD7880 /* XCRemoteSwiftPackageReference "CommonCollection" */,
-				E90395402EDDE360001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */,
+				E903954A2EDF9611001E660F /* XCRemoteSwiftPackageReference "CommonCollection" */,
+				E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */,
+				E903955B2EDF9987001E660F /* XCRemoteSwiftPackageReference "UsefulExtensions" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E928C3922DBA315C006D071D /* Products */;
@@ -407,6 +411,22 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		E903954C2EDF967E001E660F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = E903954B2EDF967E001E660F /* CommonCollection */;
+		};
+		E90395582EDF995C001E660F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = E90395572EDF995C001E660F /* SwiftSyntax */;
+		};
+		E903955A2EDF9962001E660F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = E90395592EDF9962001E660F /* SwiftParser */;
+		};
+		E903955D2EDF9994001E660F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = E903955C2EDF9994001E660F /* UsefulExtensions */;
+		};
 		E949007E2DCB7ECA00DD7880 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E928C3902DBA315C006D071D /* CoreTextTableExample */;
@@ -688,7 +708,15 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		E90395402EDDE360001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */ = {
+		E903954A2EDF9611001E660F /* XCRemoteSwiftPackageReference "CommonCollection" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Thomas1956/CommonCollection";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.2.0;
+			};
+		};
+		E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/swiftlang/swift-syntax.git";
 			requirement = {
@@ -696,44 +724,56 @@
 				minimumVersion = 602.0.0;
 			};
 		};
-		E949006A2DC90E0200DD7880 /* XCRemoteSwiftPackageReference "UsefulExtensions" */ = {
+		E903955B2EDF9987001E660F /* XCRemoteSwiftPackageReference "UsefulExtensions" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Thomas1956/UsefulExtensions";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.2.4;
-			};
-		};
-		E94900AC2DCE5CFA00DD7880 /* XCRemoteSwiftPackageReference "CommonCollection" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Thomas1956/CommonCollection";
-			requirement = {
-				branch = main;
-				kind = branch;
+				minimumVersion = 2.0.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		E90395412EDDE360001E660F /* SwiftParser */ = {
+		E903954B2EDF967E001E660F /* CommonCollection */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E90395402EDDE360001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */;
+			package = E903954A2EDF9611001E660F /* XCRemoteSwiftPackageReference "CommonCollection" */;
+			productName = CommonCollection;
+		};
+		E90395532EDF9826001E660F /* SwiftParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */;
 			productName = SwiftParser;
 		};
-		E90395432EDDE360001E660F /* SwiftSyntax */ = {
+		E90395552EDF9826001E660F /* SwiftSyntax */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E90395402EDDE360001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */;
+			package = E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */;
 			productName = SwiftSyntax;
 		};
-		E949006B2DC90E0200DD7880 /* UsefulExtensions */ = {
+		E90395572EDF995C001E660F /* SwiftSyntax */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E949006A2DC90E0200DD7880 /* XCRemoteSwiftPackageReference "UsefulExtensions" */;
+			package = E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */;
+			productName = SwiftSyntax;
+		};
+		E90395592EDF9962001E660F /* SwiftParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */;
+			productName = SwiftParser;
+		};
+		E903955C2EDF9994001E660F /* UsefulExtensions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E903955B2EDF9987001E660F /* XCRemoteSwiftPackageReference "UsefulExtensions" */;
 			productName = UsefulExtensions;
 		};
-		E94900AE2DCE5DAB00DD7880 /* CommonCollection */ = {
+		E903956A2EE04026001E660F /* CommonCollection */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E94900AC2DCE5CFA00DD7880 /* XCRemoteSwiftPackageReference "CommonCollection" */;
+			package = E903954A2EDF9611001E660F /* XCRemoteSwiftPackageReference "CommonCollection" */;
 			productName = CommonCollection;
+		};
+		E903956C2EE04037001E660F /* UsefulExtensions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E903955B2EDF9987001E660F /* XCRemoteSwiftPackageReference "UsefulExtensions" */;
+			productName = UsefulExtensions;
 		};
 /* End XCSwiftPackageProductDependency section */
 
