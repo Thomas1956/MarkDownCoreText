@@ -66,10 +66,10 @@ public extension AttributedString {
     ///---------------------------------------------------------------------------------------
     /// Debugging
     ///
-    enum DebugInfo { case none, blocks, text, presentationIntent, paragraphStyle, paragraphSpacing, lineIndent }
+    enum DebugInfo { case nothing, blocks, text, presentationIntent, paragraphStyle, paragraphSpacing, lineIndent }
     
     func debugInfo(_ infotype: DebugInfo, _ title: String? = nil) {
-        if infotype == .none { return }
+        if infotype == .nothing { return }
         
         var titleText = "\n---"
         if let title { titleText += " \(title) "}
@@ -80,7 +80,7 @@ public extension AttributedString {
             let paragraphStyle = block[keyPath: \.paragraphStyle]
             
             switch infotype {
-            case .none: ()
+            case .nothing: ()
                 
             case .blocks:
                 print("\(block)")
@@ -153,169 +153,3 @@ public extension AttributedString {
         return String(text.padding(toLength: 20, withPad: ".", startingAt: 0))
     }
 }
-
-
-//--------------------------------------------------------------------------------------------
-// MARK: - Zufügen der Userspezifische Attribute zu einen AttributedString
-/*
-public extension AttributedString {
-
-    /// User-Attribute
-    ///
-    mutating func userAttributes(size: CGFloat, weight: UIFont.Weight) {
-        var attrString = self
-        /// Segmente des AttributedString, die identische Eigenschaften haben
-        for run in attrString.runs {
-            
-            /// Bearbeiten der StyleAttribute
-            if let styleMode = run.style {
-                let currentRange = run.range
-                attrString[currentRange].uiKit.foregroundColor = styleMode.userstyle.color
-                attrString[currentRange].font = UIFont.systemFont(ofSize: styleMode.userstyle.size,
-                                                                  weight: styleMode.userstyle.weight )
-            }
-            
-            /// Bearbeiten der ColorAttribute
-            if let colorMode = run.color {
-                let currentRange = run.range
-                let color = DefaultColors(rawValue: colorMode)?.color ?? UIColor(hexstring: colorMode) ?? .red
-                attrString[currentRange].uiKit.foregroundColor = color
-            }
-            
-            /// Temporäre Merker für Textgröße und Schriftstärke
-            var fontsize  : CGFloat? = nil
-            var fontweight: UIFont.Weight? = nil
-            
-            /// Bearbeiten der Schriftstärke
-            if let weightMode = run.weight {
-                fontweight = weightMode.weight
-                fontsize   = size               /// Wenn Weight gesetzt wird, muss auch die Defaultgröße übernommen werden.
-            }
-            
-            /// Bearbeiten der Textgröße
-            if let sizeMode = run.size {
-                fontsize = sizeMode             /// Merken der Textgröße
-            }
-            
-            /// Wenn die Textgröße und optional auch die Schriftstärke gesetzt ist, muss der Font eingestellt werden
-            if let fontsize {
-                let currentRange = run.range
-                attrString[currentRange].font = UIFont.systemFont(ofSize: fontsize, weight: fontweight ?? weight)
-            }
-            
-        }
-        self = attrString
-    }
-    
-    /// Zuweisung der vordefinierten Farben aus einem String als RawValue
-    enum DefaultColors: String, Codable, Hashable {
-        
-        case red, orange, yellow, green, mint, teal, cyan, blue, indigo, purple, pink, brown,
-             gray, gray2, gray3, gray4, gray5, gray6, black, label
-        
-        var color: UIColor {
-            switch self {
-            case .red:      return .systemRed
-            case .orange:   return .systemOrange
-            case .yellow:   return .systemYellow
-            case .green:    return .systemGreen
-            case .mint:     return .systemMint
-            case .teal:     return .systemTeal
-            case .cyan:     return .systemCyan
-            case .blue:     return .systemBlue
-            case .indigo:   return .systemIndigo
-            case .purple:   return .systemPurple
-            case .pink:     return .systemPink
-            case .brown:    return .systemBrown
-                
-            case .gray:     return .systemGray
-            case .gray2:    return .systemGray2
-            case .gray3:    return .systemGray3
-            case .gray4:    return .systemGray4
-            case .gray5:    return .systemGray5
-            case .gray6:    return .systemGray6
-                
-            case .black,
-                    .label:    return .label
-            }
-        }
-    }
-}
-
-
-//--------------------------------------------------------------------------------------------
-// MARK: - Userspezifische Attribute für einen AttributedString
-
-/// Textgröße
-///
-public struct SizeAttribute: CodableAttributedStringKey, MarkdownDecodableAttributedStringKey {
-    public typealias Value = CGFloat
-    public static var name: String = "size"
-}
-
-/// Textfarbe
-///
-public struct ColorAttribute: CodableAttributedStringKey, MarkdownDecodableAttributedStringKey {
-    public typealias Value = String
-    public static var name: String = "color"
-}
-
-/// Schriftstärke
-public struct WeightAttribute: CodableAttributedStringKey, MarkdownDecodableAttributedStringKey {
-    public enum Value: String, Codable, Hashable {
-        
-        case black, heavy, bold, semibold, medium, regular, light, thin, ultralight
-        
-        var weight: UIFont.Weight {
-            switch self {
-            case .black:      .black            /// Dicker ist als HEAVY.
-            case .heavy:      .heavy            /// Dicker ist als BOLD.
-            case .bold:       .bold             /// Dicker ist als die Standardschrift.
-            case .semibold:   .semibold         /// Etwas dicker als MEDIUM.
-            case .medium:     .medium           /// Etwas dicker als die Standardschrift.
-            case .regular:    .regular          /// Standardschrift.
-            case .light:      .light            /// Etwas dünner ist als die Standardschrift.
-            case .thin:       .thin             /// Dünner als die Standardschrift.
-            case .ultralight: .ultraLight       /// Dünner und heller ist als die Standardschrift.
-            }
-        }
-    }
-    public static var name: String = "weight"
-}
-
-/// Kombinierter Stil des Textes
-///
-public struct StyleAttribute: CodableAttributedStringKey, MarkdownDecodableAttributedStringKey {
-    public enum Value: String, Codable, Hashable {
-        case plain, dark, black, marked
-        
-        var userstyle: (color: UIColor, size: CGFloat, weight: UIFont.Weight) {
-            switch self {
-            case .plain:  (UIColor.gray,       13, .regular)
-            case .dark:   (UIColor.darkGray,   13, .semibold)
-            case .black:  (UIColor.gray,       15, .semibold)
-            case .marked: (UIColor.systemRed,  17, .semibold)
-            }
-        }
-    }
-    public static var name: String = "style"
-}
-
-/// Attribute, die eingestellt werden können
-///
-public extension AttributeScopes {
-    struct CommonAttributes: AttributeScope {
-        let size:   SizeAttribute
-        let color:  ColorAttribute
-        let weight: WeightAttribute
-        let style:  StyleAttribute
-    }
-    var commonAttr: CommonAttributes.Type { CommonAttributes.self }
-}
-
-public extension AttributeDynamicLookup {
-    subscript<T: AttributedStringKey>(dynamicMember keyPath: KeyPath<AttributeScopes.CommonAttributes, T>) -> T {
-        self[T.self]
-    }
-}
-*/
