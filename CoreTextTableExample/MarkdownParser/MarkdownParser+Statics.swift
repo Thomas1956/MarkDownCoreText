@@ -85,8 +85,8 @@ public struct Markdown {
     
     /// Konstanten für den Code Block
     struct CodeBlock {
-        static var textsize         : Double = 14               /// Größe des Textfonts im Code Block
-        static var padding          = UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
+        static var codeTextSizeFactor : Double = 80.0           /// Prozentuale Größe des Textfonts im Code Block
+        static var padding            = UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
     }
 }
 
