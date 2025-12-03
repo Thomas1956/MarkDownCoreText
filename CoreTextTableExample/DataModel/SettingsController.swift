@@ -12,6 +12,7 @@ import CommonCollection
 
 
 // MARK: – SettingsController für Loading, Saving & Restoring
+@MainActor
 final class SettingsController {
     static let shared = SettingsController()
     private let ctx = Persistence.shared.persistentContainer.viewContext
@@ -140,6 +141,10 @@ extension SettingsController {
         FieldMap(settingsKey: \Settings.viewTextSize,
                  getMarkdown: { Markdown.textSize },
                  setMarkdown: { Markdown.textSize = $0 }),
+
+        FieldMap(settingsKey: \Settings.codeTextSizeFactor,
+                 getMarkdown: { Markdown.CodeBlock.codeTextSizeFactor },
+                 setMarkdown: { Markdown.CodeBlock.codeTextSizeFactor = $0 }),
 
         FieldMap(settingsKey: \Settings.viewHeadIndent,
                  getMarkdown: { Markdown.headIndent },
