@@ -87,7 +87,7 @@ public class MarkdownParser {
         ///-----------------------------------------------------------------------------------
         /// Debuggen der Blöcke im AttributedString
         ///
-        attr.debugInfo(.none, "Vorher")
+        attr.debugInfo(.nothing, "Vorher")
  
         return CoreTextBlockFactory.renderers(from: attr, textSize: size)
     }
