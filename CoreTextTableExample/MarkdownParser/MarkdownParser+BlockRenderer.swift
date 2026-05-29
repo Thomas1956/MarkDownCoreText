@@ -486,36 +486,238 @@ final class CodeBlockRenderer: BlockRenderer {
 
 
 // -------- Table -------------------------------------------------------
-/// Noch sehr einfach: fixed‑width Spalten, automatische Zeilenhöhe pro Zelle
 final class TableRenderer: BlockRenderer {
     var blockContent: BlockContent
     var frame: CGRect = .zero
     var pageIndex: Int = 0                 // 0-basiert
 
-    private let text: NSAttributedString
-    private let block: BlockContent.TableBlock
-    private let cellText: NSAttributedString
-
-    init(blockContent: BlockContent) {
-        self.blockContent = blockContent
-        self.text = blockContent.attrText
-
-        self.block = blockContent.tableBlock
-        self.cellText = text
+    private typealias MT = Markdown.Table
+    
+    private let tableBlock: BlockContent.TableBlock
+    private let cells: [[NSAttributedString?]]
+    private let padding = UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
+    private let gridLineWidth: CGFloat = 1
+    private let minimumColumnWidth: CGFloat = 44
+    private let minimumRowHeight: CGFloat
+    private var columnWidths: [CGFloat]
+    private var rowHeights: [CGFloat] = []
+    private var tableRect: CGRect = .zero
+    
+    init(blockContents: [BlockContent]) {
+        let firstBlock = blockContents.first ?? BlockContent(attrText: NSAttributedString(), block: nil, range: AttributedString().startIndex..<AttributedString().endIndex)
+        self.blockContent = firstBlock
+        self.tableBlock = firstBlock.tableBlock
+        self.minimumRowHeight = max(24, firstBlock.attrText.size().height + padding.top + padding.bottom)
+        self.columnWidths = Self.preferredColumnWidths(from: tableBlock.columns,
+                                                       padding: UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8),
+                                                       minimumColumnWidth: 44)
+        
+        let rowCount = max(1, tableBlock.lastRow + 1)
+        let columnCount = max(1, tableBlock.lastColumn + 1)
+        var cells = Array(repeating: Array<NSAttributedString?>(repeating: nil, count: columnCount), count: rowCount)
+        
+        for content in blockContents {
+            guard let block = content.block,
+                  let row = block.tableRow,
+                  let column = block.tableColumn,
+                  row < rowCount,
+                  column < columnCount
+            else { continue }
+            
+            cells[row][column] = Self.cellText(from: content.attrText,
+                                               row: row,
+                                               column: column,
+                                               tableBlock: tableBlock)
+        }
+        
+        self.cells = cells
     }
+    
+    convenience init(blockContent: BlockContent) {
+        self.init(blockContents: [blockContent])
+    }
+    
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
-        // Prototyp: Gesamtbreite = width, Höhe = Anzahl Zeilen × 24
-        let rowHeight: CGFloat = 24
-        let h = rowHeight * CGFloat(block.lastRow + 1) + 8
-        self.frame = CGRect(x: 0, y: y, width: width, height: h)
-        return h
+        let hasBlockQuote = blockContent.block?.hasBlockQuote ?? false
+        let leftIndent = hasBlockQuote ? MB.contentIndent : M.headIndent
+        let availableWidth = max(0, width - leftIndent + M.tailIndent)
+        columnWidths = Self.fittedColumnWidths(from: tableBlock.columns,
+                                               availableWidth: availableWidth,
+                                               padding: padding,
+                                               minimumColumnWidth: minimumColumnWidth)
+        rowHeights = measureRowHeights(columnWidths: columnWidths)
+        
+        let tableHeight = rowHeights.reduce(0, +)
+        let bottomSpacing = M.paragraphSpacing * fontSize
+        tableRect = CGRect(x: leftIndent, y: bottomSpacing, width: columnWidths.reduce(0, +), height: tableHeight)
+        let totalHeight = tableHeight + bottomSpacing
+        frame = CGRect(x: 0, y: y, width: width, height: totalHeight)
+        return totalHeight
     }
+    
     func draw(in context: CGContext) {
-        // Placeholder: zeichne einfach Texte – echte Tabellen‑Logik wäre hier
-        let path = CGMutablePath(); path.addRect(CGRect(origin: .zero, size: frame.size))
-        let fs = CTFramesetterCreateWithAttributedString(cellText as CFAttributedString)
-        let ctFrame = CTFramesetterCreateFrame(fs, CFRange(location: 0, length: cellText.length), path, nil)
-        CTFrameDraw(ctFrame, context)
+        guard !columnWidths.isEmpty, !rowHeights.isEmpty else { return }
+        
+        drawBackgrounds(in: context)
+        drawCellTexts(in: context)
+        drawGrid(in: context)
+    }
+    
+    private static func cellText(from source: NSAttributedString,
+                                 row: Int,
+                                 column: Int,
+                                 tableBlock: BlockContent.TableBlock) -> NSAttributedString {
+        let text = NSMutableAttributedString(attributedString: source)
+        let trimCharacters = CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: String.paragraphSeparator))
+        while text.length > 0,
+              let lastScalar = text.string.unicodeScalars.last,
+              trimCharacters.contains(lastScalar) {
+            text.deleteCharacters(in: NSRange(location: text.length - 1, length: 1))
+        }
+        
+        let sourceFont = source.length > 0 ? source.attribute(.font, at: 0, effectiveRange: nil) as? UIFont : nil
+        let fontSize = sourceFont?.pointSize ?? CGFloat(Markdown.textSize)
+        let weight = row == 0 ? MT.weightHeader : MT.weightText
+        let font = UIFont.systemFont(ofSize: fontSize, weight: weight)
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.lineBreakMode = .byWordWrapping
+        paragraph.alignment = column < tableBlock.columns.count ? tableBlock.columns[column].alignment : .left
+        paragraph.lineHeightMultiple = Markdown.lineHeightMultiple
+        
+        let range = NSRange(location: 0, length: text.length)
+        text.addAttributes([.font: font, .paragraphStyle: paragraph], range: range)
+        return text
+    }
+    
+    private static func preferredColumnWidths(from columns: [BlockContent.TableColumn],
+                                              padding: UIEdgeInsets,
+                                              minimumColumnWidth: CGFloat) -> [CGFloat] {
+        columns.map { column in
+            max(minimumColumnWidth, column.lineWidth + padding.left + padding.right)
+        }
+    }
+    
+    private static func fittedColumnWidths(from columns: [BlockContent.TableColumn],
+                                           availableWidth: CGFloat,
+                                           padding: UIEdgeInsets,
+                                           minimumColumnWidth: CGFloat) -> [CGFloat] {
+        let preferredWidths = preferredColumnWidths(from: columns,
+                                                    padding: padding,
+                                                    minimumColumnWidth: minimumColumnWidth)
+        guard !preferredWidths.isEmpty, availableWidth > 0 else { return preferredWidths }
+        
+        let preferredTotal = preferredWidths.reduce(0, +)
+        guard preferredTotal > availableWidth else { return preferredWidths }
+        
+        let minimumTotal = minimumColumnWidth * CGFloat(preferredWidths.count)
+        guard availableWidth > minimumTotal else {
+            return Array(repeating: minimumColumnWidth, count: preferredWidths.count)
+        }
+        
+        let shrinkableTotal = preferredWidths.reduce(0) { $0 + max(0, $1 - minimumColumnWidth) }
+        let targetShrink = preferredTotal - availableWidth
+        guard shrinkableTotal > 0 else { return preferredWidths }
+        
+        return preferredWidths.map { width in
+            let shrinkableWidth = max(0, width - minimumColumnWidth)
+            let shrink = targetShrink * shrinkableWidth / shrinkableTotal
+            return floor(max(minimumColumnWidth, width - shrink))
+        }
+    }
+    
+    private func measureRowHeights(columnWidths: [CGFloat]) -> [CGFloat] {
+        cells.map { rowCells in
+            let heights = rowCells.enumerated().map { column, text -> CGFloat in
+                guard let text else { return minimumRowHeight }
+                let textWidth = max(1, columnWidths[column] - padding.left - padding.right)
+                let hyphenatedText = text.insertingLineEndHyphens(width: textWidth)
+                let framesetter = CTFramesetterCreateWithAttributedString(hyphenatedText as CFAttributedString)
+                let constraint = CGSize(width: textWidth, height: .greatestFiniteMagnitude)
+                let size = CTFramesetterSuggestFrameSizeWithConstraints(framesetter,
+                                                                        CFRange(location: 0, length: hyphenatedText.length),
+                                                                        nil,
+                                                                        constraint,
+                                                                        nil)
+                return ceil(size.height) + padding.top + padding.bottom
+            }
+            return max(minimumRowHeight, heights.max() ?? minimumRowHeight)
+        }
+    }
+    
+    private func drawBackgrounds(in context: CGContext) {
+        context.setFillColor(UIColor.secondarySystemBackground.cgColor)
+        context.fill(tableRect)
+        
+        guard let headerHeight = rowHeights.first else { return }
+        let headerRect = CGRect(x: tableRect.minX,
+                                y: tableRect.maxY - headerHeight,
+                                width: tableRect.width,
+                                height: headerHeight)
+        context.setFillColor(UIColor.tertiarySystemFill.cgColor)
+        context.fill(headerRect)
+    }
+    
+    private func drawGrid(in context: CGContext) {
+        let halfLineWidth = gridLineWidth / 2
+        let left = tableRect.minX + halfLineWidth
+        let right = tableRect.maxX - halfLineWidth
+        let bottom = tableRect.minY + halfLineWidth
+        let top = tableRect.maxY - halfLineWidth
+        
+        context.setStrokeColor(UIColor.separator.cgColor)
+        context.setLineWidth(gridLineWidth)
+        context.setLineCap(.butt)
+        
+        context.move(to: CGPoint(x: left, y: bottom))
+        context.addLine(to: CGPoint(x: left, y: top))
+        
+        var x = tableRect.minX
+        for (index, width) in columnWidths.enumerated() {
+            x += width
+            let lineX = index == columnWidths.count - 1 ? right : x
+            context.move(to: CGPoint(x: lineX, y: bottom))
+            context.addLine(to: CGPoint(x: lineX, y: top))
+        }
+        
+        context.move(to: CGPoint(x: left, y: top))
+        context.addLine(to: CGPoint(x: right, y: top))
+        
+        var y = tableRect.maxY
+        for (index, height) in rowHeights.enumerated() {
+            y -= height
+            let lineY = index == rowHeights.count - 1 ? bottom : y
+            context.move(to: CGPoint(x: left, y: lineY))
+            context.addLine(to: CGPoint(x: right, y: lineY))
+        }
+        context.strokePath()
+    }
+    
+    private func drawCellTexts(in context: CGContext) {
+        var rowTop = tableRect.maxY
+        for (rowIndex, rowCells) in cells.enumerated() {
+            let rowHeight = rowHeights[rowIndex]
+            var x = tableRect.minX
+            
+            for (columnIndex, text) in rowCells.enumerated() {
+                defer { x += columnWidths[columnIndex] }
+                guard let text else { continue }
+                
+                let textRect = CGRect(x: x + padding.left,
+                                      y: rowTop - rowHeight + padding.bottom,
+                                      width: max(1, columnWidths[columnIndex] - padding.left - padding.right),
+                                      height: max(1, rowHeight - padding.top - padding.bottom))
+                let hyphenatedText = text.insertingLineEndHyphens(width: textRect.width)
+                let path = CGMutablePath()
+                path.addRect(textRect)
+                let framesetter = CTFramesetterCreateWithAttributedString(hyphenatedText as CFAttributedString)
+                let frame = CTFramesetterCreateFrame(framesetter,
+                                                     CFRange(location: 0, length: hyphenatedText.length),
+                                                     path,
+                                                     nil)
+                CTFrameDraw(frame, context)
+            }
+            rowTop -= rowHeight
+        }
     }
 }
 

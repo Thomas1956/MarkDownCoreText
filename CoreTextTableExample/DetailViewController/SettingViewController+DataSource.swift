@@ -16,26 +16,6 @@ import UsefulExtensions
 extension SettingViewController  {
         
     ///---------------------------------------------------------------------------------------
-    /// A U S W A H L  zur Aktivierung der Sektionen
-    ///
-    func sectionAuswahl() {
-        var itemsActivate = [BasicType]()
-        let itemsSection = SectionContent.allCases.filter( {$0 != .auswahl} )
-
-        let layout = itemsSection.map { section in
-            let content = ContentData(viewType: .button, .rw, nil, section.rawValue,
-                                      title: section.title, parameter: .alignLeading)
-            return ContentDataLayout(content)
-        }
-
-        itemsActivate.append(.basic(ContentDataLayout(subLayouts: layout)))
-
-        var sectionSnapshot = SectionSnapshot()
-        sectionSnapshot.append(SectionContent.auswahl, items: itemsActivate.itemType)
-        dataSource.apply(sectionSnapshot, to: SectionContent.auswahl.title, animatingDifferences: true)
-    }
-
-    ///---------------------------------------------------------------------------------------
     /// Inhalt der Section für das Drucken zusammenstellen
     ///
     func sectionPrint() {
@@ -46,12 +26,14 @@ extension SettingViewController  {
 
         items.append(.stdInfo(Content.textDefaults.title))
         /// Defaultwerte wiederherstellen.
-        self.linkDefaults = BasicType.stdItem("Defaultwerte einstellen" , image: "arrow.trianglehead.2.clockwise")
+        let linkDefaults = BasicType.stdItem("Defaultwerte einstellen" , image: "arrow.trianglehead.2.clockwise")
         items.append(linkDefaults)
+        self.linkDefaults = linkDefaults
         
         /// Drucken oder Teilen
-        self.linkPrint = BasicType.stdItem("Drucken oder Teilen", image: "square.and.arrow.up")
+        let linkPrint = BasicType.stdItem("Drucken oder Teilen", image: "square.and.arrow.up")
         items.append(linkPrint)
+        self.linkPrint = linkPrint
 
         var sectionSnapshot = SectionSnapshot()
         sectionSnapshot.append(SectionContent.print, items: items.itemType)
@@ -69,7 +51,7 @@ extension SettingViewController  {
         snapshot.deleteSections(SectionContent.allCases.map {$0.title} )
         dataSource.apply(snapshot)
 
-        sectionAuswahl()
+//        sectionAuswahl()
         
         if Self.activeSection[.BlockQuoteSetting] ?? false {
             sectionBlockQuoteSetting(settings, forEditing: forEditing)

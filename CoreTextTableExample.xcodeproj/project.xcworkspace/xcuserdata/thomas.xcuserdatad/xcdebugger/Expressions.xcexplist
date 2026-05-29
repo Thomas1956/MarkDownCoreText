@@ -12,6 +12,9 @@
          contextName = "closure #1 in MarkdownScrollView.markdown(string:size:weight:textColor:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
+         contextName = "StepperContentView.configure(configuration:):StepperContentView.swift">
+      </ContextState>
+      <ContextState
          contextName = "BlockRenderer.contentRect.getter:MarkdownScrollView.swift">
       </ContextState>
       <ContextState
@@ -29,16 +32,27 @@
          contextName = "BlockRenderer.drawContent(in:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
+         contextName = "StepperContentView.debugUpdateTextColor():StepperContentView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.minStepperWidth + self.label.width + 10">
+            </PersistentString>
+            <PersistentString
+               value = "self.stepperWidth">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "ParagraphRenderer.draw(in:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
          contextName = "HorizontalRuleRenderer.draw(in:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
-         contextName = "static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
+         contextName = "MarkdownContentView.layout(width:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
-         contextName = "MarkdownContentView.layout(width:):MarkdownScrollView.swift">
+         contextName = "static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
          contextName = "MarkdownScrollView.markdown(string:size:weight:textColor:):MarkdownScrollView.swift">

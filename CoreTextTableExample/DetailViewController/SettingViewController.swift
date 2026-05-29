@@ -12,41 +12,25 @@ import CommonCollection
 
 
 //--------------------------------------------------------------------------------------------
-
-final class ScopeView: UICollectionReusableView {
-
-    private lazy var segmented: UISegmentedControl = {
-        let sc = UISegmentedControl(items: ["Anzeige","PDF","Block","Drucken"])
-//        sc.selectedSegmentIndex = ...
-        sc.addTarget(self, action:#selector(change(_:)), for:.valueChanged)
-        sc.translatesAutoresizingMaskIntoConstraints = false
-        return sc
-    }()
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        addSubview(segmented)
-        NSLayoutConstraint.activate([
-            segmented.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            segmented.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            segmented.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            segmented.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
-        ])
-    }
-    required init?(coder: NSCoder) { fatalError() }
-
-    @objc private func change(_ sender: UISegmentedControl) {
-//        NotificationCenter.default.post(name: .scopeChanged,
-//                                        object: sender.selectedSegmentIndex)
-    }
-}
-
-
-//--------------------------------------------------------------------------------------------
 // MARK: - SettingViewController
 
 class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     
+    ///---------------------------------------------------------------------------------------
+    /// Rückmeldung mit Anzeige als Live View
+    public convenience init(object        : Settings,
+                            title         : String,
+                            firstResponse : Bool = true,
+                            onLiveChange  : ((Settings)->Void)?,
+                            onFinish      : ((Bool)->Void)?)
+    {
+        self.init(object: object, title: title, onChange: onFinish)
+        self.onLiveChange = onLiveChange
+    }
+    
+    public var onLiveChange: ((Settings) -> Void)?
+    
+    ///---------------------------------------------------------------------------------------
     /// Titel des Detail View Controllers und den ENUM für die Konfiguration der Sektionen.
     override var titleController : String { "Details" }
     override var sectionConfiguration : SectionDirectory { SectionContent.configuration }
@@ -55,8 +39,8 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     override var sectionWithList : String { "" }
 
     /// Liste der Links, die für Aktionen benötigt werden.
-    var linkPrint: BasicType!
-    var linkDefaults: BasicType!
+    var linkPrint: BasicType?
+    var linkDefaults: BasicType?
     
     let colorSelectContent = [
         (nil                    , "-"      , .black                 ),
@@ -79,7 +63,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         var dir = SectionContent.allCases.reduce(into: [SectionContent: Bool]()) { result, property in
             result[property] = false
         }
-//        dir[.links] = true
+        dir[.ViewSettings] = true
         activeSection = dir
     }
     
@@ -93,9 +77,8 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         }
         
         /// Aktualisierung der Meldung veranlassen
-        ItemType.reloadIfNeeded(on: self.dataSource, ViewSettings.message.key)
+        dataSource.reloadIfNeeded([ViewSettings.message.key])
  
-        
         let changed = setting.changedValues()
         changed.forEach( { print($0.key, $0.value) } )
         
@@ -106,7 +89,40 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     // MARK: - Initialisierung
     
     override func viewDidLoad() {
+//        CGFloat.defaultLineLabelWidth = 120
+        
+        self.topPinnedHeader = CapsuleHeaderView.self
         super.viewDidLoad()
+
+        ///-----------------------------------------------------------------------------------
+        /// TopPinnedHeader für die Auswahl
+        ///
+        CapsuleHeaderView.attach(
+            to        : collectionView,
+            dataSource: dataSource,
+            
+            input     :
+                [.text  ("Anzeige",                      toolTip: "Anzeige der Elemente"),
+                 .text  ("PDF",                          toolTip: "PDF-Parameter einstellen"),
+                 .text  ("Block",                        toolTip: "Blockparameter einstellen"),
+                 .symbol("printer",             "Druck", toolTip: "Drucken"),
+                 .symbol("questionmark.circle", "Hilfe", toolTip: "Hilfe")
+                ],
+            
+            onChange  : { index in
+                /// alle Sektionen ermitteln
+                let sections = SectionContent.allCases
+                guard sections.indices.contains(index) else { return }
+
+                /// Zuerst alle Sektionen abwählen (false)
+                for key in sections { Self.activeSection[key] = false }
+
+                /// Neu ausgewählte Sektion setzen
+                let key = sections[index]
+                Self.activeSection[key] = true
+                self.applySnapshot(forEditing: self.isEditing)
+             })
+
         view.backgroundColor = .white
         
         /// Kann nicht in der Basisklasse definiert werden
@@ -138,17 +154,26 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             return
         }
 
-        
-        if key == ViewSettings.viewColor.key {
+        if key == ViewSettings.viewHeadIndent.key {
+            print("HeadIndent \(value) ")
+            setting.pushProperty(value: value as? Double, key: key)
+//            ItemType.reconfigureIfNeeded(on: self.dataSource, ViewSettings.viewHeadIndent_1.key)
+        }
+        else if key == ViewSettings.viewTailIndent.key {
+            print("TailIndent \(value) ")
+            setting.pushProperty(value: value as? Double, key: key)
+//            ItemType.reconfigureIfNeeded(on: self.dataSource, ViewSettings.viewTailIndent_1.key)
+        }
+
+        else if key == ViewSettings.viewColor.key {
             let color = value as? UIColor ?? .label
             setting.pushProperty(value: color, key: key)
-            ItemType.reloadIfNeeded(on: self.dataSource, ViewSettings.viewColorSelect.key)
             print("Color", setting.isChanged, key, value)
         }
         else if key == PdfSettings.pdfTextColor.key {
             let color = value as? UIColor ?? .label
             setting.pushProperty(value: color, key: key)
-            ItemType.reloadIfNeeded(on: self.dataSource, PdfSettings.pdfColorSelect.key)
+//            ItemType.reloadIfNeeded(on: self.dataSource, PdfSettings.pdfColorSelect.key)
             print("Color", setting.isChanged, key, value)
         }
        else {
@@ -157,6 +182,9 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             print("Änderungen", setting.isChanged, key, value)
         }
         saveButtonState()
+        
+        /// Rückmeldung über Änderungen für Live Preview
+        onLiveChange?(setting)
     }
     
     ///---------------------------------------------------------------------------------------
@@ -171,18 +199,18 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         typealias C = ViewSettings
         typealias P = PdfSettings
 
-        if key == C.viewColorSelect.key {
-            /// Das Image aus der Entity heraus ermitteln und in einen Image-Namen umwandeln.
-            if let color = entity?.property(forKey: C.viewColor.key) as? UIColor
-            {
-                /// Die Liste aller auswählbaren Images holen und den aktuellen Eintrag suchen.
-                guard var select = colorSelectContent.first(where: {$0.value as? UIColor == color} )
-                else { return nil }
-                
-                select.value = nil
-                return select
-            }
-        }
+//        if key == C.viewColorSelect.key {
+//            /// Das Image aus der Entity heraus ermitteln und in einen Image-Namen umwandeln.
+//            if let color = entity?.property(forKey: C.viewColor.key) as? UIColor
+//            {
+//                /// Die Liste aller auswählbaren Images holen und den aktuellen Eintrag suchen.
+//                guard var select = colorSelectContent.first(where: {$0.value as? UIColor == color} )
+//                else { return nil }
+//                
+//                select.value = nil
+//                return select
+//            }
+//        }
         
         if key == P.pdfColorSelect.key {
             /// Das Image aus der Entity heraus ermitteln und in einen Image-Namen umwandeln.
@@ -255,8 +283,8 @@ extension SettingViewController: UICollectionViewDelegate {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
 
         /// Beispiel für Aufruf des Druckens
-        if item == linkPrint   .itemType { actionShare(linkPrint) }
-        if item == linkDefaults.itemType { actionSetDefaults()    }
+        if item == linkPrint?   .itemType { actionShare(linkPrint) }
+        if item == linkDefaults?.itemType { actionSetDefaults()    }
     }
     
     /// Abfrage, ob eine Zelle ausgewählt werden kann
@@ -265,8 +293,8 @@ extension SettingViewController: UICollectionViewDelegate {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return false }
 
         /// Beispiel für Aufruf des Druckens
-        if item == linkPrint   .itemType  { return true }
-        if item == linkDefaults.itemType  { return true }
+        if item == linkPrint?   .itemType  { return true }
+        if item == linkDefaults?.itemType  { return true }
 
         collectionView.deselectItem(at: indexPath, animated: false)
         return false

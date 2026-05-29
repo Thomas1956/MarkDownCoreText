@@ -161,7 +161,7 @@ extension AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value
     /// T A B L E
     ///
     /// Ist eine Tabelle in den Components des Presentation Intent  vorhanden ?
-    var hasTable: Bool { self.tableParameter() != nil }
+    var hasTable: Bool { self.tableParameter != nil }
 
     /// Spalte der Tabelle
     var tableColumn: Int? {
@@ -188,10 +188,10 @@ extension AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value
     }
 
     /// Identität der Tabelle
-    var tableIdentity: Int? { self.tableParameter()?.identity }
+    var tableIdentity: Int? { self.tableParameter?.identity }
     
     /// Alignment der Spalte der Tabelle
-    var tableAlignments: [NSTextAlignment]? { self.tableParameter()?.alignments }
+    var tableAlignments: [NSTextAlignment]? { self.tableParameter?.alignments }
     
     ///---------------------------------------------------------------------------------------
     /// Aufbereitung der Daten für Listen (ordered / unordered)
@@ -220,7 +220,7 @@ extension AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value
     /// Aufbereitung der Daten für Tabellen
     /// Rückgabe der Tabellen-Identity, Alignments der Tabelle (damit auch Spaltenzahl)
     ///
-    private func tableParameter() -> (identity: Int, alignments: [NSTextAlignment])?
+    private func tableParameter_1() -> (identity: Int, alignments: [NSTextAlignment])?
     {
         if let table = self.components.compactMap( { component in
             if case .table(let columns) = component.kind {return (columns: columns, identity: component.identity) }
@@ -233,6 +233,102 @@ extension AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value
         }
         return nil
     }
+    
+    /// Aufbereitung der Daten für Tabellen
+    private var tableParameter: (identity: Int, alignments: [NSTextAlignment])? {
+        guard let component = tableComponent else { return nil }
+        guard case .table(let columns) = component.kind else { return nil }
+        
+        let alignments = columns.map {
+            switch $0.alignment {
+                case .left:   return NSTextAlignment.left
+                case .center: return .center
+                default:      return .right
+            }
+        }
+        
+        return (identity: component.identity, alignments: alignments)
+    }
+    
+    //----------------------------------------------------------------------------------------
+    // MARK: Helpers
+    
+    typealias PresentationType = PresentationIntent.IntentType
+    
+    /// Erste Component, die dem Test entspricht
+    private func firstComponent(where matches: (PresentationType) -> Bool) -> PresentationType? {
+        components.first(where: matches)
+    }
+    
+    /// Alle Components, die dem Test entsprechen
+    private func components(where matches: (PresentationType) -> Bool) -> [PresentationType] {
+        components.filter(matches)
+    }
+    
+    /// Liefert die Component mit der kleinsten Identity
+    private func minIdentityComponent(from components: [PresentationType]) -> PresentationType? {
+        components.min(by: { $0.identity < $1.identity })
+    }
+    
+    /// Liefert die Component mit der größten Identity
+    private func maxIdentityComponent(from components: [PresentationType]) -> PresentationType? {
+        components.max(by: { $0.identity < $1.identity })
+    }
+    
+    ///---------------------------------------------------------------------------------------
+    /// Alle Listen-Container (ordered / unordered)
+    private var listComponents: [PresentationType] {
+        components(where: { $0.kind == .orderedList || $0.kind == .unorderedList })
+    }
+    
+    /// Alle BlockQuote-Container
+    private var blockQuoteComponents: [PresentationType] {
+        components(where: { $0.kind == .blockQuote })
+    }
+    
+    /// Erste CodeBlock-Component
+    private var codeBlockComponent: PresentationType? {
+        firstComponent {
+            if case .codeBlock(_) = $0.kind { return true }
+            return false
+        }
+    }
+    
+    /// Erste Header-Component
+    private var headerComponent: PresentationType? {
+        firstComponent {
+            if case .header(_) = $0.kind { return true }
+            return false
+        }
+    }
+    
+    /// Erste Table-Component
+    private var tableComponent: PresentationType? {
+        firstComponent {
+            if case .table(_) = $0.kind { return true }
+            return false
+        }
+    }
+        
+    /// Erste Paragraph-Component
+    private var paragraphComponent: PresentationType? {
+        firstComponent(where: { $0.kind == .paragraph })
+    }
+    
+    var paragraphIdentity: Int? {
+        paragraphComponent?.identity
+    }
+    
+    ///---------------------------------------------------------------------------------------
+    /// Identity des inhaltlichen Blocks - erstes Element in den `components` (i.A. `header`, `paragraph`, `codeBlock`)
+    ///
+    var firstIdentity: (kind: PresentationIntent.Kind, identity: Int)? {
+        guard let intent = components.first else { return nil }
+        return (intent.kind, intent.identity)
+    }
+    
+
+
 }
 
 

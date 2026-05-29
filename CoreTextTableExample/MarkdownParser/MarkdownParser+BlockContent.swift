@@ -73,7 +73,7 @@ struct BlockContent {
         self.block = block
         self.range = range
         
-        if let ident = self.block?.blockIdentity {
+        if let ident = self.block?.firstIdentity {
             self.identity = ident.identity
             self.kind     = ident.kind
         }
@@ -117,7 +117,7 @@ struct BlockContent {
         if let block = self.block {
             
             listString =  String(!block.hasList ? "" :
-                                    String(format: "%2d ",    block.listIdentity) +
+                                 String(format: "%2d ",    block.listIdentity) +
                                  String(format: "%2d ",    block.listHierarchie ?? 0) + "List" +
                                  String(format: "%2d -> ", block.listOrdinal) +
                                  String(format: "%2.1f  ", headIndent) +
@@ -136,22 +136,27 @@ struct BlockContent {
     /// Alle Block Content eines AttributedString ermittlen und aufbereiten (Indent der Listen)
     ///
     static func allBlockContents(attrText: AttributedString, textSize: CGFloat) -> [BlockContent] {
+        var allBlocks: [BlockContent] = []
         
-        var allBlocks : [BlockContent] = []
         for (intentBlock, intentRange) in attrText.runs[\.presentationIntent] {
-            guard let intents = intentBlock?.components.compactMap( { intent in
-                if case .header(_)     = intent.kind { return intent }
-                if case .paragraph     = intent.kind { return intent }
-                if case .codeBlock(_)  = intent.kind { return intent }
-                if case .thematicBreak = intent.kind { return intent }
-                return nil
-            }),
-                  !intents.isEmpty
+            guard let intentBlock,
+                  intentBlock.components.contains(where: { intent in
+                      if case .header(_)     = intent.kind { return true }
+                      if case .paragraph     = intent.kind { return true }
+                      if case .codeBlock(_)  = intent.kind { return true }
+                      if case .thematicBreak = intent.kind { return true }
+                      if case .table(_)      = intent.kind { return true }
+                      if case .tableHeaderRow = intent.kind { return true }
+                      if case .tableRow(_)   = intent.kind { return true }
+                      if case .tableCell(_)  = intent.kind { return true }
+                      return false
+                  })
             else { continue }
             
-            let text = NSAttributedString( AttributedString(attrText[intentRange]))
-            allBlocks.append( BlockContent(attrText: text, block: intentBlock, range: intentRange) )
+            let text = NSAttributedString(AttributedString(attrText[intentRange]))
+            allBlocks.append(BlockContent(attrText: text, block: intentBlock, range: intentRange))
         }
+        
         prepareBlocks(allBlocks: &allBlocks, attrText: attrText, textSize: textSize)
         return allBlocks
     }
@@ -384,11 +389,11 @@ struct BlockContent {
             }
         }
         
-        //        for table in dictTableBlock {
-        //            for column in table.value.columns {
-        //                print(table.key, table.value.lastRow, table.value.lastColumn, "|", column.alignment.rawValue, column.lineWidth)
-        //            }
-        //        }
+//        for table in dictTableBlock {
+//            for column in table.value.columns {
+//                print(table.key, table.value.lastRow, table.value.lastColumn, "|", column.alignment.rawValue, column.lineWidth)
+//            }
+//        }
         
         //        return allBlocks
         
@@ -426,13 +431,13 @@ struct BlockContent {
             /// Start eines BlockQuote
             if  currBlockQuote && !prevBlockQuote {
                 allBlocks[index].isFirstBlockQuote = true
-                attrText.addAttributes([.foregroundColor: UIColor.systemPurple], range: NSRange(location: 0, length: 1))
+//                attrText.addAttributes([.foregroundColor: UIColor.systemPurple], range: NSRange(location: 0, length: 1))
             }
             
             /// Ende eines BlockQuote
             if currBlockQuote && !nextBlockQuote {
                 allBlocks[index].isLastBlockQuote = true
-                attrText.addAttributes([.foregroundColor: UIColor.systemTeal], range: NSRange(location: 1, length: 1))
+//                attrText.addAttributes([.foregroundColor: UIColor.systemTeal], range: NSRange(location: 1, length: 1))
             }
             
             /// Absatz nach einer BlockQuote

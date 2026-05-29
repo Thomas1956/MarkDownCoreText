@@ -21,24 +21,29 @@ extension SettingViewController  {
     /// Alle Attribute von BasicDetail sind in der Extension des Protokolls mit Defaultwerten vorbelegt. Demzufolge können alle
     /// standardmäßig genutzten, nicht benötigten Attribute aus dem ENUM gelöscht werden.
     ///
-    enum ViewSettings: String, BasicDetail, CaseIterable {
+    enum ViewSettings: String, @MainActor BasicDetail, CaseIterable {
  
         /// Die Strings sollen den Namen der Properties entsprechen (Beispiel löschen und EIGENE Case's ergänzen)
-        case viewHeadIndent, viewTailIndent, viewLineHeight, viewTextSize, viewColor,
-             viewSoftBreaks, viewSpacing, viewSpacingBefore,
-             viewColorSelect,
+        case viewTextSize, codeTextSizeFactor,
+             viewColor, viewSoftBreaks,
+             viewLineHeight, viewSpacing, viewSpacingBefore,
+             viewHeadIndent, viewTailIndent,
              message
 
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .viewHeadIndent:    "Linker Einzug"
-            case .viewTailIndent:    "Rechter Einzug"
-            case .viewLineHeight:    "Zeilenhöhe"
-            case .viewTextSize:      "Größe Editor"
-            case .viewSoftBreaks:    "Soft-Breaks nutzen"
-            case .viewSpacing:       "Abstand nach Absatz"
-            case .viewSpacingBefore: "Abstand vor Absatz"
+            case .viewTextSize:       "Textgröße".markdown(size: 15)
+            case .codeTextSizeFactor: "Textfaktor\nCode Block".markdown(size: 15)
+            case .viewColor:          "Textfarbe"
+            case .viewSoftBreaks:     "Soft-Breaks"
+
+            case .viewLineHeight:     "Zeilen".markdown(size: 15)
+            case .viewSpacing:        "nach Absatz".markdown(size: 15)
+            case .viewSpacingBefore:  "vor Absatz".markdown(size: 15)
+
+            case .viewHeadIndent:     "Linker Rand".markdown(size: 15)
+            case .viewTailIndent:     "Rechter Rand".markdown(size: 15)
             default: nil
             }
         }
@@ -46,7 +51,6 @@ extension SettingViewController  {
         /// Platzhalter bei Texteingaben
         var placeholder: String? {
             switch self {            
-            case .viewColorSelect: "Textfarbe auswählen"
             default: nil
             }
         }
@@ -54,7 +58,38 @@ extension SettingViewController  {
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
         var parameter: [KeyText]? {
             switch self {
-            case .viewSoftBreaks: .alignLeading
+            case .viewTextSize:
+                    .make(alignment: .leading, fraction: 0, symbol: "Pt", minimum: 5.0, maximum: 100.0, stepValue: 1)
+
+            case .codeTextSizeFactor:
+                    .make(alignment: .leading, fraction: 0, symbol: "%", minimum: 50, maximum: 120.0, stepValue: 5)
+
+            case .viewColor: .make(list: [
+                    /// Optionale Parameter
+                    ("chipWidth"      , 80.0                  ),
+                    ("backgroundColor", UIColor.systemGray6   ),
+                   
+                    /// Liste der Farben
+                    ("Schwarz"        , UIColor.black         ),
+                    ("Dunkelgrau"     , UIColor.textDarkgray  ),
+                    ("Grau"           , UIColor.textGray      ),
+                    ("Hellgrau"       , UIColor.textLightgray ),
+                    ("Blau"           , UIColor.textBlue      ),
+                    ("Mint"           , UIColor.textMint      ),
+                    ("Grün"           , UIColor.textGreen     ),
+                    ("Orange"         , UIColor.textOrange    ),
+                    ("Rot"            , UIColor.textRed       ),
+                    ("Purpur"         , UIColor.textPurple    ),
+                ].keyTextArray)
+               
+            case .viewSoftBreaks: .alignTrailing
+
+            case .viewLineHeight:
+                    .make(alignment: .leading, fraction: 2, symbol: "", minimum: 1.0, maximum: 5.0, stepValue: 0.1)
+            
+            case .viewHeadIndent, .viewTailIndent, .viewSpacing, .viewSpacingBefore:
+                    .make(alignment: .leading, fraction: 1, symbol: "Pt", minimum: 0, maximum: 30, stepValue: 0.5)
+
             default: .einsNachkomma
             }
         }
@@ -62,6 +97,9 @@ extension SettingViewController  {
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType {
             switch self {
+            case .viewHeadIndent, .viewTailIndent, .  viewLineHeight,
+                 .viewSpacing,    .viewSpacingBefore, .viewTextSize, .codeTextSizeFactor: .stepper
+            case .viewColor:      .colorchip
             case .viewSoftBreaks: .button
             default: .number
             }
@@ -71,12 +109,6 @@ extension SettingViewController  {
         /// Textstil und Größen für die Positionierung
         ///
         var textstyle            : UIFont.TextStyle?       { .body }
-        var configurationWidth   : CGFloat?                {
-            switch self {
-            case .viewSoftBreaks : 62.0
-            default: nil
-            }
-        }
         var configurationHeight  : CGFloat?                {  nil  }
         var configurationMargins : NSDirectionalEdgeInsets { .zero }
         
@@ -85,21 +117,41 @@ extension SettingViewController  {
         ///
         var image: ImageSourceConvertible? {
             switch self {
-            case .viewColorSelect: "paintpalette.fill"
             default: nil
             }
         }
         
+        ///-----------------------------------------------------------------------------------
+
+        var configurationWidth   : CGFloat?                {
+            switch self {
+            case .viewSoftBreaks : 120.0
+//            case .viewTextSize,   .codeTextSizeFactor,
+//                 .viewLineHeight, .viewSpacing, .viewSpacingBefore,
+//                 .viewHeadIndent, .viewTailIndent
+//                : 300.0
+            default: nil
+            }
+        }
+
         var presentation: ContentPresentation? {       /// Defaultmäßig wird TITLE verwendet
             switch self {
-            case .viewColorSelect: .outlineDisclosure
+            case .viewSoftBreaks, .viewColor          : .line
+//            case .viewTextSize,   .codeTextSizeFactor,
+//                 .viewLineHeight, .viewSpacing, .viewSpacingBefore,
+//                 .viewHeadIndent, .viewTailIndent
+//                : .line
             default: nil
             }
         }
 
         var widthUsage: WidthUsage?  {
             switch self {
-            case .viewSoftBreaks: .content
+            case .viewSoftBreaks : .container
+//            case .viewTextSize,   .codeTextSizeFactor,
+//                 .viewLineHeight, .viewSpacing, .viewSpacingBefore,
+//                 .viewHeadIndent, .viewTailIndent
+//                : .container
             default: nil
             }
         }           /// Defaultmäßig wirkt die Breite auf LABEL
@@ -111,42 +163,54 @@ extension SettingViewController  {
     /// Der Name der Sektion MUSS manuell im SectionContent definiert werden
     func sectionViewSettings(_ setting: Settings, forEditing: Bool) {
         typealias Content = ViewSettings
-        let rwo : ContentRWType = forEditing ? .rw : .ro
+        
+        let layoutMargins = NSDirectionalEdgeInsets(top: 12, leading: 8, bottom:  0, trailing: 8)
 
         ///-----------------------------------------------------------------------------------
         /// items als BasicType anlegen
         var items = [BasicType]()
         
-        items.append(.basic([Content.viewHeadIndent.data(setting),
-                             Content.viewTailIndent.data(setting),
-                             Content.viewLineHeight.data(setting),
-                            ]))
+        var info1 = "Schrift".markdown(size: 17, weight: .semibold, textcolor: .textGray).asContentDataLayout()
+        info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
+        items.append(.basic(info1))
         
-        items.append(.basic([Content.viewSpacing.data(setting),
-                             Content.viewSpacingBefore.data(setting),
-                            ]))
-        
-        items.append(.basic([Content.viewTextSize.data(setting)]))
-        items.append(.basic([Content.viewSoftBreaks.data(setting, presentation: .line)]))
+//        let stepper1 = Content.leftIndent .line(person, labelWidth: 120)
+//        let stepper2 = Content.rightIndent.line(person, contentWidth: 170, labelWidth: 120)
+//        items.append(.basic([stepper1, SPACE, stepper2]))
 
-        let linkColorSelect = BasicType.stdLink(Content.viewColorSelect, type: rwo)
-        items.append(linkColorSelect)
-        
-        
-        /// SelectionContentView parametrieren
-        let parameter = self.colorSelectContent
-        
-        let selectionData = ContentData(viewType: .selection, rwo, setting, Content.viewColor.key, parameter: parameter)
-        let selectColor = BasicType.basic(ContentDataLayout(selectionData, presentation: .plain))
 
-        items.append(.basic(.lineSpace(height: 8, color: .secondarySystemBackground)))
-        items.append(.stdItem(ContentData(key: Content.message.key), height: 80))
-         
+        items.append(.basic( Content.viewTextSize      .line(setting, contentWidth: 180)))
+        items.append(.basic( Content.codeTextSizeFactor.line(setting, contentWidth: 180)))
+        items.append(.basic( Content.viewColor         .data(setting)))
+        items.append(.basic( Content.viewSoftBreaks    .line(setting, contentWidth: 180)))
+        
+        let textAbstand = "Abstände".markdown(size: 17, weight: .semibold, textcolor: .textGray)
+        let linkAbstand = BasicType.stdItem(textAbstand, presentation: .outlineDisclosure)
+        items.append(.lineSpace(height: 6, color: .systemGray5, layoutMargins: layoutMargins))
+        items.append(linkAbstand)
+        
+        let itemsAbstand: [BasicType] = [
+            .basic( Content.viewLineHeight   .line(setting, contentWidth: 180)),
+            .basic( Content.viewSpacing      .line(setting, contentWidth: 180)),
+            .basic( Content.viewSpacingBefore.line(setting, contentWidth: 180)),
+        ]
+        
+        let textEinzug = "Einzüge".markdown(size: 17, weight: .semibold, textcolor: .textGray)
+        let linkEinzug = BasicType.stdItem(textEinzug, presentation: .outlineDisclosure)
+        items.append(.lineSpace(height: 6, color: .systemGray5, layoutMargins: layoutMargins))
+        items.append(linkEinzug)
+        
+        let itemsEinzug: [BasicType] = [
+            .basic(Content.viewHeadIndent.line(setting, contentWidth: 180)),
+            .basic(Content.viewTailIndent.line(setting, contentWidth: 180)),
+        ]
+
         ///-----------------------------------------------------------------------------------
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen
-        var sectionSnapshot = SectionSnapshot()
-        sectionSnapshot.append(SectionContent.ViewSettings, items: items.itemType)
-        sectionSnapshot.append([selectColor.itemType], to: linkColorSelect.itemType)
-        dataSource.apply(sectionSnapshot, to: SectionContent.ViewSettings.title, animatingDifferences: true)
+        ///
+        dataSource.makeSection(SectionContent.ViewSettings, items: items.itemType) { snapshot in
+            snapshot.append(itemsAbstand.itemType, to: linkAbstand.itemType)
+            snapshot.append(itemsEinzug .itemType, to: linkEinzug .itemType)
+        }
     }
 }

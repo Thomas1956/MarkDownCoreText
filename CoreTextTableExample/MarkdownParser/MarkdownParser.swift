@@ -88,7 +88,9 @@ public class MarkdownParser {
         /// Debuggen der Blöcke im AttributedString
         ///
         attr.debugInfo(.nothing, "Vorher")
- 
+        /// Debugging nach dem Inline-Presentation
+        attr.debugInfo(.presentationIntent, "Nach Inline Presentation")
+
         return CoreTextBlockFactory.renderers(from: attr, textSize: size)
     }
 }
@@ -203,7 +205,7 @@ extension MarkdownParser {
             
             /// Gruppen nach (kind, identity) zusammenfassen → je 1 Renderer
             var renderers: [BlockRenderer] = []
-            var currentTableBlock: BlockContent.TableBlock? = nil
+//            var currentTableBlock: BlockContent.TableBlock? = nil
 
             ///-------------------------------------------------------------------------------
             /// Einen Renderer aus dem BlockContent heraus erstellen
@@ -222,7 +224,8 @@ extension MarkdownParser {
                 /// Tabelle
                 if block.hasTable {
                     // Tabelle oder normaler Absatz?
-                    if let table = currentTableBlock, table.lastColumn > 0 {
+                    let table = intentBlock.tableBlock
+                    if table.lastColumn > 0 {
                         renderers.append(TableRenderer(blockContent: intentBlock))
                     } else {
                         renderers.append(ParagraphRenderer(blockContent: intentBlock))
@@ -236,16 +239,47 @@ extension MarkdownParser {
                 if block.hasParagraph {
                     renderers.append(ParagraphRenderer(blockContent: intentBlock))
                 }
-                currentTableBlock = nil
+//                currentTableBlock = nil
             }
 
+            var currentTableBlocks: [BlockContent] = []
+            var currentTableIdentity: Int?
+            
+            func flushTableRenderer() {
+                guard let first = currentTableBlocks.first else { return }
+                let table = first.tableBlock
+                if table.lastColumn > 0 {
+                    renderers.append(TableRenderer(blockContents: currentTableBlocks))
+                } else {
+                    currentTableBlocks.forEach { makeRenderer(intentBlock: $0) }
+                }
+                currentTableBlocks.removeAll()
+                currentTableIdentity = nil
+            }
+            
             for block in blocks {
+                if let presentation = block.block,
+                   presentation.hasTable,
+                   let tableIdentity = presentation.tableIdentity {
+                    if currentTableIdentity == nil || currentTableIdentity == tableIdentity {
+                        currentTableBlocks.append(block)
+                        currentTableIdentity = tableIdentity
+                    } else {
+                        flushTableRenderer()
+                        currentTableBlocks.append(block)
+                        currentTableIdentity = tableIdentity
+                    }
+                    continue
+                }
+                
+                flushTableRenderer()
                 makeRenderer(intentBlock: block)
      
-    //            if block.tableBlock.lastColumn > 0 {
-    //                currentTableBlock = block.tableBlock
-    //            }
+//                if block.tableBlock.lastColumn > 0 {
+//                    currentTableBlock = block.tableBlock
+//                }
             }
+            flushTableRenderer()
             return renderers
         }
     }

@@ -90,25 +90,25 @@ public extension AttributedString {
                 print("<\(text)>")
                 
             case .presentationIntent: ()
-//                let text = NSAttributedString( AttributedString(self[block.range]))
-//                let content = BlockContent(attrText: text, runsBlock: block, range: block.range)
-//                if let cblock = content.block, let paragraphStyle
-//                {
-//                    let listString = (!cblock.hasList ? "" :
-//                                      String(format: "%2d ",    cblock.listIdentity) +
-//                                      String(format: "%2d ",    cblock.listHierarchie ?? 0) + "List" +
-//                                      String(format: "%3d -> ", cblock.listOrdinal) +
-//                                      String(format: "%2.1f, ", paragraphStyle.firstLineHeadIndent) +
-//                                      String(format: "%2.1f",   paragraphStyle.headIndent)
-//                    ).padding(to: 28)
-//                    
-//                    
-//                    let debugStr = String(format: " %2d  ", content.identity) + "\(content.kind)".padding(to: 15) +
-//                    listString + "\t\(cblock)".padding(to: 50)
-//                    
-//                    let text = AttributedString(self[block.range]).debugString
-//                    print("\(text) \t\(debugStr)")
-//                }
+                let text = NSAttributedString( AttributedString(self[block.range]))
+                let content = BlockContent(attrText: text, block: block.presentationIntent, range: block.range)
+                if let cblock = content.block //, let paragraphStyle
+                {
+                    let listString = (!cblock.hasList ? "" :
+                                      String(format: "%2d ",    cblock.listIdentity) +
+                                      String(format: "%2d ",    cblock.listHierarchie ?? 0) + "List" +
+                                      String(format: "%3d -> ", cblock.listOrdinal) +
+                                      String(format: "%2.1f, ", paragraphStyle?.firstLineHeadIndent ?? CGFloat(0) ) +
+                                      String(format: "%2.1f",   paragraphStyle?.headIndent ?? CGFloat(0) )
+                    ).padding(to: 28)
+                    
+                    
+                    let debugStr = String(format: " %2d  ", content.identity) + "\(content.kind)".fixedLength(to: 15) +
+                    listString + "\t\(cblock)".fixedLength(to: 50)
+                    
+                    let text = AttributedString(self[block.range]).debugString
+                    print("\(text) \t\(debugStr)")
+                }
                 
             case .paragraphStyle:
                 let text = AttributedString(self[block.range]).debugStringLong

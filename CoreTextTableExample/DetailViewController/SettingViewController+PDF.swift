@@ -21,7 +21,7 @@ extension SettingViewController  {
     /// Alle Attribute von BasicDetail sind in der Extension des Protokolls mit Defaultwerten vorbelegt. Demzufolge können alle
     /// standardmäßig genutzten, nicht benötigten Attribute aus dem ENUM gelöscht werden.
     ///
-    enum PdfSettings: String, BasicDetail, CaseIterable {
+    enum PdfSettings: String, @MainActor BasicDetail, CaseIterable {
         case  pdfTextSize, pdfTextColor, pdfMarginLeft, pdfMarginRight, pdfMarginTop, pdfMarginBottom,
               pdfColorSelect
         

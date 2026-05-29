@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Thomas1956/CommonCollection",
       "state" : {
-        "revision" : "c8d65192ffa45d6f3f3f93555b449227c3999736",
-        "version" : "5.2.0"
+        "revision" : "d89a18bcadeb9920813f20e254e07206fb7ca9d1",
+        "version" : "5.2.1"
       }
     },
     {

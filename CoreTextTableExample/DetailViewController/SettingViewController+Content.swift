@@ -19,7 +19,7 @@ extension SettingViewController  {
     // MARK: - Definition der Sektionen
     
     enum SectionContent: String, BasicSection, CaseIterable {
-        case auswahl, ViewSettings, PdfSettings, BlockQuoteSetting, print
+        case ViewSettings, PdfSettings, BlockQuoteSetting, print
         
         var title : String {
             switch self {
@@ -27,7 +27,6 @@ extension SettingViewController  {
             case .BlockQuoteSetting: "Block"
             case .PdfSettings:       "PDF"
             case .print:             "Drucken"
-            case .auswahl:           "Auswahl"
             }
         }
         
@@ -39,9 +38,7 @@ extension SettingViewController  {
         
         var headerMode: UICollectionLayoutListConfiguration.HeaderMode {
             switch self {
-            case .auswahl: .none
-            case .print: .none
-            default: .firstItemInSection
+            default: .none
             }
         }
         
@@ -64,7 +61,7 @@ extension SettingViewController  {
     /// Alle Attribute von BasicDetail sind in der Extension des Protokolls mit Defaultwerten vorbelegt. Demzufolge können alle
     /// standardmäßig genutzten, nicht benötigten Attribute aus dem ENUM gelöscht werden.
     ///
-    enum DetailContent: String, BasicDetail, Hashable, CaseIterable {
+    enum DetailContent: String, @MainActor BasicDetail, Hashable, CaseIterable {
    
         /// Die Strings sollen den Namen der Properties entsprechen
         case textDefaults
