@@ -31,6 +31,38 @@ public struct Markdown {
 //    static var paddingHorz            : Double = 0.5          /// blockQouteSpacings
 //    static var paddingBefore          : Double = 0.3
 //    static var paddingAfter           : Double = 0.3
+    
+    /// Basiskonstanten für MarkdownTypography
+    static let blockSpacing            : CGFloat = 15
+    static let blockSpacingBefore      : CGFloat = 15
+    static let blockHeadIndent         : CGFloat = 10
+    static let blockTailIndent         : CGFloat = 10
+    static let blockContentIndent      : CGFloat = 10
+    static let blockQuoteContentIndent : CGFloat = 20
+    static let blockQuoteStripeGap     : CGFloat = 5
+    static let blockQuoteStripeWidth   : CGFloat = 6
+    static let blockQuoteStripeColor   : UIColor = .systemGray4
+    static let rulerRightIndent        : CGFloat = 0
+    static let rulerHeight             : CGFloat = 10
+    static let rulerLineHeight         : CGFloat = 1.5
+    
+    /// Gerätespezifische Referenzgrößen für Header
+    static var fontSizes: [UIUserInterfaceIdiom: [CGFloat]] {
+        [.mac:   [34, 30, 24, 20, 18, 16],
+         .pad:   [32, 24, 20, 18, 16, 16],
+         .phone: [24, 18, 16, 16, 16, 16]]
+    }
+    
+    static func headerSpacing(level: Int, size: CGFloat) -> (before: CGFloat, after: CGFloat) {
+        switch level {
+        case 1:  return (before: size * 0.90, after: size * 0.30)
+        case 2:  return (before: size * 0.75, after: size * 0.28)
+        case 3:  return (before: size * 0.65, after: size * 0.24)
+        case 4:  return (before: size * 0.55, after: size * 0.20)
+        case 5:  return (before: size * 0.45, after: size * 0.18)
+        default: return (before: size * 0.40, after: size * 0.16)
+        }
+    }
 
     /// Konstanten für den Edit View Controller
     struct Edit {

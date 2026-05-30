@@ -87,47 +87,54 @@ class MarkdownViewController: UIViewController, UIDocumentPickerDelegate {
     ///---------------------------------------------------------------------------------------
     /// PDF-Export
     ///
-    private var tmpPDF: URL?            // <– merken, um später zu löschen
-
+    private var temporaryPDFExportURL: URL?
+    
     @objc func didPressExportButton(_ sender: Any) {
+        let renderers = MarkdownParser.markdown(string: self.textMarkdown,
+                                                size: Markdown.PDF.textSize,
+                                                textColor: Markdown.PDF.textColor)
+        let location = MarkdownDocumentLocation.shared
+        let exportURL = location.temporaryPDFExportURL
         
-        let renderers = MarkdownParser.markdown(string: self.textMarkdown, size: Markdown.PDF.textSize,
-                                                textColor: Markdown.PDF.textColor )
-        
-        // 1) PDF erzeugen → tmpURL zurückgeben
-        MarkdownParser.exportPDF(renderers: renderers) { [unowned self] in
-            let tmp = FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent("Markdown")
-                .appendingPathExtension("pdf")
-            self.tmpPDF = tmp            // merken
-            return tmp
+        do {
+            try FileManager.default.removeItemIfExists(at: exportURL)
+            try MarkdownParser.exportPDF(renderers: renderers) { exportURL }
+            temporaryPDFExportURL = exportURL
+            
+            let picker = UIDocumentPickerViewController(forExporting: [exportURL], asCopy: true)
+            picker.delegate = self
+            picker.directoryURL = location.directoryURL
+            picker.modalPresentationStyle = .formSheet
+            present(picker, animated: true)
+        } catch {
+            showAlert(title: "PDF-Export fehlgeschlagen",
+                      message: "PDF-Datei konnte nicht vorbereitet werden:\n\(error.localizedDescription)")
         }
-        guard let url = tmpPDF else { return }
-
-        // 2) Document-Picker (Export-Modus) anzeigen
-        let picker = UIDocumentPickerViewController(forExporting: [url], asCopy: true)
-        picker.delegate = self
-        picker.modalPresentationStyle = .formSheet
-        present(picker, animated: true)
     }
-
+    
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(.init(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
     ///---------------------------------------------------------------------------------------
     // MARK: UIDocumentPickerDelegate
     
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-        if let u = tmpPDF { try? FileManager.default.removeItem(at: u) }
-        tmpPDF = nil
-    }
-
-    func documentPicker(_ controller: UIDocumentPickerViewController,
-                        didPickDocumentsAt urls: [URL]) {
-        // Datei wurde kopiert → Temp entfernen
-        if let u = tmpPDF { try? FileManager.default.removeItem(at: u) }
-        tmpPDF = nil
+        if let url = temporaryPDFExportURL {
+            try? FileManager.default.removeItem(at: url)
+            temporaryPDFExportURL = nil
+        }
     }
     
-    ///---------------------------------------------------------------------------------------
+    func documentPicker(_ controller: UIDocumentPickerViewController,
+                        didPickDocumentsAt urls: [URL]) {
+        if let url = temporaryPDFExportURL {
+            try? FileManager.default.removeItem(at: url)
+            temporaryPDFExportURL = nil
+        }
+    }
 
     
     let text1 =

@@ -57,10 +57,13 @@ extension BlockRenderer {
     ///---------------------------------------------------------------------------------------
     /// Umranden des Rechteckes für Paragraph Spacing (danach)
     var blockQouteSpacings: (paddingBefore: CGFloat, paddingAfter: CGFloat, paddingHorz: CGFloat) {
-        guard let block   = blockContent.block else { return (0,0,0) }
-        let paddingBefore = blockContent.isFirstBlockQuote ? fontSize * 0.3 : 0   // 0.3em vertikal
-        let paddingAfter  = blockContent.isLastBlockQuote  ? fontSize * 0.3 : 0   // 0.3em vertikal
-        let paddingHorz   = block       .hasBlockQuote     ? fontSize * 0.5 : 0   // 0.5em horizontal
+        guard let block = blockContent.block else { return (0, 0, 0) }
+        let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize))
+        let blockQuote = typography.blockQuote
+        let attachment = blockQuote.rectAttachment
+        let paddingBefore = blockContent.isFirstBlockQuote ? attachment.rectInsetTop : 0
+        let paddingAfter = blockContent.isLastBlockQuote ? attachment.rectInsetBottom : 0
+        let paddingHorz = block.hasBlockQuote ? blockQuote.blockQuoteContentIndent : 0
         return (paddingBefore, paddingAfter, paddingHorz)
     }
     
@@ -124,10 +127,13 @@ extension BlockRenderer {
         let (before, after) = blockContent.attrText.paragraphSpacings
 
         /// Hintergrund füllen
+        let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize))
+        let blockQuote = typography.blockQuote
+        let attachment = blockQuote.rectAttachment
         var rect = rect
-        rect.origin.x    += MB.horizontalIndent
+        rect.origin.x    += attachment.rectInsetLeft
         rect.origin.y    += blockContent.isLastBlockQuote ? after : 0
-        rect.size.width  -= MB.horizontalIndent * 2
+        rect.size.width  -= attachment.rectInsetLeft + attachment.rectInsetRight
         rect.size.height -= (blockContent.isLastBlockQuote ? after : 0) + (blockContent.isFirstBlockQuote ? before : 0)
         let color = MB.backgroundColor
         context.setFillColor(color.cgColor)
@@ -135,9 +141,9 @@ extension BlockRenderer {
         
         /// Balken am linken Rand
         var balken = rect
-        balken.origin.x  += MB.barIndent
-        balken.size.width = MB.barWidth
-        context.setFillColor(MB.barColor.cgColor)
+        balken.origin.x  += attachment.stripeGap
+        balken.size.width = attachment.stripeWidth
+        context.setFillColor(Markdown.blockQuoteStripeColor.cgColor)
         context.fill(balken)
     }
     
@@ -383,16 +389,24 @@ final class CodeBlockRenderer: BlockRenderer {
     var frame: CGRect = .zero
     var pageIndex: Int = 0                 // 0-basiert
     private let text: NSAttributedString
-    private let padding = MC.padding
+    private let padding: UIEdgeInsets
+    private let metrics: MarkdownTypography.CodeBlockMetrics
     
     init(blockContent: BlockContent) {
         self.blockContent = blockContent
         let fontStd  = blockContent.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
-        let fontSize = fontStd?.pointSize ?? 17.0
-        let size = fontSize * MC.codeTextSizeFactor / 100.0
+        let fontSize = fontStd?.pointSize ?? CGFloat(Markdown.textSize)
+        let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize))
+        self.metrics = typography.codeBlock
+        let attachment = metrics.rectAttachment
+        self.padding = UIEdgeInsets(top: attachment.rectInsetTop,
+                                    left: attachment.rectInsetLeft,
+                                    bottom: attachment.rectInsetBottom,
+                                    right: attachment.rectInsetRight)
         
         /// Font einstellen
-        let font = UIFont.monospacedSystemFont(ofSize: size, weight: .regular)
+        let font = metrics.font
+        let size = font.pointSize
 
         /// Wenn der Code Block als Language Hint 'tab4' hat, als Tabulator 4 Spaces sonst 8 Spaces verwenden.
         let tabHint = blockContent.block?.languageHint ?? ""
@@ -418,7 +432,7 @@ final class CodeBlockRenderer: BlockRenderer {
             paragraphStyle.firstLineHeadIndent = 0
             paragraphStyle.headIndent          = 0
             paragraphStyle.tailIndent          = 0
-            paragraphStyle.lineHeightMultiple  = 1.0
+            paragraphStyle.lineHeightMultiple  = metrics.lineHeightMultiple
             paragraphStyle.minimumLineHeight   = 0
             
             /// Den Text übernehmen und die Attribute des Absatzes zufügen.
@@ -450,7 +464,7 @@ final class CodeBlockRenderer: BlockRenderer {
                             width: availableWidth,
                             height: totalHeight)
 
-        return totalHeight + M.paragraphSpacing * fontSize
+        return totalHeight + metrics.paragraphSpacing
     }
 
     func draw(in context: CGContext) {
@@ -464,7 +478,7 @@ final class CodeBlockRenderer: BlockRenderer {
         context.addPath(
             UIBezierPath(
                 roundedRect: rectBackground.insetBy(dx: 2, dy: 2),
-                cornerRadius: 8
+                cornerRadius: metrics.rectAttachment.rectCornerRadius
             ).cgPath
         )
         context.drawPath(using: .fillStroke)
@@ -495,9 +509,9 @@ final class TableRenderer: BlockRenderer {
     
     private let tableBlock: BlockContent.TableBlock
     private let cells: [[NSAttributedString?]]
-    private let padding = UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
-    private let gridLineWidth: CGFloat = 1
-    private let minimumColumnWidth: CGFloat = 44
+    private let padding: UIEdgeInsets
+    private let gridLineWidth: CGFloat
+    private let minimumColumnWidth: CGFloat
     private let minimumRowHeight: CGFloat
     private var columnWidths: [CGFloat]
     private var rowHeights: [CGFloat] = []
@@ -507,10 +521,16 @@ final class TableRenderer: BlockRenderer {
         let firstBlock = blockContents.first ?? BlockContent(attrText: NSAttributedString(), block: nil, range: AttributedString().startIndex..<AttributedString().endIndex)
         self.blockContent = firstBlock
         self.tableBlock = firstBlock.tableBlock
-        self.minimumRowHeight = max(24, firstBlock.attrText.size().height + padding.top + padding.bottom)
+        let font = firstBlock.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont ?? UIFont.systemFont(ofSize: CGFloat(Markdown.textSize))
+        let typography = MarkdownTypography(bodyFont: font)
+        let inset = max(4, typography.scaled(Markdown.blockContentIndent * 0.5))
+        self.padding = UIEdgeInsets(top: inset * 0.75, left: inset, bottom: inset * 0.75, right: inset)
+        self.gridLineWidth = max(0.5, typography.thematicBreak.rulerLineHeight * 0.5)
+        self.minimumColumnWidth = max(36, typography.scaled(44))
+        self.minimumRowHeight = max(typography.scaled(24), firstBlock.attrText.size().height + padding.top + padding.bottom)
         self.columnWidths = Self.preferredColumnWidths(from: tableBlock.columns,
-                                                       padding: UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8),
-                                                       minimumColumnWidth: 44)
+                                                       padding: padding,
+                                                       minimumColumnWidth: minimumColumnWidth)
         
         let rowCount = max(1, tableBlock.lastRow + 1)
         let columnCount = max(1, tableBlock.lastColumn + 1)
@@ -539,8 +559,9 @@ final class TableRenderer: BlockRenderer {
     
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         let hasBlockQuote = blockContent.block?.hasBlockQuote ?? false
-        let leftIndent = hasBlockQuote ? MB.contentIndent : M.headIndent
-        let availableWidth = max(0, width - leftIndent + M.tailIndent)
+        let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize))
+        let leftIndent = hasBlockQuote ? typography.blockQuote.blockQuoteContentIndent : CGFloat(M.headIndent)
+        let availableWidth = max(0, width - leftIndent + CGFloat(M.tailIndent))
         columnWidths = Self.fittedColumnWidths(from: tableBlock.columns,
                                                availableWidth: availableWidth,
                                                padding: padding,
@@ -548,7 +569,7 @@ final class TableRenderer: BlockRenderer {
         rowHeights = measureRowHeights(columnWidths: columnWidths)
         
         let tableHeight = rowHeights.reduce(0, +)
-        let bottomSpacing = M.paragraphSpacing * fontSize
+        let bottomSpacing = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).paragraph.paragraphSpacing
         tableRect = CGRect(x: leftIndent, y: bottomSpacing, width: columnWidths.reduce(0, +), height: tableHeight)
         let totalHeight = tableHeight + bottomSpacing
         frame = CGRect(x: 0, y: y, width: width, height: totalHeight)
@@ -582,7 +603,7 @@ final class TableRenderer: BlockRenderer {
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineBreakMode = .byWordWrapping
         paragraph.alignment = column < tableBlock.columns.count ? tableBlock.columns[column].alignment : .left
-        paragraph.lineHeightMultiple = Markdown.lineHeightMultiple
+        paragraph.lineHeightMultiple = CGFloat(Markdown.lineHeightMultiple)
         
         let range = NSRange(location: 0, length: text.length)
         text.addAttributes([.font: font, .paragraphStyle: paragraph], range: range)
@@ -733,7 +754,8 @@ final class HorizontalRuleRenderer: BlockRenderer {
         self.text = blockContent.attrText
     }
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
-        let h = MR.height
+        let metrics = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).thematicBreak
+        let h = metrics.rulerHeight
         self.frame = CGRect(x: 0, y: y, width: width, height: h)
         return h
     }
@@ -746,17 +768,18 @@ final class HorizontalRuleRenderer: BlockRenderer {
             let rect = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             drawBlockQuote(in: context, rect: rect)
             
-            leftIndent = MB.contentIndent
+            leftIndent = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).blockQuote.blockQuoteContentIndent
         }
 
         var color = UIColor.label
         /// Die Farbe der Linie  wird etwas heller als der Text dargestellt
         if MR.colorHighLight { color = color.highlight }
         
+        let metrics = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).thematicBreak
         let y = CGFloat(frame.height/2)
         context.move(to: CGPoint(x: leftIndent, y: y))
-        context.addLine(to: CGPoint(x: self.frame.width - MR.rightIndent, y: y))
-        context.setLineWidth(MR.lineHeight)
+        context.addLine(to: CGPoint(x: self.frame.width - metrics.rulerRightIndent, y: y))
+        context.setLineWidth(metrics.rulerLineHeight)
         context.setStrokeColor(color.cgColor)
         context.strokePath()
     }

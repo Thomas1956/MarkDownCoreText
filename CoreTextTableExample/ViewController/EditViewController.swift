@@ -27,6 +27,7 @@ class EditViewController: UIViewController {
     private let keyColumnWidth = "EditViewController.columnWidth"
 
     var start : DispatchTime?
+    private var temporaryMarkdownExportURL: URL?
 
     /// Zugehöriger Detail View Contoller
     public lazy var detailViewController: MarkdownViewController? = {
@@ -81,47 +82,22 @@ class EditViewController: UIViewController {
     /// Import Markdown Datei
     @objc func didPressImportButton(_ sender: Any) {
         let allowedTypes: [UTType] = [.markdown]
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: allowedTypes, asCopy: true)
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: allowedTypes, asCopy: false)
         picker.delegate = self
         picker.allowsMultipleSelection = false
+        picker.directoryURL = MarkdownDocumentLocation.shared.directoryURL
         present(picker, animated: true)
     }
     
     /// Export Markdown Datei
     @objc func didPressExportButton(_ sender: Any) {
-        /// Text aus dem UITextView holen
-        let text = textView.text ?? ""
-        
-        /// Temp-URL für die Export-Datei anlegen
-        let fileName = "TempMarkdown.md"
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
-        
-        do {
-            /// Text in die Datei schreiben
-            try text.write(to: tempURL, atomically: true, encoding: .utf8)
-            
-            /// Document Picker zum Exportieren öffnen
-            let picker = UIDocumentPickerViewController(
-                forExporting: [tempURL],
-                asCopy: true
-            )
-            present(picker, animated: true)
-            
-        } catch {
-            /// Im Fehlerfall einen Alert anzeigen
-            let alert = UIAlertController(
-                title: "Export fehlgeschlagen",
-                message: error.localizedDescription,
-                preferredStyle: .alert
-            )
-            alert.addAction(.init(title: "OK", style: .default))
-            present(alert, animated: true)
-        }
+        saveMarkdownFile()
     }
     
     /// Löschen des Text View
     @objc func didPressDeleteButton(_ sender: Any) {
         textView.text.removeAll()
+        MarkdownDocumentLocation.shared.resetToDefaults()
         detailViewController?.markdown(text: textView.text)
     }
     
@@ -215,6 +191,32 @@ class EditViewController: UIViewController {
 
 private extension EditViewController {
     
+    func saveMarkdownFile() {
+        let location = MarkdownDocumentLocation.shared
+        let exportURL = location.temporaryMarkdownExportURL
+        
+        do {
+            try FileManager.default.removeItemIfExists(at: exportURL)
+            try (textView.text ?? "").write(to: exportURL, atomically: true, encoding: .utf8)
+            temporaryMarkdownExportURL = exportURL
+            
+            let picker = UIDocumentPickerViewController(forExporting: [exportURL], asCopy: true)
+            picker.delegate = self
+            picker.directoryURL = location.directoryURL
+            picker.modalPresentationStyle = .formSheet
+            present(picker, animated: true)
+        } catch {
+            showAlert(title: "Speichern fehlgeschlagen",
+                      message: "Markdown-Datei konnte nicht vorbereitet werden:\n\(error.localizedDescription)")
+        }
+    }
+    
+    func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(.init(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
     /// Aktuellen MD-Text in den User-Defaults speichern
     func loadSavedText() {
         if let savedText = UserDefaults.standard.string(forKey: keySavedText) {
@@ -244,16 +246,18 @@ extension EditViewController: UIDocumentPickerDelegate {
                         didPickDocumentsAt urls: [URL]) {
         guard let url = urls.first else { return }
         
-        /// Falls Sandbox-Scoped: Zugriff anfordern
-        let didStart = url.startAccessingSecurityScopedResource()
-        defer {
-            if didStart {
-                url.stopAccessingSecurityScopedResource()
-            }
+        if let exportURL = temporaryMarkdownExportURL {
+            try? FileManager.default.removeItem(at: exportURL)
+            temporaryMarkdownExportURL = nil
+            MarkdownDocumentLocation.shared.updateLoadedFileURL(url)
+            return
         }
         
         do {
-            let data = try Data(contentsOf: url)
+            let data = try MarkdownDocumentLocation.shared.access(url: url) { url in
+                try Data(contentsOf: url)
+            }
+            MarkdownDocumentLocation.shared.updateLoadedFileURL(url)
             /// Versuche UTF-8, fallback auf String(decoding:)
             if let str = String(data: data, encoding: .utf8) {
                 textView.text = str
@@ -263,18 +267,16 @@ extension EditViewController: UIDocumentPickerDelegate {
             detailViewController?.markdown(text: textView.text)
             
         } catch {
-            /// Fehler anzeigen
-            let alert = UIAlertController(
-                title: "Import-Fehler",
-                message: "Datei konnte nicht geladen werden:\n\(error.localizedDescription)",
-                preferredStyle: .alert
-            )
-            alert.addAction(.init(title: "OK", style: .default))
-            present(alert, animated: true)
+            showAlert(title: "Import-Fehler",
+                      message: "Datei konnte nicht geladen werden:\n\(error.localizedDescription)")
         }
     }
     
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        if let url = temporaryMarkdownExportURL {
+            try? FileManager.default.removeItem(at: url)
+            temporaryMarkdownExportURL = nil
+        }
         controller.dismiss(animated: true)
     }
 }

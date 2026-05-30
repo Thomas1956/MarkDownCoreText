@@ -13,12 +13,18 @@ import UIKit
 
 public class MarkdownParser {
 
+    /// Struktur für die Typographie
+    static var typo = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: 16))
+
     ///---------------------------------------------------------------------------------------
     /// Main entry: parse Markdown string, build renderers, trigger layout
     ///
     static func markdown(string: String, size: CGFloat = 17, weight: UIFont.Weight = .regular,
                          textColor: UIColor = .gray) -> [BlockRenderer]
     {
+        /// Typographie mit der Fontgröße aktualisieren
+        typo.bodyFont(UIFont.systemFont(ofSize: size, weight: weight))
+        
         /// Automatischen Silbentrennung mit dem Einfügen von Soft-Hyphen
         let string = string.stringWithHyphens()
 
@@ -91,7 +97,7 @@ public class MarkdownParser {
         /// Debugging nach dem Inline-Presentation
         attr.debugInfo(.presentationIntent, "Nach Inline Presentation")
 
-        return CoreTextBlockFactory.renderers(from: attr, textSize: size)
+        return CoreTextBlockFactory.renderers(from: attr, typography: typo)
     }
 }
 
@@ -194,10 +200,10 @@ extension MarkdownParser {
     fileprivate enum CoreTextBlockFactory {
 
         /// Haupt‑Einstieg: komplette AttributedString in BlockRenderer aufspalten
-        static func renderers(from attr: AttributedString, textSize: CGFloat) -> [BlockRenderer] {
+        static func renderers(from attr: AttributedString, typography: MarkdownTypography) -> [BlockRenderer] {
             
             ///  Alle BlockContent‑Elemente ermitteln
-            let blocks = BlockContent.allBlockContents(attrText: attr, textSize: textSize)
+            let blocks = BlockContent.allBlockContents(attrText: attr, typography: typography)
             
 //            blocks.forEach { block in
 //                print(block.attrText)
@@ -326,7 +332,7 @@ extension MarkdownParser {
     //----------------------------------------------------------------------------------------
     // MARK: - PDF-Export
     
-    static func exportPDF(renderers: [BlockRenderer], presentSavePanel: () -> URL?) {
+    static func exportPDF(renderers: [BlockRenderer], presentSavePanel: () -> URL?) throws {
 
         typealias MP = Markdown.PDF
         
@@ -346,7 +352,9 @@ extension MarkdownParser {
         guard let url = presentSavePanel() else { return }
 
         // -------- PDF-Context anlegen -------------------------------------
-        guard let ctx = CGContext(url as CFURL, mediaBox: &pageRect, nil) else { return }
+        guard let ctx = CGContext(url as CFURL, mediaBox: &pageRect, nil) else {
+            throw CocoaError(.fileWriteUnknown, userInfo: [NSURLErrorKey: url])
+        }
 
         // -------- Jede Seite einzeln zeichnen -----------------------------
         for p in 0 ..< pageCount {
