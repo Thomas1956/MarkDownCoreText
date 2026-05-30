@@ -312,12 +312,26 @@ extension MarkdownParser {
         var y: CGFloat   = 0              // ← kein Rand mehr hier!
         var currentPage  = 0
 
-        for r in renderers {
-            let h = r.measure(y: y, width: pageWidth)
+        for index in renderers.indices {
+            let r = renderers[index]
+            var h = r.measure(y: y, width: pageWidth)
 
             if y + h > printableHeight {  // Grenze ist Printable‑Höhe
                 currentPage += 1
                 y = 0                     // nächstes Blatt, oben anfangen
+                h = r.measure(y: y, width: pageWidth)
+            }
+            
+            if shouldKeepWithNext(renderer: r,
+                                  index: index,
+                                  renderers: renderers,
+                                  y: y,
+                                  height: h,
+                                  pageWidth: pageWidth,
+                                  printableHeight: printableHeight) {
+                currentPage += 1
+                y = 0
+                h = r.measure(y: y, width: pageWidth)
             }
 
             r.pageIndex = currentPage
@@ -326,6 +340,27 @@ extension MarkdownParser {
             y += h
         }
         return currentPage + 1
+    }
+    
+    private static func shouldKeepWithNext(renderer: BlockRenderer,
+                                           index: Int,
+                                           renderers: [BlockRenderer],
+                                           y: CGFloat,
+                                           height: CGFloat,
+                                           pageWidth: CGFloat,
+                                           printableHeight: CGFloat) -> Bool {
+        guard y > 0,
+              renderer.blockContent.block?.hasHeader == true,
+              index + 1 < renderers.count
+        else { return false }
+        
+        let nextRenderer = renderers[index + 1]
+        guard nextRenderer.blockContent.block?.hasHeader != true else { return false }
+        
+        let nextHeight = nextRenderer.measure(y: y + height, width: pageWidth)
+        let combinedHeight = height + nextHeight
+        
+        return combinedHeight <= printableHeight && y + combinedHeight > printableHeight
     }
     
         
