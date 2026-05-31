@@ -41,25 +41,12 @@ extension Settings: PropertyReminder, GenericEntity {
             return true
         }
     }
-
-    ///---------------------------------------------------------------------------------------
-    // MARK: - Zusätzlich Properties und Funktionen ergänzen
-    
-    /// Beispiel für die berechnete Property `firstLetter`, die für die Anzeige der Sektionen genutzt werden kann.
-    /*
-    @objc public var firstLetter: String {
-        self.willAccessValue(forKey: #keyPath(Person.firstLetter))
-        /// Damit die Sektionen mit der Sortierung übereinstimmen, müssen die Diacritics entfernt werden
-        let familyname = self.familyName?.uppercased().folding(options: .diacriticInsensitive, locale: .current) ?? "A"
-        self.didAccessValue(forKey: #keyPath(Person.firstLetter))
-        /// Anfangsbuchstaben zurückgeben
-        return String(familyname.prefix(1))
-    }
-    */    
 }
 
 
+//--------------------------------------------------------------------------------------------
 // MARK: – Entity-Extension für einfache Predicates
+
 extension Settings {
     public enum Kind: String {
         case `default`
@@ -101,14 +88,14 @@ extension Settings {
     private static let backgroundColorDefinitions: [(String, UIColor)] = [
         ("Hellgrau"  , .systemGray6),
         ("Grau"      , .systemGray5),
-        ("Blau"      , UIColor.systemBlue.withAlphaComponent(0.12)),
-        ("Indigo"    , UIColor.systemIndigo.withAlphaComponent(0.12)),
-        ("Mint"      , UIColor.systemMint.withAlphaComponent(0.14)),
-        ("Grün"      , UIColor.systemGreen.withAlphaComponent(0.12)),
-        ("Gelb"      , UIColor.systemYellow.withAlphaComponent(0.18)),
-        ("Orange"    , UIColor.systemOrange.withAlphaComponent(0.14)),
-        ("Rot"       , UIColor.systemRed.withAlphaComponent(0.10)),
-        ("Purpur"    , UIColor.systemPurple.withAlphaComponent(0.12))
+        ("Blau"      , .systemBlue  .withAlphaComponent(0.12)),
+        ("Indigo"    , .systemIndigo.withAlphaComponent(0.12)),
+        ("Mint"      , .systemMint  .withAlphaComponent(0.14)),
+        ("Grün"      , .systemGreen .withAlphaComponent(0.12)),
+        ("Gelb"      , .systemYellow.withAlphaComponent(0.18)),
+        ("Orange"    , .systemOrange.withAlphaComponent(0.14)),
+        ("Rot"       , .systemRed   .withAlphaComponent(0.10)),
+        ("Purpur"    , .systemPurple.withAlphaComponent(0.12))
     ]
     
     static let textColorPalette       = makeColorPalette(textColorDefinitions)
@@ -191,9 +178,3 @@ final class ColorTransformer: ValueTransformer {
         )
     }
 }
-
-// Registrierung z. B. im AppDelegate
-//ValueTransformer.setValueTransformer(
-//    ColorTransformer(),
-//    forName: NSValueTransformerName("ColorTransformer")
-//)
