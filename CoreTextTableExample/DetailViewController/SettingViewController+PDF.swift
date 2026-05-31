@@ -108,7 +108,7 @@ extension SettingViewController  {
     // MARK: - Den Inhalt der Section zusammenstellen
     
     /// Der Name der Sektion MUSS manuell im SectionContent definiert werden
-    func sectionPdfSettings(_ setting: Settings, forEditing: Bool) {
+    func sectionPdfSetting(_ setting: Settings, forEditing: Bool) {
         typealias C = PdfSettings
 
         let layoutMargins = NSDirectionalEdgeInsets(top: 12, leading: 8, bottom:  0, trailing: 8)
@@ -138,7 +138,7 @@ extension SettingViewController  {
         
         ///-----------------------------------------------------------------------------------
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen
-        dataSource.makeSection(SectionContent.PdfSettings, items: items.itemType) { snapshot in
+        dataSource.makeSection(SectionContent.PdfSetting, items: items.itemType) { snapshot in
             snapshot.append(itemsRaender.itemType, to: linkRaender.itemType)
         }
     }

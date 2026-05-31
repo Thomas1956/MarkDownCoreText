@@ -49,6 +49,7 @@
 		E9A940842DC4ECA6004501E6 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406E2DC4ECA6004501E6 /* SceneDelegate.swift */; };
 		E9A940852DC4ECA6004501E6 /* MarkdownViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406F2DC4ECA6004501E6 /* MarkdownViewController.swift */; };
 		E9A940882DC4EE4D004501E6 /* MarkdownParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */; };
+		E9C218EB2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C218EA2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,6 +106,7 @@
 		E9A9406E2DC4ECA6004501E6 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		E9A9406F2DC4ECA6004501E6 /* MarkdownViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownViewController.swift; sourceTree = "<group>"; };
 		E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownParser.swift; sourceTree = "<group>"; };
+		E9C218EA2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+RulerSetting.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -183,12 +185,13 @@
 			isa = PBXGroup;
 			children = (
 				E94900A42DCE5C0E00DD7880 /* SettingViewController.swift */,
-				E952F0872DE0FA7A00F097EF /* SectionViewController+View.swift */,
-				E93B3BAA2DE246A9007436C5 /* SettingViewController+BlockQuote.swift */,
-				E94900A52DCE5C0E00DD7880 /* SettingViewController+Action.swift */,
 				E94900A62DCE5C0E00DD7880 /* SettingViewController+Content.swift */,
-				E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */,
+				E94900A52DCE5C0E00DD7880 /* SettingViewController+Action.swift */,
 				E94900A72DCE5C0E00DD7880 /* SettingViewController+DataSource.swift */,
+				E952F0872DE0FA7A00F097EF /* SectionViewController+View.swift */,
+				E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */,
+				E93B3BAA2DE246A9007436C5 /* SettingViewController+BlockQuote.swift */,
+				E9C218EA2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift */,
 			);
 			path = DetailViewController;
 			sourceTree = "<group>";
@@ -376,6 +379,7 @@
 				E94900B12DCE5E0400DD7880 /* Settings+PropertyReminder.swift in Sources */,
 				E9A940762DC4ECA6004501E6 /* String.swift in Sources */,
 				E9A940772DC4ECA6004501E6 /* AppDelegate.swift in Sources */,
+				E9C218EB2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift in Sources */,
 				E9A940782DC4ECA6004501E6 /* CoreTextTableView.swift in Sources */,
 				E9A940792DC4ECA6004501E6 /* MarkdownContentView.swift in Sources */,
 				E9A940882DC4EE4D004501E6 /* MarkdownParser.swift in Sources */,

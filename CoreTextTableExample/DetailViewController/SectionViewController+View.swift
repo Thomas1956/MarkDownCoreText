@@ -110,7 +110,7 @@ extension SettingViewController  {
     // MARK: - Den Inhalt der Section zusammenstellen
     
     /// Der Name der Sektion MUSS manuell im SectionContent definiert werden
-    func sectionViewSettings(_ setting: Settings, forEditing: Bool) {
+    func sectionViewSetting(_ setting: Settings, forEditing: Bool) {
         typealias Content = ViewSettings
         
         let layoutMargins = NSDirectionalEdgeInsets(top: 12, leading: 8, bottom:  0, trailing: 8)
@@ -152,7 +152,7 @@ extension SettingViewController  {
         ///-----------------------------------------------------------------------------------
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen
         ///
-        dataSource.makeSection(SectionContent.ViewSettings, items: items.itemType) { snapshot in
+        dataSource.makeSection(SectionContent.ViewSetting, items: items.itemType) { snapshot in
             snapshot.append(itemsAbstand.itemType, to: linkAbstand.itemType)
             snapshot.append(itemsEinzug .itemType, to: linkEinzug .itemType)
         }

@@ -19,13 +19,14 @@ extension SettingViewController  {
     // MARK: - Definition der Sektionen
     
     enum SectionContent: String, BasicSection, CaseIterable {
-        case ViewSettings, PdfSettings, BlockQuoteSetting, print
+        case ViewSetting, PdfSetting, BlockQuoteSetting, RulerSetting, print
         
         var title : String {
             switch self {
-            case .ViewSettings:      "Anzeige"
+            case .ViewSetting:       "Anzeige"
+            case .PdfSetting:        "PDF"
             case .BlockQuoteSetting: "Block"
-            case .PdfSettings:       "PDF"
+            case .RulerSetting:      "Ruler"
             case .print:             "Drucken"
             }
         }
@@ -103,12 +104,6 @@ extension SettingViewController  {
         var configurationHeight  : CGFloat?                {  nil  }
         var configurationMargins : NSDirectionalEdgeInsets { .zero }
         
-        ///-----------------------------------------------------------------------------------
-        /// Zusätzliche Daten für BasicType
-        ///
-//        var presentation: ContentPresentation? { nil }      /// Defaultmäßig wird TITLE verwendet
-//        var widthUsage  : WidthUsage?          { nil }      /// Defaultmäßig wirkt die Breite auf LABEL
-
       }
 }
 

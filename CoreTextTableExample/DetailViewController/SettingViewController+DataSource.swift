@@ -49,16 +49,19 @@ extension SettingViewController  {
         snapshot.deleteSections(SectionContent.allCases.map {$0.title} )
         dataSource.apply(snapshot)
         
-        if Self.activeSection[.ViewSettings] ?? false {
-            sectionViewSettings     (settings, forEditing: forEditing)
+        if Self.activeSection[.ViewSetting] ?? false {
+            sectionViewSetting     (settings, forEditing: forEditing)
         }
-        if Self.activeSection[.PdfSettings] ?? false {
-            sectionPdfSettings      (settings, forEditing: forEditing)
+        if Self.activeSection[.PdfSetting] ?? false {
+            sectionPdfSetting      (settings, forEditing: forEditing)
         }
         if Self.activeSection[.BlockQuoteSetting] ?? false {
             sectionBlockQuoteSetting(settings, forEditing: forEditing)
         }
-        if Self.activeSection[.print] ?? false {
+        if Self.activeSection[.RulerSetting] ?? false {
+            sectionRulerSetting(settings, forEditing: forEditing)
+        }
+       if Self.activeSection[.print] ?? false {
             sectionPrint()
         }
     }

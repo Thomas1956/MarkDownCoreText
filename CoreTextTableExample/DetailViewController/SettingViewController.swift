@@ -50,7 +50,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         var dir = SectionContent.allCases.reduce(into: [SectionContent: Bool]()) { result, property in
             result[property] = false
         }
-        dir[.ViewSettings] = true
+        dir[.ViewSetting] = true
         activeSection = dir
     }
     
@@ -95,6 +95,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
                 [.text  ("Anzeige",                      toolTip: "Anzeige der Elemente"),
                  .text  ("PDF",                          toolTip: "PDF-Parameter einstellen"),
                  .text  ("Block",                        toolTip: "Blockparameter einstellen"),
+                 .text  ("Ruler",                        toolTip: "Trennstrich einstellen"),
                  .symbol("printer",             "Druck", toolTip: "Drucken"),
                  .symbol("questionmark.circle", "Hilfe", toolTip: "Hilfe")
                 ],
@@ -122,7 +123,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         titleController = "Details"
         self.topPinnedHeader = capsuleRepresentedHeader // CapsuleHeaderView.self
 
-        Self.selectSection(.ViewSettings)
+        Self.selectSection(.ViewSetting)
         super.viewDidLoad()
 
         view.backgroundColor = .white
