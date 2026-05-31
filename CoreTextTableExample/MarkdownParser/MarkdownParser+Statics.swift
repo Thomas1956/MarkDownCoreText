@@ -74,6 +74,7 @@ public struct Markdown {
         static var marginBottom : Double = 2 * _1cm
         static var textSize     : Double = 12                   /// Eingestellte Fontgröße für PDF
         static var textColor    : UIColor = .label              /// Eingestellte Textfarbe
+        static var footerTextScale: Double = 0.8                /// Schriftgröße der Fußzeile relativ zum Text
     }
     
     /// Konstanten für die Tabelle

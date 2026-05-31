@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreText
 
 
 //--------------------------------------------------------------------------------------------
@@ -15,6 +16,9 @@ public class MarkdownParser {
 
     /// Struktur für die Typographie
     static var typo = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: 16))
+    
+    /// PDF-Metadaten aus dem YAML Front Matter des aktuellen Dokumentes.
+    static var pdfFooter = PDFDocumentFooter()
 
     ///---------------------------------------------------------------------------------------
     /// Main entry: parse Markdown string, build renderers, trigger layout
@@ -25,8 +29,11 @@ public class MarkdownParser {
         /// Typographie mit der Fontgröße aktualisieren
         typo.bodyFont(UIFont.systemFont(ofSize: size, weight: weight))
         
+        let parsedDocument = parseDocumentMetadata(from: string)
+        pdfFooter = parsedDocument.footer
+        
         /// Automatischen Silbentrennung mit dem Einfügen von Soft-Hyphen
-        let string = string.stringWithHyphens()
+        let string = parsedDocument.markdown.stringWithHyphens()
 
         let rawAttr: AttributedString
         do {
@@ -106,6 +113,99 @@ public class MarkdownParser {
 // MARK: - Extension MarkdownParser
 
 extension MarkdownParser {
+    
+    //----------------------------------------------------------------------------------------
+    // MARK: - PDF-Dokument-Metadaten
+    
+    struct PDFDocumentFooter {
+        var left: String?
+        var center: String? = "Seite {page}"
+        var right: String?
+        
+        var hasVisibleText: Bool {
+            left?.isEmpty == false || center?.isEmpty == false || right?.isEmpty == false
+        }
+    }
+    
+    private struct ParsedMarkdownDocument {
+        let markdown: String
+        let footer: PDFDocumentFooter
+    }
+    
+    private static func parseDocumentMetadata(from source: String) -> ParsedMarkdownDocument {
+        guard source.hasPrefix("---") else {
+            return ParsedMarkdownDocument(markdown: source, footer: PDFDocumentFooter())
+        }
+        
+        let normalized = source.replacingOccurrences(of: "\r\n", with: "\n")
+        let lines = normalized.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+        guard lines.first?.trimmingCharacters(in: .whitespacesAndNewlines) == "---" else {
+            return ParsedMarkdownDocument(markdown: source, footer: PDFDocumentFooter())
+        }
+        
+        guard let closingIndex = lines.dropFirst().firstIndex(where: {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines) == "---"
+        }) else {
+            return ParsedMarkdownDocument(markdown: source, footer: PDFDocumentFooter())
+        }
+        
+        let metadataLines = Array(lines[1..<closingIndex])
+        let markdownLines = Array(lines[(closingIndex + 1)...])
+        let footer = parseFooterMetadata(from: metadataLines)
+        return ParsedMarkdownDocument(markdown: markdownLines.joined(separator: "\n"), footer: footer)
+    }
+    
+    private static func parseFooterMetadata(from lines: [String]) -> PDFDocumentFooter {
+        var footer = PDFDocumentFooter()
+        var inFooterSection = false
+        
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.isEmpty || trimmed.hasPrefix("#") { continue }
+            
+            if trimmed == "pdfFooter:" || trimmed == "footer:" {
+                inFooterSection = true
+                continue
+            }
+            
+            let keyValue = trimmed.split(separator: ":", maxSplits: 1).map(String.init)
+            guard keyValue.count == 2 else { continue }
+            
+            let key = keyValue[0].trimmingCharacters(in: .whitespacesAndNewlines)
+            let value = cleanMetadataValue(keyValue[1])
+            
+            if inFooterSection {
+                switch key {
+                case "left":   footer.left = value
+                case "center": footer.center = value
+                case "right":  footer.right = value
+                default: break
+                }
+            } else {
+                switch key {
+                case "pdfFooterLeft", "footerLeft":     footer.left = value
+                case "pdfFooterCenter", "footerCenter": footer.center = value
+                case "pdfFooterRight", "footerRight":   footer.right = value
+                default: break
+                }
+            }
+        }
+        return footer
+    }
+    
+    private static func cleanMetadataValue(_ value: String) -> String? {
+        var result = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        if result == "null" || result == "nil" || result == "~" { return nil }
+        
+        if result.count >= 2,
+           let first = result.first,
+           let last = result.last,
+           (first == "\"" && last == "\"" || first == "'" && last == "'") {
+            result.removeFirst()
+            result.removeLast()
+        }
+        return result
+    }
     
     //----------------------------------------------------------------------------------------
     // MARK: - Inline-Presentation bearbeiten
@@ -365,6 +465,59 @@ extension MarkdownParser {
     
         
     //----------------------------------------------------------------------------------------
+    // MARK: - PDF-Fußzeile
+    
+    private static func resolvedFooterText(_ text: String?, page: Int, pages: Int) -> String? {
+        guard var result = text, !result.isEmpty else { return nil }
+        result = result.replacingOccurrences(of: "{page}", with: "\(page)")
+        result = result.replacingOccurrences(of: "{pages}", with: "\(pages)")
+        result = result.replacingOccurrences(of: "{date}", with: Date.now.formatted(date: .numeric, time: .omitted))
+        return result
+    }
+    
+    private static func drawFooter(in ctx: CGContext,
+                                   pageRect: CGRect,
+                                   page: Int,
+                                   pages: Int,
+                                   footer: PDFDocumentFooter) {
+        typealias MP = Markdown.PDF
+        guard footer.hasVisibleText else { return }
+        
+        let font = UIFont.systemFont(ofSize: CGFloat(MP.textSize * MP.footerTextScale), weight: .regular)
+        let textColor = MP.textColor.withAlphaComponent(0.75)
+        let lineHeight = font.lineHeight
+        let baselineY = max(4, (CGFloat(MP.marginBottom) - lineHeight) / 2 + font.ascender)
+        let leftX = CGFloat(MP.marginLeft)
+        let rightX = pageRect.width - CGFloat(MP.marginRight)
+        let centerX = pageRect.midX
+        
+        func draw(_ text: String?, alignment: NSTextAlignment) {
+            guard let text else { return }
+            let attr = NSAttributedString(string: text, attributes: [
+                .font: font,
+                .foregroundColor: textColor
+            ])
+            let line = CTLineCreateWithAttributedString(attr)
+            let width = CGFloat(CTLineGetTypographicBounds(line, nil, nil, nil))
+            
+            let x: CGFloat
+            switch alignment {
+            case .center: x = centerX - width / 2
+            case .right:  x = rightX - width
+            default:      x = leftX
+            }
+            
+            ctx.textMatrix = .identity
+            ctx.textPosition = CGPoint(x: x, y: baselineY)
+            CTLineDraw(line, ctx)
+        }
+        
+        draw(resolvedFooterText(footer.left, page: page, pages: pages), alignment: .left)
+        draw(resolvedFooterText(footer.center, page: page, pages: pages), alignment: .center)
+        draw(resolvedFooterText(footer.right, page: page, pages: pages), alignment: .right)
+    }
+    
+    //----------------------------------------------------------------------------------------
     // MARK: - PDF-Export
     
     static func exportPDF(renderers: [BlockRenderer], presentSavePanel: () -> URL?) throws {
@@ -423,6 +576,11 @@ extension MarkdownParser {
             }
 
             ctx.restoreGState()   // beendet globales saveGState
+            drawFooter(in: ctx,
+                       pageRect: pageRect,
+                       page: p + 1,
+                       pages: pageCount,
+                       footer: pdfFooter)
             ctx.endPDFPage()
         }
         ctx.closePDF()
