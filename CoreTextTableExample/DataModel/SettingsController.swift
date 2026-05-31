@@ -298,7 +298,7 @@ extension SettingsController {
         // ------- UIColor ----------
         for m in Self.colorMaps {
             let newVal = m.toSettings(m.getMarkdown())
-            if !(target[keyPath: m.settingsKey] != newVal) {
+            if target[keyPath: m.settingsKey] != newVal {
                 target[keyPath: m.settingsKey] = newVal
                 didChange = true
             }

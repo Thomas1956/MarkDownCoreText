@@ -20,26 +20,6 @@ extension SettingViewController  {
     /// Action - Teilen und Drucken
     ///
     @objc func actionShare(_ sender: Any?) {
-        guard let setting = self.entity else { return }
-        
-        let predicate = NSPredicate.all
-        let settings = Settings.fetch(predicate, context: viewContext)
-
-        /* Beispiel für das Drucken
- 
-        /// Produkte, die dem Lager zugeordnet sind und noch nicht verkauft wurden
-        let predicate = NSPredicate(format: "%K = %@ AND %K = nil", #keyPath(Produkt.lager), lager, #keyPath(Produkt.verkauf) )
-         */
-        let subTitle = "Liste für das Drucken."
-
-        ///-----------------------------------------------------------------------------------
-        /// Druckaufbereitung - Für die Unterstützung des Druckens das Template 'Print Support' dem Projekt zufügen.
-        ///
-        /*
-        let pageSupport = SettingsSupport(settings: settings, subTitle: subTitle)
-        shareContent(view, pageSupport: pageSupport)
-         */
-
     }
     
     ///---------------------------------------------------------------------------------------
@@ -51,10 +31,11 @@ extension SettingViewController  {
         /// Defaultwerte zurückspeichern
         SettingsController.shared.restoreDefaults(to: setting)
         
-        navigationItem.rightBarButtonItem?.isEnabled = setting.hasPersistentChangedValues
-
-        print(setting.viewColor)
+        saveButtonState()
         
+        /// Rückmeldung über Änderungen für Live Preview
+        onLiveChange?(setting)
+
         var snapshot = self.dataSource.snapshot()
         snapshot.reloadItems(snapshot.itemIdentifiers)
         self.dataSource.apply(snapshot, animatingDifferences: true)
