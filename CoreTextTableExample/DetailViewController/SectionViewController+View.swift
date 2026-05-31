@@ -72,7 +72,7 @@ extension SettingViewController  {
                     .start.fraction(2).symbol("").minimumValue(1).maximumValue(5).stepValue(0.1)
             
             case .viewHeadIndent, .viewTailIndent, .viewSpacing, .viewSpacingBefore:
-                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
+                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(1)
 
             default: .einsNachkomma
             }

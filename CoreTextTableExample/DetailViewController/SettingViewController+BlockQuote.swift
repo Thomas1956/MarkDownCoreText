@@ -50,9 +50,9 @@ extension SettingViewController  {
         var parameter: [KeyText]? {
             switch self {
             case .blockHorizIndent, .blockContentIndent:
-                    .start.blockAlignment(.leading).fraction(1).symbol("Pt").minimumValue(0).maximumValue(80).stepValue(0.5)
+                    .start.blockAlignment(.leading).fraction(1).symbol("Pt").minimumValue(0).maximumValue(80).stepValue(1)
             case .blockBarIndent, .blockVerticalOffset:
-                    .start.blockAlignment(.leading).fraction(1).symbol("Pt").minimumValue(0).maximumValue(40).stepValue(0.5)
+                    .start.blockAlignment(.leading).fraction(1).symbol("Pt").minimumValue(0).maximumValue(40).stepValue(1)
             case .blockBarWidth:
                     .start.blockAlignment(.leading).fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
 

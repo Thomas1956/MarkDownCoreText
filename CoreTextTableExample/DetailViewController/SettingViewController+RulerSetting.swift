@@ -50,9 +50,9 @@ extension SettingViewController  {
             case .rulerLineHeight:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
             case .rulerRightIndent: 
-                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
+                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(1)
 
-            case .rulerHighlightColor: .alignTrailing
+            case .rulerHighlightColor: .alignLeading
             }
         }
         
@@ -80,10 +80,10 @@ extension SettingViewController  {
         info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
         items.append(.basic(info1))
         
-        items.append(.basic(Content.rulerHeight        .line(setting, .rw, contentWidth: 180)))
-        items.append(.basic(Content.rulerLineHeight    .line(setting, .rw, contentWidth: 180)))
-        items.append(.basic(Content.rulerRightIndent   .line(setting, .rw, contentWidth: 180)))
-        items.append(.basic(Content.rulerHighlightColor.line(setting, .rw, contentWidth: 180)))
+        items.append(.basic(Content.rulerHeight        .line(setting, .rw, labelWidth: 120)))
+        items.append(.basic(Content.rulerLineHeight    .line(setting, .rw, labelWidth: 120)))
+        items.append(.basic(Content.rulerRightIndent   .line(setting, .rw, labelWidth: 120)))
+        items.append(.basic(Content.rulerHighlightColor.line(setting, .rw, labelWidth: 120)))
 
         ///-----------------------------------------------------------------------------------
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen
