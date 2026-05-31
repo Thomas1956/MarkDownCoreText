@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Thomas1956/CommonCollection",
       "state" : {
-        "revision" : "d89a18bcadeb9920813f20e254e07206fb7ca9d1",
-        "version" : "5.2.1"
+        "branch" : "main",
+        "revision" : "26b04f403f73c3aa4b7ea2ad67e540027d0e5b4b"
       }
     },
     {
@@ -15,17 +15,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-syntax.git",
       "state" : {
-        "revision" : "4799286537280063c85a32f09884cfbca301b1a1",
-        "version" : "602.0.0"
+        "branch" : "main",
+        "revision" : "996efe58bff528645fb8273d641d3d1e5e2a693b"
       }
     },
     {
       "identity" : "usefulextensions",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Thomas1956/UsefulExtensions.git",
+      "location" : "https://github.com/Thomas1956/UsefulExtensions",
       "state" : {
-        "revision" : "f12a2eb1700171dedf1e6e7d65aaade9883910ab",
-        "version" : "2.0.1"
+        "branch" : "main",
+        "revision" : "105248a3bcdc50d88b30508a9f4e0c1a3beaccb1"
       }
     }
   ],

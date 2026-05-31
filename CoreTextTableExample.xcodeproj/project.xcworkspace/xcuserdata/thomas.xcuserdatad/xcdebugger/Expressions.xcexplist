@@ -3,16 +3,50 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "ParagraphRenderer.init(blockContent:):MarkdownScrollView.swift">
+         contextName = "static SettingsController.copyMarkdown(to:):SettingsController.swift">
       </ContextState>
       <ContextState
-         contextName = "ParagraphRenderer.init(blockContent:):MarkdownParser+BlockRenderer.swift">
+         contextName = "HorizontalRuleRenderer.draw(in:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "ParagraphRenderer.draw(in:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "HeadingRenderer.init(level:attributed:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "ColorChipContentView.configure(configuration:):ColorChipContentView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "flushBuilder #1 (block:) in static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "flushBuilder #1 (blockContent:) in static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "BlockRenderer.drawContent(in:):MarkdownScrollView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in BlockRenderer.preprocess(_:):MarkdownParser+BlockRenderer.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "value">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "closure #1 in MarkdownScrollView.markdown(string:size:weight:textColor:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
-         contextName = "StepperContentView.configure(configuration:):StepperContentView.swift">
+         contextName = "ColorChipContentView.layoutSubviews():ColorChipContentView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.items">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MarkdownContentView.layout(width:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
          contextName = "BlockRenderer.contentRect.getter:MarkdownScrollView.swift">
@@ -26,10 +60,10 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "flushBuilder #1 (block:) in static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
+         contextName = "ParagraphRenderer.init(blockContent:):MarkdownParser+BlockRenderer.swift">
       </ContextState>
       <ContextState
-         contextName = "BlockRenderer.drawContent(in:):MarkdownScrollView.swift">
+         contextName = "StepperContentView.configure(configuration:):StepperContentView.swift">
       </ContextState>
       <ContextState
          contextName = "StepperContentView.debugUpdateTextColor():StepperContentView.swift">
@@ -43,33 +77,13 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "ParagraphRenderer.draw(in:):MarkdownScrollView.swift">
-      </ContextState>
-      <ContextState
-         contextName = "HorizontalRuleRenderer.draw(in:):MarkdownScrollView.swift">
-      </ContextState>
-      <ContextState
-         contextName = "MarkdownContentView.layout(width:):MarkdownScrollView.swift">
-      </ContextState>
-      <ContextState
-         contextName = "static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
+         contextName = "ParagraphRenderer.init(blockContent:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
          contextName = "MarkdownScrollView.markdown(string:size:weight:textColor:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState
-         contextName = "HeadingRenderer.init(level:attributed:):MarkdownScrollView.swift">
-      </ContextState>
-      <ContextState
-         contextName = "flushBuilder #1 (blockContent:) in static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in BlockRenderer.preprocess(_:):MarkdownParser+BlockRenderer.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "value">
-            </PersistentString>
-         </PersistentStrings>
+         contextName = "static CoreTextBlockFactory.renderers(from:textSize:):MarkdownScrollView.swift">
       </ContextState>
    </ContextStates>
 </VariablesViewState>

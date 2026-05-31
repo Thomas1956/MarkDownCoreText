@@ -30,7 +30,7 @@ extension SettingViewController  {
             }
         }
         
-        var appearence: UICollectionLayoutListConfiguration.Appearance {
+        var appearance: UICollectionLayoutListConfiguration.Appearance {
             switch self {
             default: .insetGrouped
             }
@@ -106,8 +106,8 @@ extension SettingViewController  {
         ///-----------------------------------------------------------------------------------
         /// Zusätzliche Daten für BasicType
         ///
-        var presentation: ContentPresentation? { nil }      /// Defaultmäßig wird TITLE verwendet
-        var widthUsage  : WidthUsage?          { nil }      /// Defaultmäßig wirkt die Breite auf LABEL
+//        var presentation: ContentPresentation? { nil }      /// Defaultmäßig wird TITLE verwendet
+//        var widthUsage  : WidthUsage?          { nil }      /// Defaultmäßig wirkt die Breite auf LABEL
 
       }
 }

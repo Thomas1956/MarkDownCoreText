@@ -720,24 +720,24 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Thomas1956/CommonCollection";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.2.0;
+				branch = main;
+				kind = branch;
 			};
 		};
 		E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/swiftlang/swift-syntax.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 602.0.0;
+				branch = main;
+				kind = branch;
 			};
 		};
 		E903955B2EDF9987001E660F /* XCRemoteSwiftPackageReference "UsefulExtensions" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Thomas1956/UsefulExtensions";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.1;
+				branch = main;
+				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

@@ -32,7 +32,6 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     
     ///---------------------------------------------------------------------------------------
     /// Titel des Detail View Controllers und den ENUM für die Konfiguration der Sektionen.
-    override var titleController : String { "Details" }
     override var sectionConfiguration : SectionDirectory { SectionContent.configuration }
     
     /// Für den Fall, dass eine Liste von Objekten im VC ist, muss hier der Name der Sektion eingetragen werden.
@@ -41,18 +40,6 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     /// Liste der Links, die für Aktionen benötigt werden.
     var linkPrint: BasicType?
     var linkDefaults: BasicType?
-    
-    let colorSelectContent = [
-        (nil                    , "-"      , .black                 ),
-        (UIColor.lightGray      , "Weiss"  , UIColor.lightGray      ),
-        (UIColor.gray           , "Grau"   , UIColor.gray           ),
-        (UIColor.yellow.lowlight, "Gelb"   , UIColor.yellow.lowlight),
-        (UIColor.red            , "Rot"    , UIColor.red            ),
-        (UIColor.blue           , "Blau"   , UIColor.blue           ),
-        (UIColor.green.darklight, "Grün"   , UIColor.green.darklight),
-        (UIColor.brown          , "Braun"  , UIColor.brown          ),
-        (UIColor.black          , "Schwarz", UIColor.black          ),
-    ].keyTextArray
 
     ///---------------------------------------------------------------------------------------
 
@@ -65,6 +52,12 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         }
         dir[.ViewSettings] = true
         activeSection = dir
+    }
+    
+    static func selectSection(_ section: SectionContent) {
+        if activeSection == nil { initSection() }
+        for key in SectionContent.allCases { activeSection[key] = false }
+        activeSection[section] = true
     }
     
     ///---------------------------------------------------------------------------------------
@@ -86,59 +79,56 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     }
     
     //----------------------------------------------------------------------------------------
-    // MARK: - Initialisierung
+    // MARK: - Variablen für die Header
     
-    override func viewDidLoad() {
-//        CGFloat.defaultLineLabelWidth = 120
-        
-        self.topPinnedHeader = CapsuleHeaderView.self
-        super.viewDidLoad()
+    public var scopeIndex = 0
 
-        ///-----------------------------------------------------------------------------------
-        /// TopPinnedHeader für die Auswahl
-        ///
-        CapsuleHeaderView.attach(
-            to        : collectionView,
-            dataSource: dataSource,
-            
-            input     :
+    ///---------------------------------------------------------------------------------------
+    /// Capsule Header View (representable)
+    ///
+    public var capsuleRepresentedHeader: AnySectionHeader {
+        .representable(
+            CapsuleHeaderView.self,
+            identifier: .sectionHeaderTop,
+            elementKind : SupplementaryKind.topPinned,
+            input     : .init(
                 [.text  ("Anzeige",                      toolTip: "Anzeige der Elemente"),
                  .text  ("PDF",                          toolTip: "PDF-Parameter einstellen"),
                  .text  ("Block",                        toolTip: "Blockparameter einstellen"),
                  .symbol("printer",             "Druck", toolTip: "Drucken"),
                  .symbol("questionmark.circle", "Hilfe", toolTip: "Hilfe")
                 ],
-            
+                at: { [weak self] in self?.scopeIndex ?? 0 } ),
             onChange  : { index in
+                self.scopeIndex = index
+                print("Scope:", index)
+                
                 /// alle Sektionen ermitteln
                 let sections = SectionContent.allCases
                 guard sections.indices.contains(index) else { return }
 
-                /// Zuerst alle Sektionen abwählen (false)
-                for key in sections { Self.activeSection[key] = false }
-
                 /// Neu ausgewählte Sektion setzen
                 let key = sections[index]
-                Self.activeSection[key] = true
+                Self.selectSection(key)
                 self.applySnapshot(forEditing: self.isEditing)
-             })
+            }
+        )
+    }
+
+    //----------------------------------------------------------------------------------------
+    // MARK: - Initialisierung
+    
+    override func viewDidLoad() {
+        titleController = "Details"
+        self.topPinnedHeader = capsuleRepresentedHeader // CapsuleHeaderView.self
+
+        Self.selectSection(.ViewSettings)
+        super.viewDidLoad()
 
         view.backgroundColor = .white
         
         /// Kann nicht in der Basisklasse definiert werden
         collectionView.delegate = self
-    }
-    
-    ///---------------------------------------------------------------------------------------
-    /// Konfiguration von Zellen, die nicht vom BasicType abgedeckt sind (z.B. Summen, Statistik, Liste von Objekten)
-    /// Der Aufruf der Funktion erfolgt NICHT im Registration Handler sondern in 'dequeueConfiguredReusableCell'
-    ///
-    override func cellConfiguration(cell: CommonCollectionViewCell, itemIdentifier: ItemType,
-                                    indexPath: IndexPath)
-    {
-        guard let item = itemIdentifier.item else { return }
-        self.cellConfiguration(cell: cell, itemIdentifier: item, onChange:     self.onEditChange,
-                                                                 onUpdateData: self.onUpdateData)
     }
     
     ///---------------------------------------------------------------------------------------
@@ -212,18 +202,18 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
 //            }
 //        }
         
-        if key == P.pdfColorSelect.key {
-            /// Das Image aus der Entity heraus ermitteln und in einen Image-Namen umwandeln.
-            if let color = entity?.property(forKey: P.pdfTextColor.key) as? UIColor
-            {
-                /// Die Liste aller auswählbaren Images holen und den aktuellen Eintrag suchen.
-                guard var select = colorSelectContent.first(where: {$0.value as? UIColor == color} )
-                else { return nil }
-                
-                select.value = nil
-                return select
-            }
-        }
+//        if key == P.pdfColorSelect.key {
+//            /// Das Image aus der Entity heraus ermitteln und in einen Image-Namen umwandeln.
+//            if let color = entity?.property(forKey: P.pdfTextColor.key) as? UIColor
+//            {
+//                /// Die Liste aller auswählbaren Images holen und den aktuellen Eintrag suchen.
+//                guard var select = colorSelectContent.first(where: {$0.value as? UIColor == color} )
+//                else { return nil }
+//                
+//                select.value = nil
+//                return select
+//            }
+//        }
 
         if key == C.message.key, let settings = entity {
             
@@ -269,17 +259,15 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         /// Methode, die typischerweise in der Extension DataSource definiert ist.
         return applySnapshot(forEditing: forEditing)
     }
-}
 
-
-//--------------------------------------------------------------------------------------------
-// MARK: - UICollectionViewDelegate
-
-extension SettingViewController: UICollectionViewDelegate {
     
+    //--------------------------------------------------------------------------------------------
+    // MARK: - UICollectionViewDelegate: Bearbeitung im Handler
+
     /// Ausführen einer Aktion bei Auswahl einer Zelle
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    public override func handleSelection(of item: ItemType, at indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
+
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
 
         /// Beispiel für Aufruf des Druckens
@@ -288,8 +276,7 @@ extension SettingViewController: UICollectionViewDelegate {
     }
     
     /// Abfrage, ob eine Zelle ausgewählt werden kann
-    /// Diese Funktion MUSS auch implementiert werden, wenn keine Auswahl erfolgt. Defaultmäßig ist der Rückgabewert TRUE !
-    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+    public override func canSelect(item: ItemType, at indexPath: IndexPath) -> Bool {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return false }
 
         /// Beispiel für Aufruf des Druckens

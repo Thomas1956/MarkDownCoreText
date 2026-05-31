@@ -59,36 +59,20 @@ extension SettingViewController  {
         var parameter: [KeyText]? {
             switch self {
             case .viewTextSize:
-                    .make(alignment: .leading, fraction: 0, symbol: "Pt", minimum: 5.0, maximum: 100.0, stepValue: 1)
+                    .start.fraction(0).symbol("Pt").minimumValue(5).maximumValue(100).stepValue(1)
 
             case .codeTextSizeFactor:
-                    .make(alignment: .leading, fraction: 0, symbol: "%", minimum: 50, maximum: 120.0, stepValue: 5)
+                    .start.fraction(0).symbol("%").minimumValue(50).maximumValue(120).stepValue(5)
 
-            case .viewColor: .make(list: [
-                    /// Optionale Parameter
-                    ("chipWidth"      , 80.0                  ),
-                    ("backgroundColor", UIColor.systemGray6   ),
-                   
-                    /// Liste der Farben
-                    ("Schwarz"        , UIColor.black         ),
-                    ("Dunkelgrau"     , UIColor.textDarkgray  ),
-                    ("Grau"           , UIColor.textGray      ),
-                    ("Hellgrau"       , UIColor.textLightgray ),
-                    ("Blau"           , UIColor.textBlue      ),
-                    ("Mint"           , UIColor.textMint      ),
-                    ("Grün"           , UIColor.textGreen     ),
-                    ("Orange"         , UIColor.textOrange    ),
-                    ("Rot"            , UIColor.textRed       ),
-                    ("Purpur"         , UIColor.textPurple    ),
-                ].keyTextArray)
-               
-            case .viewSoftBreaks: .alignTrailing
+            case .viewColor:
+                    .start.chipWidth(80).backgroundColor(.systemGray6)
+                    .list(Settings.textColorPalette)
 
             case .viewLineHeight:
-                    .make(alignment: .leading, fraction: 2, symbol: "", minimum: 1.0, maximum: 5.0, stepValue: 0.1)
+                    .start.fraction(2).symbol("").minimumValue(1).maximumValue(5).stepValue(0.1)
             
             case .viewHeadIndent, .viewTailIndent, .viewSpacing, .viewSpacingBefore:
-                    .make(alignment: .leading, fraction: 1, symbol: "Pt", minimum: 0, maximum: 30, stepValue: 0.5)
+                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
 
             default: .einsNachkomma
             }
@@ -120,41 +104,6 @@ extension SettingViewController  {
             default: nil
             }
         }
-        
-        ///-----------------------------------------------------------------------------------
-
-        var configurationWidth   : CGFloat?                {
-            switch self {
-            case .viewSoftBreaks : 120.0
-//            case .viewTextSize,   .codeTextSizeFactor,
-//                 .viewLineHeight, .viewSpacing, .viewSpacingBefore,
-//                 .viewHeadIndent, .viewTailIndent
-//                : 300.0
-            default: nil
-            }
-        }
-
-        var presentation: ContentPresentation? {       /// Defaultmäßig wird TITLE verwendet
-            switch self {
-            case .viewSoftBreaks, .viewColor          : .line
-//            case .viewTextSize,   .codeTextSizeFactor,
-//                 .viewLineHeight, .viewSpacing, .viewSpacingBefore,
-//                 .viewHeadIndent, .viewTailIndent
-//                : .line
-            default: nil
-            }
-        }
-
-        var widthUsage: WidthUsage?  {
-            switch self {
-            case .viewSoftBreaks : .container
-//            case .viewTextSize,   .codeTextSizeFactor,
-//                 .viewLineHeight, .viewSpacing, .viewSpacingBefore,
-//                 .viewHeadIndent, .viewTailIndent
-//                : .container
-            default: nil
-            }
-        }           /// Defaultmäßig wirkt die Breite auf LABEL
     }
     
     //----------------------------------------------------------------------------------------
@@ -173,36 +122,31 @@ extension SettingViewController  {
         var info1 = "Schrift".markdown(size: 17, weight: .semibold, textcolor: .textGray).asContentDataLayout()
         info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
         items.append(.basic(info1))
-        
-//        let stepper1 = Content.leftIndent .line(person, labelWidth: 120)
-//        let stepper2 = Content.rightIndent.line(person, contentWidth: 170, labelWidth: 120)
-//        items.append(.basic([stepper1, SPACE, stepper2]))
 
-
-        items.append(.basic( Content.viewTextSize      .line(setting, contentWidth: 180)))
-        items.append(.basic( Content.codeTextSizeFactor.line(setting, contentWidth: 180)))
-        items.append(.basic( Content.viewColor         .data(setting)))
-        items.append(.basic( Content.viewSoftBreaks    .line(setting, contentWidth: 180)))
+        items.append(.basic( Content.viewTextSize      .line(setting, .rw, labelWidth: 120)))
+        items.append(.basic( Content.codeTextSizeFactor.line(setting, .rw, labelWidth: 120)))
+        items.append(.basic( Content.viewColor         .line(setting, .rw, labelWidth: 120)))
+        items.append(.basic( Content.viewSoftBreaks    .line(setting, .rw, labelWidth: 120)))
         
         let textAbstand = "Abstände".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkAbstand = BasicType.stdItem(textAbstand, presentation: .outlineDisclosure)
-        items.append(.lineSpace(height: 6, color: .systemGray5, layoutMargins: layoutMargins))
+        items.append(.vDivider(6, color: .systemGray5, layoutMargins: layoutMargins))
         items.append(linkAbstand)
         
         let itemsAbstand: [BasicType] = [
-            .basic( Content.viewLineHeight   .line(setting, contentWidth: 180)),
-            .basic( Content.viewSpacing      .line(setting, contentWidth: 180)),
-            .basic( Content.viewSpacingBefore.line(setting, contentWidth: 180)),
+            .basic( Content.viewLineHeight   .line(setting, .rw, labelWidth: 120)),
+            .basic( Content.viewSpacing      .line(setting, .rw, labelWidth: 120)),
+            .basic( Content.viewSpacingBefore.line(setting, .rw, labelWidth: 120)),
         ]
         
         let textEinzug = "Einzüge".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkEinzug = BasicType.stdItem(textEinzug, presentation: .outlineDisclosure)
-        items.append(.lineSpace(height: 6, color: .systemGray5, layoutMargins: layoutMargins))
+        items.append(.vDivider(6, color: .systemGray5, layoutMargins: layoutMargins))
         items.append(linkEinzug)
         
         let itemsEinzug: [BasicType] = [
-            .basic(Content.viewHeadIndent.line(setting, contentWidth: 180)),
-            .basic(Content.viewTailIndent.line(setting, contentWidth: 180)),
+            .basic(Content.viewHeadIndent.line(setting, .rw, labelWidth: 120)),
+            .basic(Content.viewTailIndent.line(setting, .rw, labelWidth: 120)),
         ]
 
         ///-----------------------------------------------------------------------------------

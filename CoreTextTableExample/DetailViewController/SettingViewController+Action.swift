@@ -53,6 +53,8 @@ extension SettingViewController  {
         
         navigationItem.rightBarButtonItem?.isEnabled = setting.hasPersistentChangedValues
 
+        print(setting.viewColor)
+        
         var snapshot = self.dataSource.snapshot()
         snapshot.reloadItems(snapshot.itemIdentifiers)
         self.dataSource.apply(snapshot, animatingDifferences: true)

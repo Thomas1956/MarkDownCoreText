@@ -24,7 +24,7 @@ extension SettingViewController  {
         /// items anlegen
         var items = [BasicType]()
 
-        items.append(.stdInfo(Content.textDefaults.title))
+        items.append(.info(Content.textDefaults.title))
         /// Defaultwerte wiederherstellen.
         let linkDefaults = BasicType.stdItem("Defaultwerte einstellen" , image: "arrow.trianglehead.2.clockwise")
         items.append(linkDefaults)
@@ -35,11 +35,9 @@ extension SettingViewController  {
         items.append(linkPrint)
         self.linkPrint = linkPrint
 
-        var sectionSnapshot = SectionSnapshot()
-        sectionSnapshot.append(SectionContent.print, items: items.itemType)
-        dataSource.apply(sectionSnapshot, to: SectionContent.print.title, animatingDifferences: true)
+        dataSource.makeSection(SectionContent.print, items: items.itemType)
     }
-    
+ 
     ///---------------------------------------------------------------------------------------
     /// Alle definierten Sektionen erzeugen
     ///
@@ -50,19 +48,17 @@ extension SettingViewController  {
         var snapshot = Snapshot()
         snapshot.deleteSections(SectionContent.allCases.map {$0.title} )
         dataSource.apply(snapshot)
-
-//        sectionAuswahl()
         
-        if Self.activeSection[.BlockQuoteSetting] ?? false {
-            sectionBlockQuoteSetting(settings, forEditing: forEditing)
-        }
         if Self.activeSection[.ViewSettings] ?? false {
             sectionViewSettings     (settings, forEditing: forEditing)
         }
         if Self.activeSection[.PdfSettings] ?? false {
             sectionPdfSettings      (settings, forEditing: forEditing)
         }
-        if Self.activeSection[.print] ?? false {            
+        if Self.activeSection[.BlockQuoteSetting] ?? false {
+            sectionBlockQuoteSetting(settings, forEditing: forEditing)
+        }
+        if Self.activeSection[.print] ?? false {
             sectionPrint()
         }
     }

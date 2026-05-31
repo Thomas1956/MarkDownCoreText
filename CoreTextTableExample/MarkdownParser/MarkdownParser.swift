@@ -95,7 +95,7 @@ public class MarkdownParser {
         ///
         attr.debugInfo(.nothing, "Vorher")
         /// Debugging nach dem Inline-Presentation
-        attr.debugInfo(.presentationIntent, "Nach Inline Presentation")
+//        attr.debugInfo(.presentationIntent, "Nach Inline Presentation")
 
         return CoreTextBlockFactory.renderers(from: attr, typography: typo)
     }

@@ -143,7 +143,7 @@ extension BlockRenderer {
         var balken = rect
         balken.origin.x  += attachment.stripeGap
         balken.size.width = attachment.stripeWidth
-        context.setFillColor(Markdown.blockQuoteStripeColor.cgColor)
+        context.setFillColor(MB.barColor.cgColor)
         context.fill(balken)
     }
     
@@ -784,7 +784,6 @@ final class HorizontalRuleRenderer: BlockRenderer {
         context.strokePath()
     }
 }
-
 
 
 

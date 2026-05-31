@@ -188,16 +188,19 @@ struct MarkdownTypography {
     // MARK: Block Quote
     
     var blockQuote: BlockQuoteMetrics {
+        typealias MB = Markdown.BlockQuote
+        
         let refSize = referenceHeaderSizes.first ?? referenceHeaderSizes.last ?? bodyFont.pointSize
         let size = scaled(refSize, rounded: true)
         let spacing = 2 * Markdown.headerSpacing(level: 0, size: size).after
         
-        let contentIndent = scaled(Markdown.blockQuoteContentIndent)
-        let stripeWidth = scaled(Markdown.blockQuoteStripeWidth)
-        let stripeGap = scaled(Markdown.blockQuoteStripeGap)
-        let rectInsetTop = 0.40 * spacing
-        let rectInsetBottom = spacing - rectInsetTop
-        let rectInsetRight = scaled(Markdown.blockContentIndent)
+        let contentIndent = scaled(CGFloat(MB.contentIndent))
+        let stripeWidth = scaled(CGFloat(MB.barWidth))
+        let stripeGap = scaled(CGFloat(MB.barIndent))
+        let rectInsetTop = scaled(CGFloat(MB.verticalOffset))
+        let rectInsetBottom = max(0, spacing - rectInsetTop)
+        let rectInsetLeft = scaled(CGFloat(MB.horizontalIndent))
+        let rectInsetRight = rectInsetLeft
         let headIndent = scaled(Markdown.blockHeadIndent)
         let tailIndent = rectInsetRight + scaled(Markdown.blockTailIndent)
         
@@ -211,7 +214,7 @@ struct MarkdownTypography {
             rectAttachment: RectAttachment(
                 rectInsetTop: rectInsetTop,
                 rectInsetBottom: rectInsetBottom,
-                rectInsetLeft: 0,
+                rectInsetLeft: rectInsetLeft,
                 rectInsetRight: rectInsetRight,
                 stripeWidth: stripeWidth,
                 stripeGap: stripeGap,

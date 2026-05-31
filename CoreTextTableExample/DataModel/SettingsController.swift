@@ -238,6 +238,16 @@ extension SettingsController {
                  getMarkdown: { Markdown.PDF.textColor },
                  setMarkdown: { Markdown.PDF.textColor = $0 })
     ]
+    
+    private static let optionalColorMaps: [FieldMap<UIColor?>] = [
+        FieldMap(settingsKey: \Settings.blockBarColor,
+                 getMarkdown: { Markdown.BlockQuote.barColor },
+                 setMarkdown: { if let color = $0 { Markdown.BlockQuote.barColor = color } }),
+        
+        FieldMap(settingsKey: \Settings.blockBackColor,
+                 getMarkdown: { Markdown.BlockQuote.backgroundColor },
+                 setMarkdown: { if let color = $0 { Markdown.BlockQuote.backgroundColor = color } })
+    ]
 
     // ------------------------------------------------------------
     //  3)  Settings ➜ Markdown   (beim App-Start / nach Save)
@@ -247,6 +257,7 @@ extension SettingsController {
         for m in Self.doubleMaps { m.setMarkdown( m.toMarkdown( s[keyPath: m.settingsKey] ) ) }
         for m in Self.boolMaps   { m.setMarkdown( m.toMarkdown( s[keyPath: m.settingsKey] ) ) }
         for m in Self.colorMaps  { m.setMarkdown( m.toMarkdown( s[keyPath: m.settingsKey] ) ) }
+        for m in Self.optionalColorMaps { m.setMarkdown( m.toMarkdown( s[keyPath: m.settingsKey] ) ) }
     }
 
     // ------------------------------------------------------------
@@ -288,6 +299,15 @@ extension SettingsController {
         for m in Self.colorMaps {
             let newVal = m.toSettings(m.getMarkdown())
             if !(target[keyPath: m.settingsKey] != newVal) {
+                target[keyPath: m.settingsKey] = newVal
+                didChange = true
+            }
+        }
+        
+        // ------- UIColor? ----------
+        for m in Self.optionalColorMaps {
+            let newVal = m.toSettings(m.getMarkdown())
+            if target[keyPath: m.settingsKey] != newVal {
                 target[keyPath: m.settingsKey] = newVal
                 didChange = true
             }

@@ -73,17 +73,74 @@ extension Settings {
         return req
     }
     
+    private static let textColorDefinitions: [(String, UIColor)] = [
+        ("Schwarz"   , .black),
+        ("Dunkelgrau", .textDarkgray),
+        ("Grau"      , .textGray),
+        ("Hellgrau"  , .textLightgray),
+        ("Blau"      , .textBlue),
+        ("Mint"      , .textMint),
+        ("Grün"      , .textGreen),
+        ("Orange"    , .textOrange),
+        ("Rot"       , .textRed),
+        ("Purpur"    , .textPurple)
+    ]
+    
+    private static let barColorDefinitions: [(String, UIColor)] = [
+        ("Grau"      , .systemGray4),
+        ("Dunkelgrau", .systemGray2),
+        ("Blau"      , .systemBlue),
+        ("Indigo"    , .systemIndigo),
+        ("Mint"      , .systemMint),
+        ("Grün"      , .systemGreen),
+        ("Orange"    , .systemOrange),
+        ("Rot"       , .systemRed),
+        ("Purpur"    , .systemPurple)
+    ]
+    
+    private static let backgroundColorDefinitions: [(String, UIColor)] = [
+        ("Hellgrau"  , .systemGray6),
+        ("Grau"      , .systemGray5),
+        ("Blau"      , UIColor.systemBlue.withAlphaComponent(0.12)),
+        ("Indigo"    , UIColor.systemIndigo.withAlphaComponent(0.12)),
+        ("Mint"      , UIColor.systemMint.withAlphaComponent(0.14)),
+        ("Grün"      , UIColor.systemGreen.withAlphaComponent(0.12)),
+        ("Gelb"      , UIColor.systemYellow.withAlphaComponent(0.18)),
+        ("Orange"    , UIColor.systemOrange.withAlphaComponent(0.14)),
+        ("Rot"       , UIColor.systemRed.withAlphaComponent(0.10)),
+        ("Purpur"    , UIColor.systemPurple.withAlphaComponent(0.12))
+    ]
+    
+    static let textColorPalette       = makeColorPalette(textColorDefinitions)
+    static let blockBarColorPalette   = makeColorPalette(barColorDefinitions)
+    static let blockBackColorPalette  = makeColorPalette(backgroundColorDefinitions)
+    
+    private static var completeColorPalette: [UIColor] {
+        (textColorDefinitions + barColorDefinitions + backgroundColorDefinitions).map(\.1)
+    }
+    
+    private static func makeColorPalette(_ definitions: [(String, UIColor)]) -> [KeyText] {
+        definitions.map { name, color in
+            KeyText(value: color, text: name, color: color)
+        }
+    }
+    
+    private static func normalizedColor(_ color: UIColor?, default defaultColor: UIColor) -> UIColor {
+        guard let color else { return defaultColor }
+        return completeColorPalette.first(where: { $0 == color }) ?? defaultColor
+    }
+    
     ///---------------------------------------------------------------------------------------
     /// Farbe für den PDF-Text
     @objc dynamic public var pdfTextColor: UIColor {
-        get {  pdfRawColor as? UIColor ?? .label}
-        set {  pdfRawColor = newValue  }
+        get { Self.normalizedColor(pdfRawColor as? UIColor, default: .black) }
+        set { pdfRawColor = Self.normalizedColor(newValue, default: .black) }
     }
 
     /// Farbe für den View-Text
     @objc dynamic public var viewColor: UIColor {
-        get { viewRawColor as? UIColor ?? .label }
-        set { viewRawColor = newValue  }
+        get { Self.normalizedColor(viewRawColor as? UIColor, default: .black) }
+        set { viewRawColor = Self.normalizedColor(newValue, default: .black) }
     }
     
     /// Farbe für den Edit-Text
@@ -100,14 +157,14 @@ extension Settings {
     
     /// Farbe für die Balken im BlockQuote
     @objc dynamic public var blockBarColor: UIColor? {
-        get { blockRawBarColor as? UIColor }
-        set { blockRawBarColor = newValue  }
+        get { Self.normalizedColor(blockRawBarColor as? UIColor, default: .systemGray4) }
+        set { blockRawBarColor = Self.normalizedColor(newValue, default: .systemGray4) }
     }
 
     /// Farbe für die Hintergrund im BlockQuote
     @objc dynamic public var blockBackColor: UIColor? {
-        get { blockRawBackColor as? UIColor }
-        set { blockRawBackColor = newValue  }
+        get { Self.normalizedColor(blockRawBackColor as? UIColor, default: .systemGray6) }
+        set { blockRawBackColor = Self.normalizedColor(newValue, default: .systemGray6) }
     }
 
 }
