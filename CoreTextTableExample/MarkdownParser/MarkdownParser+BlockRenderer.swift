@@ -70,7 +70,7 @@ extension BlockRenderer {
     ///---------------------------------------------------------------------------------------
     /// Berechnen der Höhe des Inhaltes
     func contentHeight(_ width: CGFloat) -> CGFloat {
-        let text = blockContent.attrText.insertingLineEndHyphens(width: contentRect.width)
+        let text = blockContent.attrText.insertingLineEndHyphens(width: width)
         let constraint = CGSize(width: width, height: .greatestFiniteMagnitude)
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
         let size = CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(location: 0, length: text.length), nil, constraint, nil)
@@ -784,5 +784,4 @@ final class HorizontalRuleRenderer: BlockRenderer {
         context.strokePath()
     }
 }
-
 
