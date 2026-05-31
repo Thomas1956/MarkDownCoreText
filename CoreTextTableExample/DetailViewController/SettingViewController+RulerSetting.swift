@@ -31,7 +31,7 @@ extension SettingViewController  {
             case .rulerHeight:         "Höhe des Absatzes"
             case .rulerLineHeight:     "Höhe des Trennstriches"
             case .rulerRightIndent:    "Rechter Abstand"
-            case .rulerHighlightColor: "Farbe des Trennstriches"
+            case .rulerHighlightColor: "Farbe aufhellen"
             }
         }
         
@@ -52,9 +52,7 @@ extension SettingViewController  {
             case .rulerRightIndent: 
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
 
-            case .rulerHighlightColor:
-                    .start.chipWidth(80).backgroundColor(.systemGray6)
-                    .list(Settings.textColorPalette)
+            case .rulerHighlightColor: .alignTrailing
             }
         }
         
@@ -62,7 +60,7 @@ extension SettingViewController  {
         var contentViewType: ContentViewType {
             switch self {
             case .rulerHeight, .rulerLineHeight, .rulerRightIndent: .stepper
-            case .rulerHighlightColor: .colorchip
+            case .rulerHighlightColor: .button
             }
         }
     }
@@ -74,8 +72,6 @@ extension SettingViewController  {
     func sectionRulerSetting(_ setting: Settings, forEditing: Bool) {
         typealias Content = RulerSetting
 
-        let layoutMargins = NSDirectionalEdgeInsets(top: 12, leading: 8, bottom:  0, trailing: 8)
-
         ///-----------------------------------------------------------------------------------
         /// items als BasicType anlegen
         var items = [BasicType]()
@@ -84,13 +80,13 @@ extension SettingViewController  {
         info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
         items.append(.basic(info1))
         
-        items.append(.basic(Content.rulerHeight        .line(setting, .rw, labelWidth: 120)))
-        items.append(.basic(Content.rulerLineHeight    .line(setting, .rw, labelWidth: 120)))
-        items.append(.basic(Content.rulerRightIndent   .line(setting, .rw, labelWidth: 120)))
-        items.append(.basic(Content.rulerHighlightColor.line(setting, .rw, labelWidth: 120)))
+        items.append(.basic(Content.rulerHeight        .line(setting, .rw, contentWidth: 180)))
+        items.append(.basic(Content.rulerLineHeight    .line(setting, .rw, contentWidth: 180)))
+        items.append(.basic(Content.rulerRightIndent   .line(setting, .rw, contentWidth: 180)))
+        items.append(.basic(Content.rulerHighlightColor.line(setting, .rw, contentWidth: 180)))
 
         ///-----------------------------------------------------------------------------------
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen
-        dataSource.makeSection(SectionContent.BlockQuoteSetting, items: items.itemType)
+        dataSource.makeSection(SectionContent.RulerSetting, items: items.itemType)
     }
 }

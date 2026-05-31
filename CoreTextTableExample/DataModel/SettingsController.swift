@@ -188,6 +188,19 @@ extension SettingsController {
         FieldMap(settingsKey: \Settings.blockVerticalOffset,
                  getMarkdown: { Markdown.BlockQuote.verticalOffset },
                  setMarkdown: { Markdown.BlockQuote.verticalOffset = $0 }),
+        
+        // ── Markdown.Ruler ────────────────────────────────────────
+        FieldMap(settingsKey: \Settings.rulerHeight,
+                 getMarkdown: { Markdown.Ruler.height },
+                 setMarkdown: { Markdown.Ruler.height = $0 }),
+        
+        FieldMap(settingsKey: \Settings.rulerLineHeight,
+                 getMarkdown: { Markdown.Ruler.lineHeight },
+                 setMarkdown: { Markdown.Ruler.lineHeight = $0 }),
+        
+        FieldMap(settingsKey: \Settings.rulerRightIndent,
+                 getMarkdown: { Markdown.Ruler.rightIndent },
+                 setMarkdown: { Markdown.Ruler.rightIndent = $0 }),
 
         // ── Markdown.PDF ────────────────────────────────────────
         FieldMap(settingsKey: \Settings.pdfTextSize,
@@ -224,7 +237,11 @@ extension SettingsController {
     private static let boolMaps: [FieldMap<Bool>] = [
         FieldMap(settingsKey: \Settings.viewSoftBreaks,
                  getMarkdown: { Markdown.useSoftBreaks },
-                 setMarkdown: { Markdown.useSoftBreaks = $0 })
+                 setMarkdown: { Markdown.useSoftBreaks = $0 }),
+        
+        FieldMap(settingsKey: \Settings.rulerHighlightColor,
+                 getMarkdown: { Markdown.Ruler.colorHighLight },
+                 setMarkdown: { Markdown.Ruler.colorHighLight = $0 })
     ]
 
     // Farb-Felder

@@ -771,7 +771,7 @@ final class HorizontalRuleRenderer: BlockRenderer {
             leftIndent = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).blockQuote.blockQuoteContentIndent
         }
 
-        var color = UIColor.label
+        var color = text.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor ?? M.textColor
         /// Die Farbe der Linie  wird etwas heller als der Text dargestellt
         if MR.colorHighLight { color = color.highlight }
         
@@ -784,4 +784,3 @@ final class HorizontalRuleRenderer: BlockRenderer {
         context.strokePath()
     }
 }
-
