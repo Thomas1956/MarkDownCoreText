@@ -32,19 +32,14 @@ public struct Markdown {
 //    static var paddingBefore          : Double = 0.3
 //    static var paddingAfter           : Double = 0.3
     
-    /// Basiskonstanten für MarkdownTypography
-    static let blockSpacing            : CGFloat = 15
-    static let blockSpacingBefore      : CGFloat = 15
-    static let blockHeadIndent         : CGFloat = 10
-    static let blockTailIndent         : CGFloat = 10
-    static let blockContentIndent      : CGFloat = 10
-    static let blockQuoteContentIndent : CGFloat = 20
-    static let blockQuoteStripeGap     : CGFloat = 5
-    static let blockQuoteStripeWidth   : CGFloat = 6
-    static let blockQuoteStripeColor   : UIColor = .systemGray4
-    static let rulerRightIndent        : CGFloat = 0
-    static let rulerHeight             : CGFloat = 10
-    static let rulerLineHeight         : CGFloat = 1.5
+    /// Allgemeine Block-Metriken für CodeBlock, BlockQuote und Tabellen.
+    struct Block {
+        static let spacing       : CGFloat = 15
+        static let spacingBefore : CGFloat = 15
+        static let headIndent    : CGFloat = 10
+        static let tailIndent    : CGFloat = 10
+        static let contentIndent : CGFloat = 10
+    }
     
     /// Gerätespezifische Referenzgrößen für Header
     static var fontSizes: [UIUserInterfaceIdiom: [CGFloat]] {
@@ -97,9 +92,9 @@ public struct Markdown {
     
     /// Konstanten für den vertikalen Trennstrich (Ruler)
     struct Ruler {
-        static var rightIndent      : Double = 5                /// rechter Rand der Trennlinie
-        static var height           : Double = 20               /// Höhe des Hintergrundes der Trennlinie
-        static var lineHeight       : Double = 4                /// Strichdicke der Trennlinie
+        static var rightIndent      : Double = 0                /// rechter Rand der Trennlinie
+        static var height           : Double = 10               /// Höhe des Hintergrundes der Trennlinie
+        static var lineHeight       : Double = 1.5              /// Strichdicke der Trennlinie
         static var colorHighLight   : Bool   = true             /// Die Farbe der Trennlinie wird etwas heller
     }                                                           /// als die Textfarbe dargestellt
     
@@ -167,4 +162,3 @@ extension String {
     static let um: String = heavy ? "┻" : "┴"           /// Rahmen unten mitte
     static let mi: String = heavy ? "╋" : "┼"           /// Rahmenkreuz mitte
 }
-

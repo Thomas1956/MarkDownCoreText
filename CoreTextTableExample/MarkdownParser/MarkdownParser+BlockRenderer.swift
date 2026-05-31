@@ -523,7 +523,7 @@ final class TableRenderer: BlockRenderer {
         self.tableBlock = firstBlock.tableBlock
         let font = firstBlock.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont ?? UIFont.systemFont(ofSize: CGFloat(Markdown.textSize))
         let typography = MarkdownTypography(bodyFont: font)
-        let inset = max(4, typography.scaled(Markdown.blockContentIndent * 0.5))
+        let inset = max(4, typography.scaled(Markdown.Block.contentIndent * 0.5))
         self.padding = UIEdgeInsets(top: inset * 0.75, left: inset, bottom: inset * 0.75, right: inset)
         self.gridLineWidth = max(0.5, typography.thematicBreak.rulerLineHeight * 0.5)
         self.minimumColumnWidth = max(36, typography.scaled(44))
@@ -784,6 +784,5 @@ final class HorizontalRuleRenderer: BlockRenderer {
         context.strokePath()
     }
 }
-
 
 

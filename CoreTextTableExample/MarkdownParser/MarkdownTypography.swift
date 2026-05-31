@@ -159,16 +159,16 @@ struct MarkdownTypography {
         let spacing = scaled(10)
         let rectInsetTop = 0.40 * spacing
         let rectInsetBottom = spacing - rectInsetTop
-        let rectInsetLeft = scaled(Markdown.blockContentIndent)
-        let rectInsetRight = scaled(Markdown.blockContentIndent)
-        let headIndent = rectInsetLeft + scaled(Markdown.blockHeadIndent)
-        let tailIndent = rectInsetRight + scaled(Markdown.blockTailIndent)
+        let rectInsetLeft = scaled(Markdown.Block.contentIndent)
+        let rectInsetRight = scaled(Markdown.Block.contentIndent)
+        let headIndent = rectInsetLeft + scaled(Markdown.Block.headIndent)
+        let tailIndent = rectInsetRight + scaled(Markdown.Block.tailIndent)
         
         return CodeBlockMetrics(
             font: font,
             lineHeightMultiple: paragraph.lineHeightMultiple * 0.85,
-            paragraphSpacingBefore: scaled(Markdown.blockSpacingBefore),
-            paragraphSpacing: scaled(Markdown.blockSpacing),
+            paragraphSpacingBefore: scaled(Markdown.Block.spacingBefore),
+            paragraphSpacing: scaled(Markdown.Block.spacing),
             firstLineHeadIndent: headIndent,
             headIndent: headIndent,
             tailIndent: tailIndent,
@@ -201,14 +201,14 @@ struct MarkdownTypography {
         let rectInsetBottom = max(0, spacing - rectInsetTop)
         let rectInsetLeft = scaled(CGFloat(MB.horizontalIndent))
         let rectInsetRight = rectInsetLeft
-        let headIndent = scaled(Markdown.blockHeadIndent)
-        let tailIndent = rectInsetRight + scaled(Markdown.blockTailIndent)
+        let headIndent = scaled(Markdown.Block.headIndent)
+        let tailIndent = rectInsetRight + scaled(Markdown.Block.tailIndent)
         
         return BlockQuoteMetrics(
             blockQuoteContentIndent: contentIndent,
             lineHeightMultiple: paragraph.lineHeightMultiple,
-            paragraphSpacingBefore: scaled(Markdown.blockSpacingBefore),
-            paragraphSpacing: scaled(Markdown.blockSpacing),
+            paragraphSpacingBefore: scaled(Markdown.Block.spacingBefore),
+            paragraphSpacing: scaled(Markdown.Block.spacing),
             headIndent: headIndent,
             tailIndent: tailIndent,
             rectAttachment: RectAttachment(
@@ -228,9 +228,9 @@ struct MarkdownTypography {
     
     var thematicBreak: RulerMetrics {
         RulerMetrics(
-            rulerRightIndent: scaled(Markdown.rulerRightIndent),
-            rulerHeight: scaled(Markdown.rulerHeight),
-            rulerLineHeight: scaled(Markdown.rulerLineHeight)
+            rulerRightIndent: scaled(CGFloat(Markdown.Ruler.rightIndent)),
+            rulerHeight     : scaled(CGFloat(Markdown.Ruler.height)),
+            rulerLineHeight : scaled(CGFloat(Markdown.Ruler.lineHeight))
         )
     }
 }
