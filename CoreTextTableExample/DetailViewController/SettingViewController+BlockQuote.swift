@@ -137,6 +137,7 @@ extension SettingViewController  {
         let itemsHintergrund: [BasicType] = [
             .basic(Content.blockVerticalOffset.line(setting, .rw, labelWidth: 120)),
             .basic(Content.blockBackColor     .line(setting, .rw, labelWidth: 120)),
+            .vSpace(20),
         ]
 
         ///-----------------------------------------------------------------------------------

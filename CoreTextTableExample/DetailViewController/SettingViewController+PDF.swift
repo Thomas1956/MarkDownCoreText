@@ -134,6 +134,7 @@ extension SettingViewController  {
             .basic(C.pdfMarginRight .line(setting, .rw, labelWidth: 120)),
             .basic(C.pdfMarginTop   .line(setting, .rw, labelWidth: 120)),
             .basic(C.pdfMarginBottom.line(setting, .rw, labelWidth: 120)),
+            .vSpace(20),
         ]
         
         ///-----------------------------------------------------------------------------------

@@ -19,7 +19,7 @@ extension SettingViewController  {
     // MARK: - Definition der Sektionen
     
     enum SectionContent: String, BasicSection, CaseIterable {
-        case ViewSetting, PdfSetting, BlockQuoteSetting, RulerSetting, print
+        case ViewSetting, PdfSetting, BlockQuoteSetting, RulerSetting, DefaultSetting, HelpSetting
         
         var title : String {
             switch self {
@@ -27,7 +27,8 @@ extension SettingViewController  {
             case .PdfSetting:        "PDF"
             case .BlockQuoteSetting: "Block"
             case .RulerSetting:      "Ruler"
-            case .print:             "Drucken"
+            case .DefaultSetting:    "Drucken"
+            case .HelpSetting:       "Hilfe"
             }
         }
         
@@ -55,55 +56,5 @@ extension SettingViewController  {
             }
         }
     }
-  
-    //----------------------------------------------------------------------------------------
-    // MARK: - Definition der möglichen Inhalte des Dialogs
-    
-    /// Alle Attribute von BasicDetail sind in der Extension des Protokolls mit Defaultwerten vorbelegt. Demzufolge können alle
-    /// standardmäßig genutzten, nicht benötigten Attribute aus dem ENUM gelöscht werden.
-    ///
-    enum DetailContent: String, @MainActor BasicDetail, Hashable, CaseIterable {
-   
-        /// Die Strings sollen den Namen der Properties entsprechen
-        case textDefaults
-        
-        var title: TextSourceConvertible? {
-            switch self {
-            case .textDefaults:
-              """
-              Die **Standardeinstellungen** wiederherstellen. Alle Einstellungen werden überschrieben.
-              """.markdown()
-            }
-        }
-        
-        var placeholder: String? {
-            switch self {
-            default: nil
-            }
-        }
-        
-        var textstyle: UIFont.TextStyle? { .callout }
-
-        var parameter: [KeyText]? {
-            switch self {
-            default: nil
-          }
-        }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Zugewiesene Konfiguration entsprechend des Datentyps
-        ///
-        var contentViewType: ContentViewType
-        {
-            switch self {
-            default: .number
-            }
-        }
-        
-        var configurationWidth   : CGFloat?                {  nil  }
-        var configurationHeight  : CGFloat?                {  nil  }
-        var configurationMargins : NSDirectionalEdgeInsets { .zero }
-        
-      }
 }
 

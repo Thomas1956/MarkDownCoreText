@@ -16,29 +16,6 @@ import UsefulExtensions
 extension SettingViewController  {
         
     ///---------------------------------------------------------------------------------------
-    /// Inhalt der Section für das Drucken zusammenstellen
-    ///
-    func sectionPrint() {
-        typealias Content = DetailContent
-
-        /// items anlegen
-        var items = [BasicType]()
-
-        items.append(.info(Content.textDefaults.title))
-        /// Defaultwerte wiederherstellen.
-        let linkDefaults = BasicType.stdItem("Defaultwerte einstellen" , image: "arrow.trianglehead.2.clockwise")
-        items.append(linkDefaults)
-        self.linkDefaults = linkDefaults
-        
-        /// Drucken oder Teilen
-        let linkPrint = BasicType.stdItem("Drucken oder Teilen", image: "square.and.arrow.up")
-        items.append(linkPrint)
-        self.linkPrint = linkPrint
-
-        dataSource.makeSection(SectionContent.print, items: items.itemType)
-    }
- 
-    ///---------------------------------------------------------------------------------------
     /// Alle definierten Sektionen erzeugen
     ///
     func applySnapshot(forEditing: Bool) {
@@ -50,10 +27,10 @@ extension SettingViewController  {
         dataSource.apply(snapshot)
         
         if Self.activeSection[.ViewSetting] ?? false {
-            sectionViewSetting     (settings, forEditing: forEditing)
+            sectionViewSetting(settings, forEditing: forEditing)
         }
         if Self.activeSection[.PdfSetting] ?? false {
-            sectionPdfSetting      (settings, forEditing: forEditing)
+            sectionPdfSetting(settings, forEditing: forEditing)
         }
         if Self.activeSection[.BlockQuoteSetting] ?? false {
             sectionBlockQuoteSetting(settings, forEditing: forEditing)
@@ -61,8 +38,11 @@ extension SettingViewController  {
         if Self.activeSection[.RulerSetting] ?? false {
             sectionRulerSetting(settings, forEditing: forEditing)
         }
-       if Self.activeSection[.print] ?? false {
-            sectionPrint()
+        if Self.activeSection[.DefaultSetting] ?? false {
+            sectionDefaultSetting()
+        }
+        if Self.activeSection[.HelpSetting] ?? false {
+            sectionHelpSetting(settings, forEditing: forEditing)
         }
     }
 }

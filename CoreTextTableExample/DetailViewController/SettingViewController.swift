@@ -60,6 +60,11 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         activeSection[section] = true
     }
     
+    static var activeSectionIndex: Int {
+        let key = activeSection.first(where: {$0.value == true})?.key
+        return SectionContent.allCases.firstIndex(of: key ?? .ViewSetting) ?? 0
+    }
+    
     ///---------------------------------------------------------------------------------------
     /// Den Zustand des SAVE-Button aktualisieren (Methode ist so wie hier in der Basisklasse definiert)
     ///
@@ -121,9 +126,11 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     
     override func viewDidLoad() {
         titleController = "Details"
-        self.topPinnedHeader = capsuleRepresentedHeader // CapsuleHeaderView.self
+        
+        /// Den Scopeindex und den CapsuleHeaderView initialisieren.
+        self.scopeIndex = Self.activeSectionIndex
+        self.topPinnedHeader = capsuleRepresentedHeader
 
-        Self.selectSection(.ViewSetting)
         super.viewDidLoad()
 
         view.backgroundColor = .white

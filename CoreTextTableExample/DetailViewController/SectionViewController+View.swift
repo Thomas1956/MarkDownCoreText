@@ -147,6 +147,7 @@ extension SettingViewController  {
         let itemsEinzug: [BasicType] = [
             .basic(Content.viewHeadIndent.line(setting, .rw, labelWidth: 120)),
             .basic(Content.viewTailIndent.line(setting, .rw, labelWidth: 120)),
+            .vSpace(20),
         ]
 
         ///-----------------------------------------------------------------------------------

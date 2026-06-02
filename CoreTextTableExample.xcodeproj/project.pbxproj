@@ -29,6 +29,8 @@
 		E952F0882DE0FA7A00F097EF /* SectionViewController+View.swift in Sources */ = {isa = PBXBuildFile; fileRef = E952F0872DE0FA7A00F097EF /* SectionViewController+View.swift */; };
 		E95C52FB2FC9CDD90089054B /* MarkdownDocumentLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95C52FA2FC9CDD90089054B /* MarkdownDocumentLocation.swift */; };
 		E95C52FD2FC9DA170089054B /* MarkdownTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95C52FC2FC9DA170089054B /* MarkdownTypography.swift */; };
+		E97E5FB12FCF17050014B599 /* SettingViewController+DefaultSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97E5FB02FCF17050014B599 /* SettingViewController+DefaultSetting.swift */; };
+		E97E5FB32FCF18CB0014B599 /* SettingViewController+HelpSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97E5FB22FCF18CB0014B599 /* SettingViewController+HelpSetting.swift */; };
 		E9A940712DC4ECA6004501E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E9A9405C2DC4ECA6004501E6 /* Assets.xcassets */; };
 		E9A940732DC4ECA6004501E6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9A940602DC4ECA6004501E6 /* LaunchScreen.storyboard */; };
 		E9A940742DC4ECA6004501E6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9A940622DC4ECA6004501E6 /* Main.storyboard */; };
@@ -85,6 +87,8 @@
 		E952F0872DE0FA7A00F097EF /* SectionViewController+View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SectionViewController+View.swift"; sourceTree = "<group>"; };
 		E95C52FA2FC9CDD90089054B /* MarkdownDocumentLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownDocumentLocation.swift; sourceTree = "<group>"; };
 		E95C52FC2FC9DA170089054B /* MarkdownTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTypography.swift; sourceTree = "<group>"; };
+		E97E5FB02FCF17050014B599 /* SettingViewController+DefaultSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+DefaultSetting.swift"; sourceTree = "<group>"; };
+		E97E5FB22FCF18CB0014B599 /* SettingViewController+HelpSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+HelpSetting.swift"; sourceTree = "<group>"; };
 		E9A940582DC4ECA6004501E6 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		E9A940592DC4ECA6004501E6 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		E9A9405B2DC4ECA6004501E6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -192,6 +196,8 @@
 				E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */,
 				E93B3BAA2DE246A9007436C5 /* SettingViewController+BlockQuote.swift */,
 				E9C218EA2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift */,
+				E97E5FB02FCF17050014B599 /* SettingViewController+DefaultSetting.swift */,
+				E97E5FB22FCF18CB0014B599 /* SettingViewController+HelpSetting.swift */,
 			);
 			path = DetailViewController;
 			sourceTree = "<group>";
@@ -377,6 +383,7 @@
 			files = (
 				E9A940752DC4ECA6004501E6 /* Color.swift in Sources */,
 				E94900B12DCE5E0400DD7880 /* Settings+PropertyReminder.swift in Sources */,
+				E97E5FB12FCF17050014B599 /* SettingViewController+DefaultSetting.swift in Sources */,
 				E9A940762DC4ECA6004501E6 /* String.swift in Sources */,
 				E9A940772DC4ECA6004501E6 /* AppDelegate.swift in Sources */,
 				E9C218EB2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift in Sources */,
@@ -402,6 +409,7 @@
 				E952F0882DE0FA7A00F097EF /* SectionViewController+View.swift in Sources */,
 				E9A940812DC4ECA6004501E6 /* MarkdownScrollView.swift in Sources */,
 				E9A940832DC4ECA6004501E6 /* MarkdownParser+NSAttributedString.swift in Sources */,
+				E97E5FB32FCF18CB0014B599 /* SettingViewController+HelpSetting.swift in Sources */,
 				E95C52FB2FC9CDD90089054B /* MarkdownDocumentLocation.swift in Sources */,
 				E9A940842DC4ECA6004501E6 /* SceneDelegate.swift in Sources */,
 				E949006E2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift in Sources */,
