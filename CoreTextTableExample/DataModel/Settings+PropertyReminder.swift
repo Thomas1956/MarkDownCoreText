@@ -102,6 +102,8 @@ extension Settings {
     static let blockBarColorPalette   = makeColorPalette(barColorDefinitions)
     static let blockBackColorPalette  = makeColorPalette(backgroundColorDefinitions)
     static let rulerColorPalette      = makeColorPalette(barColorDefinitions)
+    static let codeBackColorPalette   = makeColorPalette(backgroundColorDefinitions)
+    static let codeBorderColorPalette = makeColorPalette(barColorDefinitions)
     
     private static var completeColorPalette: [UIColor] {
         (textColorDefinitions + barColorDefinitions + backgroundColorDefinitions).map(\.1)
@@ -164,6 +166,30 @@ extension Settings {
     @objc dynamic public var rulerColor: UIColor? {
         get { Self.defaultedColor(value(forKey: "rulerRawColor") as? UIColor, default: .systemGray4) }
         set { setValue(Self.defaultedColor(newValue, default: .systemGray4), forKey: "rulerRawColor") }
+    }
+    
+    /// Standardfarbe für den CodeBlock-Hintergrund aus der Textfarbe ableiten.
+    @objc dynamic public var codeBackUsesStandardColor: Bool {
+        get { value(forKey: "codeBackStandardColor") as? Bool ?? true }
+        set { setValue(newValue, forKey: "codeBackStandardColor") }
+    }
+    
+    /// Eigene Farbe für den CodeBlock-Hintergrund.
+    @objc dynamic public var codeBackColor: UIColor? {
+        get { Self.defaultedColor(value(forKey: "codeRawBackColor") as? UIColor, default: .systemGray6) }
+        set { setValue(Self.defaultedColor(newValue, default: .systemGray6), forKey: "codeRawBackColor") }
+    }
+    
+    /// Standardfarbe für den CodeBlock-Rahmen aus der Textfarbe ableiten.
+    @objc dynamic public var codeBorderUsesStandardColor: Bool {
+        get { value(forKey: "codeBorderStandardColor") as? Bool ?? true }
+        set { setValue(newValue, forKey: "codeBorderStandardColor") }
+    }
+    
+    /// Eigene Farbe für den CodeBlock-Rahmen.
+    @objc dynamic public var codeBorderColor: UIColor? {
+        get { Self.defaultedColor(value(forKey: "codeRawBorderColor") as? UIColor, default: .systemGray4) }
+        set { setValue(Self.defaultedColor(newValue, default: .systemGray4), forKey: "codeRawBorderColor") }
     }
 
 }

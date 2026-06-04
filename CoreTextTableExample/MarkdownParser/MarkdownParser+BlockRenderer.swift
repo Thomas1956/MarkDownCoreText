@@ -473,8 +473,11 @@ final class CodeBlockRenderer: BlockRenderer {
     func draw(in context: CGContext) {
         
         // Hintergrund
-        context.setFillColor(MB.backgroundColor.cgColor)
-        context.setStrokeColor(MB.backgroundColor.lowlight.cgColor)
+        let textColor = text.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor ?? M.textColor
+        let backgroundColor = MC.useDefaultBackgroundColor ? textColor.codeBlockBackgroundColor : MC.backgroundColor
+        let borderColor = MC.useDefaultBorderColor ? textColor.codeBlockBorderColor : MC.borderColor
+        context.setFillColor(backgroundColor.cgColor)
+        context.setStrokeColor(borderColor.cgColor)
         context.setLineWidth(1)
 
         let rectBackground = CGRect(origin: .zero, size: frame.size)

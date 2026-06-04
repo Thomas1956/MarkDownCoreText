@@ -158,6 +158,24 @@ public extension UIColor {
         return UIColor(hue: hue, saturation: satura * 0.35, lightness: light * 0.12 + 0.88, alpha: 0.18)
     }
     
+    /// Aus der Textfarbe abgeleitete Rahmenfarbe für CodeBlocks.
+    var codeBlockBorderColor: UIColor {
+        var hue    = CGFloat.zero
+        var satura = CGFloat.zero
+        var light  = CGFloat.zero
+        getHSL(&hue, saturation: &satura, lightness: &light, alpha: nil)
+        return UIColor(hue: hue, saturation: satura * 0.45, lightness: light * 0.25 + 0.65, alpha: 0.85)
+    }
+    
+    /// Aus der Textfarbe abgeleitete Hintergrundfarbe für CodeBlocks.
+    var codeBlockBackgroundColor: UIColor {
+        var hue    = CGFloat.zero
+        var satura = CGFloat.zero
+        var light  = CGFloat.zero
+        getHSL(&hue, saturation: &satura, lightness: &light, alpha: nil)
+        return UIColor(hue: hue, saturation: satura * 0.20, lightness: light * 0.08 + 0.92, alpha: 0.20)
+    }
+    
     /// Aufhellung `lightness` (HSL) auf `lightness * 0.5 + 0.5 ` [0.5 ... 1.0]
     var lightlight : UIColor {
         get {

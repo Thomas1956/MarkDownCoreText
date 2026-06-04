@@ -121,6 +121,10 @@ public struct Markdown {
         static var spacingBefore      : Double = 6.0            /// Abstand vor dem Code Block
         static var headIndent         : Double = 10.0           /// Linker Einzug des Code Blocks
         static var tailIndent         : Double = 10.0           /// Rechter Einzug des Code Blocks
+        static var useDefaultBackgroundColor: Bool = true       /// Hintergrundfarbe aus Textfarbe ableiten
+        static var backgroundColor    : UIColor = .systemGray6  /// Eigene Farbe für den Hintergrund
+        static var useDefaultBorderColor: Bool = true           /// Rahmenfarbe aus Textfarbe ableiten
+        static var borderColor        : UIColor = .systemGray4  /// Eigene Farbe für den Rahmen
         static var padding            = UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
     }
 }
