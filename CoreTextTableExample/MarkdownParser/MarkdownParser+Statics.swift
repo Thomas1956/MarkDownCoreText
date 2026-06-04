@@ -96,6 +96,7 @@ public struct Markdown {
         static var height           : Double = 10               /// Höhe des Hintergrundes der Trennlinie
         static var lineHeight       : Double = 1.5              /// Strichdicke der Trennlinie
         static var colorHighLight   : Bool   = true             /// Die Farbe der Trennlinie wird etwas heller
+        static var color            : UIColor = .systemGray4    /// Eigene Farbe, wenn colorHighLight aus ist
     }                                                           /// als die Textfarbe dargestellt
     
     /// Konstanten für den Hintergrund des Block Quote
@@ -103,11 +104,13 @@ public struct Markdown {
         static var contentIndent    : Double = 20               /// Abstand des Inhaltes vom Rand des Block Quote
         static var horizontalIndent : Double = 0                /// Ränder Hintergrund links und rechts
         static var verticalOffset   : Double = 5                /// Verschiebung des  Hintergrunds nach unten
-        static var backgroundColor  : UIColor = .systemGray6    /// Farbe für den Hintergrund
+        static var useDefaultBackgroundColor: Bool = true       /// Hintergrundfarbe aus Textfarbe ableiten
+        static var backgroundColor  : UIColor = .systemGray6    /// Eigene Farbe für den Hintergrund
             
         static var barIndent        : Double = 5                /// Linker Rand des Balkens
         static var barWidth         : Double = 6                /// Breite des Balkens
-        static var barColor         : UIColor = .systemGray4    /// Farbe für den Balken
+        static var useDefaultBarColor: Bool = true              /// Balkenfarbe aus Textfarbe ableiten
+        static var barColor         : UIColor = .systemGray4    /// Eigene Farbe für den Balken
     }
     
     /// Konstanten für den Code Block

@@ -262,7 +262,15 @@ extension SettingsController {
         
         FieldMap(settingsKey: \Settings.rulerHighlightColor,
                  getMarkdown: { Markdown.Ruler.colorHighLight },
-                 setMarkdown: { Markdown.Ruler.colorHighLight = $0 })
+                 setMarkdown: { Markdown.Ruler.colorHighLight = $0 }),
+        
+        FieldMap(settingsKey: \Settings.blockBarUsesStandardColor,
+                 getMarkdown: { Markdown.BlockQuote.useDefaultBarColor },
+                 setMarkdown: { Markdown.BlockQuote.useDefaultBarColor = $0 }),
+        
+        FieldMap(settingsKey: \Settings.blockBackUsesStandardColor,
+                 getMarkdown: { Markdown.BlockQuote.useDefaultBackgroundColor },
+                 setMarkdown: { Markdown.BlockQuote.useDefaultBackgroundColor = $0 })
     ]
 
     // Farb-Felder
@@ -280,7 +288,11 @@ extension SettingsController {
         
         FieldMap(settingsKey: \Settings.blockBackColor,
                  getMarkdown: { Markdown.BlockQuote.backgroundColor },
-                 setMarkdown: { if let color = $0 { Markdown.BlockQuote.backgroundColor = color } })
+                 setMarkdown: { if let color = $0 { Markdown.BlockQuote.backgroundColor = color } }),
+        
+        FieldMap(settingsKey: \Settings.rulerColor,
+                 getMarkdown: { Markdown.Ruler.color },
+                 setMarkdown: { if let color = $0 { Markdown.Ruler.color = color } })
     ]
 
     // ------------------------------------------------------------

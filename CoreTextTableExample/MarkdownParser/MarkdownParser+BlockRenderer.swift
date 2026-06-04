@@ -135,15 +135,18 @@ extension BlockRenderer {
         rect.origin.y    += blockContent.isLastBlockQuote ? after : 0
         rect.size.width  -= attachment.rectInsetLeft + attachment.rectInsetRight
         rect.size.height -= (blockContent.isLastBlockQuote ? after : 0) + (blockContent.isFirstBlockQuote ? before : 0)
-        let color = MB.backgroundColor
-        context.setFillColor(color.cgColor)
+        
+        let textColor = blockContent.attrText.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor ?? M.textColor
+        let backgroundColor = MB.useDefaultBackgroundColor ? textColor.blockQuoteBackgroundColor : MB.backgroundColor
+        context.setFillColor(backgroundColor.cgColor)
         context.fill(rect)
         
         /// Balken am linken Rand
         var balken = rect
         balken.origin.x  += attachment.stripeGap
         balken.size.width = attachment.stripeWidth
-        context.setFillColor(MB.barColor.cgColor)
+        let barColor = MB.useDefaultBarColor ? textColor.blockQuoteBarColor : MB.barColor
+        context.setFillColor(barColor.cgColor)
         context.fill(balken)
     }
     
@@ -771,9 +774,14 @@ final class HorizontalRuleRenderer: BlockRenderer {
             leftIndent = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).blockQuote.blockQuoteContentIndent
         }
 
-        var color = text.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor ?? M.textColor
-        /// Die Farbe der Linie  wird etwas heller als der Text dargestellt
-        if MR.colorHighLight { color = color.highlight }
+        let color: UIColor
+        if MR.colorHighLight {
+            /// Die Standardfarbe wird aus der Textfarbe abgeleitet.
+            let textColor = text.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor ?? M.textColor
+            color = textColor.highlight
+        } else {
+            color = MR.color
+        }
         
         let metrics = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).thematicBreak
         let y = CGFloat(frame.height/2)

@@ -23,7 +23,7 @@ extension SettingViewController  {
     ///
     enum RulerSetting: String, @MainActor BasicDetail, CaseIterable {
 
-        case rulerHeight, rulerLineHeight, rulerRightIndent, rulerHighlightColor
+        case rulerHeight, rulerLineHeight, rulerRightIndent, rulerHighlightColor, rulerColor
         
         /// Titel des Items
         var title: TextSourceConvertible? {
@@ -31,7 +31,8 @@ extension SettingViewController  {
             case .rulerHeight:         "Höhe des Absatzes"
             case .rulerLineHeight:     "Höhe des Trennstriches"
             case .rulerRightIndent:    "Rechter Abstand"
-            case .rulerHighlightColor: "Farbe aufhellen"
+            case .rulerHighlightColor: "Standardfarbe"
+            case .rulerColor:          "Eigene Farbe"
             }
         }
         
@@ -53,6 +54,7 @@ extension SettingViewController  {
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(1)
 
             case .rulerHighlightColor: .alignLeading
+            case .rulerColor: .start.blockAlignment(.leading).list(Settings.rulerColorPalette)
             }
         }
         
@@ -61,6 +63,7 @@ extension SettingViewController  {
             switch self {
             case .rulerHeight, .rulerLineHeight, .rulerRightIndent: .stepper
             case .rulerHighlightColor: .button
+            case .rulerColor: .colorpalettewell
             }
         }
     }
@@ -84,6 +87,7 @@ extension SettingViewController  {
         items.append(.basic(Content.rulerLineHeight    .line(setting, .rw, labelWidth: 120)))
         items.append(.basic(Content.rulerRightIndent   .line(setting, .rw, labelWidth: 120)))
         items.append(.basic(Content.rulerHighlightColor.line(setting, .rw, labelWidth: 120)))
+        items.append(.basic(Content.rulerColor         .line(setting, .rw, labelWidth: 120)))
 
         ///-----------------------------------------------------------------------------------
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen

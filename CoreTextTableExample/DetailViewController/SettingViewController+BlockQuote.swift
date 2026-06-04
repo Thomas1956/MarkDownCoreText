@@ -24,7 +24,8 @@ extension SettingViewController  {
     enum BlockQuoteSetting: String, @MainActor BasicDetail, CaseIterable {
 
         case blockHorizIndent, blockBarIndent, blockContentIndent, blockBarWidth,
-             blockVerticalOffset, blockBarColor, blockBackColor
+             blockVerticalOffset, blockBarStandardColor, blockBarColor,
+             blockBackStandardColor, blockBackColor
         
         /// Titel des Items
         var title: TextSourceConvertible? {
@@ -33,9 +34,11 @@ extension SettingViewController  {
             case .blockBarIndent:      "Abstand zum Balken".markdown(size: 15)
             case .blockContentIndent:  "Abstand zum Inhalt".markdown(size: 15)
             case .blockBarWidth:       "Balkenbreite".markdown(size: 15)
-            case .blockVerticalOffset: "Vertikaler Offset".markdown(size: 15)
-            case .blockBarColor:       "Balkenfarbe"
-            case .blockBackColor:      "Hintergrund"
+            case .blockVerticalOffset:     "Vertikaler Offset".markdown(size: 15)
+            case .blockBarStandardColor:   "Standardfarbe"
+            case .blockBarColor:           "Eigene Farbe"
+            case .blockBackStandardColor:  "Standardfarbe"
+            case .blockBackColor:          "Eigene Farbe"
             }
         }
         
@@ -56,8 +59,10 @@ extension SettingViewController  {
             case .blockBarWidth:
                     .start.blockAlignment(.leading).fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
 
+            case .blockBarStandardColor, .blockBackStandardColor:
+                    .alignLeading
             case .blockBarColor, .blockBackColor:
-                    .start.chipWidth(80).backgroundColor(.systemGray6)
+                    .start.blockAlignment(.leading)
                     .list(self == .blockBarColor ? Settings.blockBarColorPalette : Settings.blockBackColorPalette)
             }
         }
@@ -67,7 +72,8 @@ extension SettingViewController  {
             switch self {
             case .blockHorizIndent, .blockBarIndent, .blockContentIndent,
                  .blockBarWidth, .blockVerticalOffset: .stepper
-            case .blockBarColor, .blockBackColor: .colorchip
+            case .blockBarStandardColor, .blockBackStandardColor: .button
+            case .blockBarColor, .blockBackColor: .colorpalettewell
             }
         }
         
@@ -124,9 +130,10 @@ extension SettingViewController  {
         items.append(linkBalken)
         
         let itemsBalken: [BasicType] = [
-            .basic(Content.blockBarIndent.line(setting, .rw, labelWidth: 120)),
-            .basic(Content.blockBarWidth .line(setting, .rw, labelWidth: 120)),
-            .basic(Content.blockBarColor .line(setting, .rw, labelWidth: 120)),
+            .basic(Content.blockBarIndent       .line(setting, .rw, labelWidth: 120)),
+            .basic(Content.blockBarWidth        .line(setting, .rw, labelWidth: 120)),
+            .basic(Content.blockBarStandardColor.line(setting, .rw, labelWidth: 120)),
+            .basic(Content.blockBarColor        .line(setting, .rw, labelWidth: 120)),
         ]
 
         let textHintergrund = "Hintergrund".markdown(size: 17, weight: .semibold, textcolor: .textGray)
@@ -135,8 +142,9 @@ extension SettingViewController  {
         items.append(linkHintergrund)
         
         let itemsHintergrund: [BasicType] = [
-            .basic(Content.blockVerticalOffset.line(setting, .rw, labelWidth: 120)),
-            .basic(Content.blockBackColor     .line(setting, .rw, labelWidth: 120)),
+            .basic(Content.blockVerticalOffset    .line(setting, .rw, labelWidth: 120)),
+            .basic(Content.blockBackStandardColor .line(setting, .rw, labelWidth: 120)),
+            .basic(Content.blockBackColor         .line(setting, .rw, labelWidth: 120)),
             .vSpace(20),
         ]
 

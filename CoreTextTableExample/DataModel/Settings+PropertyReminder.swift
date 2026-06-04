@@ -101,6 +101,7 @@ extension Settings {
     static let textColorPalette       = makeColorPalette(textColorDefinitions)
     static let blockBarColorPalette   = makeColorPalette(barColorDefinitions)
     static let blockBackColorPalette  = makeColorPalette(backgroundColorDefinitions)
+    static let rulerColorPalette      = makeColorPalette(barColorDefinitions)
     
     private static var completeColorPalette: [UIColor] {
         (textColorDefinitions + barColorDefinitions + backgroundColorDefinitions).map(\.1)
@@ -112,9 +113,8 @@ extension Settings {
         }
     }
     
-    private static func normalizedColor(_ color: UIColor?, default defaultColor: UIColor) -> UIColor {
-        guard let color else { return defaultColor }
-        return completeColorPalette.first(where: { $0 == color }) ?? defaultColor
+    private static func defaultedColor(_ color: UIColor?, default defaultColor: UIColor) -> UIColor {
+        color ?? defaultColor
     }
     
     ///---------------------------------------------------------------------------------------
@@ -136,16 +136,34 @@ extension Settings {
         set { tableRawBoxColor = newValue  }
     }
     
+    /// Standardfarbe für die Balken im BlockQuote aus der Textfarbe ableiten.
+    @objc dynamic public var blockBarUsesStandardColor: Bool {
+        get { value(forKey: "blockBarStandardColor") as? Bool ?? true }
+        set { setValue(newValue, forKey: "blockBarStandardColor") }
+    }
+    
     /// Farbe für die Balken im BlockQuote
     @objc dynamic public var blockBarColor: UIColor? {
-        get { Self.normalizedColor(blockRawBarColor as? UIColor, default: .systemGray4) }
-        set { blockRawBarColor = Self.normalizedColor(newValue, default: .systemGray4) }
+        get { Self.defaultedColor(blockRawBarColor as? UIColor, default: .systemGray4) }
+        set { blockRawBarColor = Self.defaultedColor(newValue, default: .systemGray4) }
     }
 
+    /// Standardfarbe für den Hintergrund im BlockQuote aus der Textfarbe ableiten.
+    @objc dynamic public var blockBackUsesStandardColor: Bool {
+        get { value(forKey: "blockBackStandardColor") as? Bool ?? true }
+        set { setValue(newValue, forKey: "blockBackStandardColor") }
+    }
+    
     /// Farbe für die Hintergrund im BlockQuote
     @objc dynamic public var blockBackColor: UIColor? {
-        get { Self.normalizedColor(blockRawBackColor as? UIColor, default: .systemGray6) }
-        set { blockRawBackColor = Self.normalizedColor(newValue, default: .systemGray6) }
+        get { Self.defaultedColor(blockRawBackColor as? UIColor, default: .systemGray6) }
+        set { blockRawBackColor = Self.defaultedColor(newValue, default: .systemGray6) }
+    }
+    
+    /// Eigene Farbe für die Trennlinie, wenn die Standardfarbe deaktiviert ist.
+    @objc dynamic public var rulerColor: UIColor? {
+        get { Self.defaultedColor(value(forKey: "rulerRawColor") as? UIColor, default: .systemGray4) }
+        set { setValue(Self.defaultedColor(newValue, default: .systemGray4), forKey: "rulerRawColor") }
     }
 
 }

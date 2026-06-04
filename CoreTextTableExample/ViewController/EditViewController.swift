@@ -157,7 +157,7 @@ class EditViewController: UIViewController {
         
         viewController.navigationItem.title = NSLocalizedString("Parameter zufügen",
                                               comment: "Parameter zufügen als Überschrift")
-        viewController.preferredContentSize = CGSize(width: 550, height: 720)
+        viewController.preferredContentSize = CGSize(width: 600, height: 720)
 
         let nav = UINavigationController(rootViewController: viewController)
 

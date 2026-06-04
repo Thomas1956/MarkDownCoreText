@@ -17,7 +17,7 @@ public extension UIColor {
     
     convenience init(hue: CGFloat, saturation: CGFloat, lightness: CGFloat, alpha: CGFloat) {
         precondition(0...1 ~= hue &&
-                     0...2 ~= saturation &&
+                     0...3 ~= saturation &&
                      0...1 ~= lightness &&
                      0...1 ~= alpha, "input range is out of range 0...1")
         
@@ -25,7 +25,7 @@ public extension UIColor {
         var newSaturation: CGFloat = 0.0
         
         let brightness = lightness + saturation * min(lightness, 1-lightness)
-        if brightness == 0     { newSaturation = 0.0 }
+        if brightness == 0    { newSaturation = 0.0 }
         else                  { newSaturation = 2 * (1 - lightness / brightness) }
         
         self.init(hue: hue, saturation: newSaturation, brightness: brightness, alpha: alpha)
@@ -142,6 +142,20 @@ public extension UIColor {
             let fak : CGFloat = 0.6
             return UIColor(hue: hue, saturation: satura, lightness: light*(1-fak)+fak, alpha: alpha)
         }
+    }
+    
+    /// Aus der Textfarbe abgeleitete Balkenfarbe für BlockQuotes.
+    var blockQuoteBarColor: UIColor {
+        highlight
+    }
+    
+    /// Aus der Textfarbe abgeleitete Hintergrundfarbe für BlockQuotes.
+    var blockQuoteBackgroundColor: UIColor {
+        var hue    = CGFloat.zero
+        var satura = CGFloat.zero
+        var light  = CGFloat.zero
+        getHSL(&hue, saturation: &satura, lightness: &light, alpha: nil)
+        return UIColor(hue: hue, saturation: satura * 0.35, lightness: light * 0.12 + 0.88, alpha: 0.18)
     }
     
     /// Aufhellung `lightness` (HSL) auf `lightness * 0.5 + 0.5 ` [0.5 ... 1.0]

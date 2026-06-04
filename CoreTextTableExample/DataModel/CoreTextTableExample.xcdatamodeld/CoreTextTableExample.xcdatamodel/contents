@@ -2,8 +2,10 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24411" systemVersion="25B78" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
     <entity name="Settings" representedClassName="Settings" syncable="YES" codeGenerationType="class">
         <attribute name="blockBarIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="blockBarStandardColor" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
         <attribute name="blockBarWidth" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="blockContentIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="blockBackStandardColor" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
         <attribute name="blockHorizIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="blockRawBackColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="blockRawBarColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
@@ -30,6 +32,7 @@
         <attribute name="rulerHeight" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="rulerHighlightColor" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="rulerLineHeight" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="rulerRawColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="rulerRightIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="tableRawBoxColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="tableRawBoxWeight" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
