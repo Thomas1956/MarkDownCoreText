@@ -29,6 +29,9 @@ extension SettingViewController  {
         if Self.activeSection[.ViewSetting] ?? false {
             sectionViewSetting(settings, forEditing: forEditing)
         }
+        if Self.activeSection[.CodeBlockSetting] ?? false {
+            sectionCodeBlockSetting(settings, forEditing: forEditing)
+        }
         if Self.activeSection[.PdfSetting] ?? false {
             sectionPdfSetting(settings, forEditing: forEditing)
         }

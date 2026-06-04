@@ -22,29 +22,21 @@ extension SettingViewController  {
     /// standardmäßig genutzten, nicht benötigten Attribute aus dem ENUM gelöscht werden.
     ///
     enum PdfSettings: String, @MainActor BasicDetail, CaseIterable {
-        case  pdfTextSize, pdfTextColor, pdfMarginLeft, pdfMarginRight, pdfMarginTop, pdfMarginBottom,
-              pdfColorSelect
+        case  pdfTextSize, pdfMarginLeft, pdfMarginRight, pdfMarginTop, pdfMarginBottom
         
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
             case .pdfTextSize:     "Textgröße".markdown(size: 15)
-            case .pdfTextColor:    "Textfarbe"
             case .pdfMarginLeft:   "Linker Rand".markdown(size: 15)
             case .pdfMarginRight:  "Rechter Rand".markdown(size: 15)
             case .pdfMarginTop:    "Oberer Rand".markdown(size: 15)
             case .pdfMarginBottom: "Unterer Rand".markdown(size: 15)
-             default: nil
             }
         }
         
         /// Platzhalter bei Texteingaben
-        var placeholder: String? {
-            switch self {
-            case .pdfColorSelect: "Textfarbe auswählen"
-            default: nil
-            }
-        }
+        var placeholder: String? { nil }
                 
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
         var parameter: [KeyText]? {
@@ -56,24 +48,11 @@ extension SettingViewController  {
             case .pdfMarginLeft, .pdfMarginRight, .pdfMarginTop, .pdfMarginBottom:
                     .start.blockAlignment(.leading).fraction(1).symbol("cm")
                     .minimumValue(0).maximumValue(10.0).stepValue(0.1)
-
-            case .pdfTextColor:
-                    .start.chipWidth(80).backgroundColor(.systemGray6)
-                    .list(Settings.textColorPalette)
-
-            default: .editClear
             }
         }
         
         /// Konfiguration entsprechend des Datentyps
-        var contentViewType: ContentViewType {
-            switch self {
-            case .pdfTextSize,  .pdfMarginLeft, .pdfMarginRight,
-                 .pdfMarginTop, .pdfMarginBottom: .stepper
-            case .pdfTextColor: .colorchip
-            default: .number
-            }
-        }
+        var contentViewType: ContentViewType { .stepper }
         
         ///-----------------------------------------------------------------------------------
         /// Textstil und Größen für die Positionierung
@@ -86,22 +65,7 @@ extension SettingViewController  {
         ///-----------------------------------------------------------------------------------
         /// Zusätzliche Daten für BasicType für  Parametrierungen
         ///
-        var image: ImageSourceConvertible? {
-            switch self {
-            case .pdfColorSelect: "paintpalette.fill"
-            default: nil
-            }
-        }
-        
-//        var presentation: ContentPresentation? {       /// Defaultmäßig wird TITLE verwendet
-//            switch self {
-//            case .pdfTextColor: .line
-//            case .pdfColorSelect: .outlineDisclosure
-//            default: nil
-//            }
-//        }
-//
-//        var widthUsage: WidthUsage?  { nil }           /// Defaultmäßig wirkt die Breite auf LABEL
+        var image: ImageSourceConvertible? { nil }
     }
     
     //----------------------------------------------------------------------------------------
@@ -122,7 +86,6 @@ extension SettingViewController  {
         items.append(.basic(info1))
         
         items.append(.basic(C.pdfTextSize .line(setting, .rw, labelWidth: 120)))
-        items.append(.basic(C.pdfTextColor.line(setting, .rw, labelWidth: 120)))
         
         let textRaender = "Seitenränder".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkRaender = BasicType.stdItem(textRaender, presentation: .outlineDisclosure)

@@ -19,11 +19,12 @@ extension SettingViewController  {
     // MARK: - Definition der Sektionen
     
     enum SectionContent: String, BasicSection, CaseIterable {
-        case ViewSetting, PdfSetting, BlockQuoteSetting, RulerSetting, DefaultSetting, HelpSetting
+        case ViewSetting, CodeBlockSetting, PdfSetting, BlockQuoteSetting, RulerSetting, DefaultSetting, HelpSetting
         
         var title : String {
             switch self {
             case .ViewSetting:       "Anzeige"
+            case .CodeBlockSetting:  "Code"
             case .PdfSetting:        "PDF"
             case .BlockQuoteSetting: "Block"
             case .RulerSetting:      "Ruler"

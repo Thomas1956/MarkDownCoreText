@@ -62,7 +62,7 @@ public struct Markdown {
     /// Konstanten für den Edit View Controller
     struct Edit {
         static var textSize     : Double = 17                   /// Eingestellte Fontgröße für View
-        static var textColor    : UIColor = .label              /// Eingestellte Textfarbe
+        static var textColor    : UIColor = .black              /// Eingestellte Textfarbe
     }
     
     /// Konstanten für die PDF-Ausgabe
@@ -73,7 +73,6 @@ public struct Markdown {
         static var marginRight  : Double = 2 * _1cm
         static var marginBottom : Double = 2 * _1cm
         static var textSize     : Double = 12                   /// Eingestellte Fontgröße für PDF
-        static var textColor    : UIColor = .label              /// Eingestellte Textfarbe
         static var footerTextScale: Double = 0.8                /// Schriftgröße der Fußzeile relativ zum Text
     }
     
@@ -114,6 +113,11 @@ public struct Markdown {
     /// Konstanten für den Code Block
     struct CodeBlock {
         static var codeTextSizeFactor : Double = 80.0           /// Prozentuale Größe des Textfonts im Code Block
+        static var lineHeightMultiple : Double = 1.0            /// Zeilenabstand im Code Block
+        static var spacing            : Double = 6.0            /// Abstand nach dem Code Block
+        static var spacingBefore      : Double = 6.0            /// Abstand vor dem Code Block
+        static var headIndent         : Double = 10.0           /// Linker Einzug des Code Blocks
+        static var tailIndent         : Double = 10.0           /// Rechter Einzug des Code Blocks
         static var padding            = UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
     }
 }

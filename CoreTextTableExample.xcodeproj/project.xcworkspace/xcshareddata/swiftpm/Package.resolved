@@ -1,15 +1,6 @@
 {
-  "originHash" : "9c039cfa9b44db2e41e8d4bc2265ead0379f847736786f3180652f3e4c2bf732",
+  "originHash" : "eb913742d3ffb6ac8e6fe67ab8aa2b477c03faedd3107806b87e24305ed59df7",
   "pins" : [
-    {
-      "identity" : "commoncollection",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Thomas1956/CommonCollection",
-      "state" : {
-        "branch" : "main",
-        "revision" : "26b04f403f73c3aa4b7ea2ad67e540027d0e5b4b"
-      }
-    },
     {
       "identity" : "swift-syntax",
       "kind" : "remoteSourceControl",

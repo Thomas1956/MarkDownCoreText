@@ -484,7 +484,7 @@ extension MarkdownParser {
         guard footer.hasVisibleText else { return }
         
         let font = UIFont.systemFont(ofSize: CGFloat(MP.textSize * MP.footerTextScale), weight: .regular)
-        let textColor = MP.textColor.withAlphaComponent(0.75)
+        let textColor = Markdown.textColor.withAlphaComponent(0.75)
         let lineHeight = font.lineHeight
         let baselineY = max(4, (CGFloat(MP.marginBottom) - lineHeight) / 2 + font.ascender)
         let leftX = CGFloat(MP.marginLeft)

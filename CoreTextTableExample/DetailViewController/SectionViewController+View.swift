@@ -24,7 +24,7 @@ extension SettingViewController  {
     enum ViewSettings: String, @MainActor BasicDetail, CaseIterable {
  
         /// Die Strings sollen den Namen der Properties entsprechen (Beispiel löschen und EIGENE Case's ergänzen)
-        case viewTextSize, codeTextSizeFactor,
+        case viewTextSize,
              viewColor, viewSoftBreaks,
              viewLineHeight, viewSpacing, viewSpacingBefore,
              viewHeadIndent, viewTailIndent,
@@ -34,7 +34,6 @@ extension SettingViewController  {
         var title: TextSourceConvertible? {
             switch self {
             case .viewTextSize:       "Textgröße".markdown(size: 15)
-            case .codeTextSizeFactor: "Textfaktor\nCode Block".markdown(size: 15)
             case .viewColor:          "Textfarbe"
             case .viewSoftBreaks:     "Soft-Breaks"
 
@@ -61,12 +60,8 @@ extension SettingViewController  {
             case .viewTextSize:
                     .start.fraction(0).symbol("Pt").minimumValue(5).maximumValue(100).stepValue(1)
 
-            case .codeTextSizeFactor:
-                    .start.fraction(0).symbol("%").minimumValue(50).maximumValue(120).stepValue(5)
-
             case .viewColor:
-                    .start.chipWidth(80).backgroundColor(.systemGray6)
-                    .list(Settings.textColorPalette)
+                    .start.blockAlignment(.trailing)
 
             case .viewLineHeight:
                     .start.fraction(2).symbol("").minimumValue(1).maximumValue(5).stepValue(0.1)
@@ -81,10 +76,10 @@ extension SettingViewController  {
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType {
             switch self {
-            case .viewHeadIndent, .viewTailIndent, .  viewLineHeight,
-                 .viewSpacing,    .viewSpacingBefore, .viewTextSize, .codeTextSizeFactor: .stepper
-            case .viewColor:      .colorchip
+            case .viewHeadIndent, .viewTailIndent, .viewLineHeight,
+                 .viewSpacing,    .viewSpacingBefore, .viewTextSize: .stepper
             case .viewSoftBreaks: .button
+            case .viewColor:      .colorwell
             default: .number
             }
         }
@@ -124,7 +119,6 @@ extension SettingViewController  {
         items.append(.basic(info1))
 
         items.append(.basic( Content.viewTextSize      .line(setting, .rw, labelWidth: 120)))
-        items.append(.basic( Content.codeTextSizeFactor.line(setting, .rw, labelWidth: 120)))
         items.append(.basic( Content.viewColor         .line(setting, .rw, labelWidth: 120)))
         items.append(.basic( Content.viewSoftBreaks    .line(setting, .rw, labelWidth: 120)))
         

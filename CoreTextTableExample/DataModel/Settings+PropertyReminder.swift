@@ -118,16 +118,10 @@ extension Settings {
     }
     
     ///---------------------------------------------------------------------------------------
-    /// Farbe für den PDF-Text
-    @objc dynamic public var pdfTextColor: UIColor {
-        get { Self.normalizedColor(pdfRawColor as? UIColor, default: .black) }
-        set { pdfRawColor = Self.normalizedColor(newValue, default: .black) }
-    }
-
-    /// Farbe für den View-Text
+    /// Gemeinsame Textfarbe für LiveView und PDF.
     @objc dynamic public var viewColor: UIColor {
-        get { Self.normalizedColor(viewRawColor as? UIColor, default: .black) }
-        set { viewRawColor = Self.normalizedColor(newValue, default: .black) }
+        get { viewRawColor as? UIColor ?? .black }
+        set { viewRawColor = newValue }
     }
     
     /// Farbe für den Edit-Text

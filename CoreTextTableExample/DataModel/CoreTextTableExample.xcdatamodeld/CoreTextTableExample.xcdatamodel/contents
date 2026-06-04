@@ -8,6 +8,11 @@
         <attribute name="blockRawBackColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="blockRawBarColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="blockVerticalOffset" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="codeHeadIndent" optional="YES" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
+        <attribute name="codeLineHeight" optional="YES" attributeType="Double" defaultValueString="1.0" usesScalarValueType="YES"/>
+        <attribute name="codeSpacing" optional="YES" attributeType="Double" defaultValueString="6.0" usesScalarValueType="YES"/>
+        <attribute name="codeSpacingBefore" optional="YES" attributeType="Double" defaultValueString="6.0" usesScalarValueType="YES"/>
+        <attribute name="codeTailIndent" optional="YES" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
         <attribute name="codeTextSizeFactor" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="editRawColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="editTextSize" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>

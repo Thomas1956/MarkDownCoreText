@@ -166,13 +166,16 @@ class EditViewController: UIViewController {
             nav.modalPresentationStyle = .popover
 
             if let popover = nav.popoverPresentationController {
-                popover.sourceView = view   // deine Edit-View im Primary
-
-                /// Anker-Punkt links oben in der Primary-Spalte
-                let margin: CGFloat = 16
-                let y = view.safeAreaInsets.top    // z.B. unter der NavBar
-
-                popover.sourceRect = CGRect(x: margin, y: y, width: 1, height: 1)
+                /// Popover am auslösenden Control verankern.
+                if let barButtonItem = sender as? UIBarButtonItem {
+                    popover.barButtonItem = barButtonItem
+                } else if let sourceView = sender as? UIView {
+                    popover.sourceView = sourceView
+                    popover.sourceRect = sourceView.bounds
+                } else {
+                    popover.sourceView = view
+                    popover.sourceRect = CGRect(x: view.bounds.midX, y: view.safeAreaInsets.top, width: 1, height: 1)
+                }
                 popover.permittedArrowDirections = [.up, .down]
             }
         } else {

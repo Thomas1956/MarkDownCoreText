@@ -142,9 +142,30 @@ extension SettingsController {
                  getMarkdown: { Markdown.textSize },
                  setMarkdown: { Markdown.textSize = $0 }),
 
+        // ── Markdown.CodeBlock ─────────────────────────────────
         FieldMap(settingsKey: \Settings.codeTextSizeFactor,
                  getMarkdown: { Markdown.CodeBlock.codeTextSizeFactor },
                  setMarkdown: { Markdown.CodeBlock.codeTextSizeFactor = $0 }),
+        
+        FieldMap(settingsKey: \Settings.codeLineHeight,
+                 getMarkdown: { Markdown.CodeBlock.lineHeightMultiple },
+                 setMarkdown: { Markdown.CodeBlock.lineHeightMultiple = $0 }),
+        
+        FieldMap(settingsKey: \Settings.codeSpacing,
+                 getMarkdown: { Markdown.CodeBlock.spacing },
+                 setMarkdown: { Markdown.CodeBlock.spacing = $0 }),
+        
+        FieldMap(settingsKey: \Settings.codeSpacingBefore,
+                 getMarkdown: { Markdown.CodeBlock.spacingBefore },
+                 setMarkdown: { Markdown.CodeBlock.spacingBefore = $0 }),
+        
+        FieldMap(settingsKey: \Settings.codeHeadIndent,
+                 getMarkdown: { Markdown.CodeBlock.headIndent },
+                 setMarkdown: { Markdown.CodeBlock.headIndent = $0 }),
+        
+        FieldMap(settingsKey: \Settings.codeTailIndent,
+                 getMarkdown: { Markdown.CodeBlock.tailIndent },
+                 setMarkdown: { Markdown.CodeBlock.tailIndent = $0 }),
 
         FieldMap(settingsKey: \Settings.viewHeadIndent,
                  getMarkdown: { Markdown.headIndent },
@@ -249,11 +270,7 @@ extension SettingsController {
 
         FieldMap(settingsKey: \Settings.viewColor,
                  getMarkdown: { Markdown.textColor },
-                 setMarkdown: { Markdown.textColor = $0 }),
-
-        FieldMap(settingsKey: \Settings.pdfTextColor,
-                 getMarkdown: { Markdown.PDF.textColor },
-                 setMarkdown: { Markdown.PDF.textColor = $0 })
+                 setMarkdown: { Markdown.textColor = $0 })
     ]
     
     private static let optionalColorMaps: [FieldMap<UIColor?>] = [

@@ -92,7 +92,7 @@ class MarkdownViewController: UIViewController, UIDocumentPickerDelegate {
     @objc func didPressExportButton(_ sender: Any) {
         let renderers = MarkdownParser.markdown(string: self.textMarkdown,
                                                 size: Markdown.PDF.textSize,
-                                                textColor: Markdown.PDF.textColor)
+                                                textColor: Markdown.textColor)
         let location = MarkdownDocumentLocation.shared
         let exportURL = location.temporaryPDFExportURL
         

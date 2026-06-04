@@ -49,7 +49,7 @@ public class SyntaxHighlight {
         static let number    = UIColor.systemBlue
         static let comment   = UIColor(red:  58/256, green: 140/256, blue:  38/256, alpha: 1)
         static let modifier  = UIColor.systemOrange
-        static let plain     = UIColor.label
+        static let plain     = UIColor.black
     }
     
     ///---------------------------------------------------------------------------------------
@@ -150,16 +150,16 @@ public class SyntaxHighlight {
                         /// Deklarationen
                         case .globalDecl:        subcolor = UIColor(hex: "#3495AF")
                         case .propertyDecl:      subcolor = UIColor(hex: "#3495AF")
-                        case .localDecl:         subcolor = UIColor.label
+                        case .localDecl:         subcolor = UIColor.black
                         /// Referenzen
                         case .globalRef:         subcolor = UIColor(hex: "#3495AF")
                         case .propertyAccess:    subcolor = UIColor(hex: "#3495AF")
                         case .propertyRef:       subcolor = UIColor(hex: "#3495AF")
-                        case .localRef:          subcolor = UIColor.label
+                        case .localRef:          subcolor = UIColor.black
                         /// Parameter
                         case .parameterExt:      subcolor = UIColor(hex: "#057CB0")
-                        case .parameterInt:      subcolor = UIColor.label
-                        case .paramRef:          subcolor = UIColor.label
+                        case .parameterInt:      subcolor = UIColor.black
+                        case .paramRef:          subcolor = UIColor.black
                         /// Funktionen
                         case .functionDecl:      subcolor = UIColor(hex: "#057CB0")
                         case .functionCall:      subcolor = UIColor(hex: "#3495AF")
@@ -180,13 +180,13 @@ public class SyntaxHighlight {
 
                     default: break
                     }
-                    return .label
+                    return .black
                 }()
                 
                 ///---------------------------------------------------------------------------
                 /// Setzen der Farbe für den Range im AttributedString
                 let range = aStart..<aEnd
-                attr[range].foregroundColor = color ?? .label
+                attr[range].foregroundColor = color ?? .black
             }
             
             ///-------------------------------------------------------------------------------

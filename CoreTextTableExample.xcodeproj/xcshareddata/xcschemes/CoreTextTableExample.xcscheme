@@ -67,7 +67,7 @@
          <EnvironmentVariable
             key = "DEBUG_FARBEN"
             value = "1"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>
    </LaunchAction>

@@ -11,7 +11,6 @@
 		E90395482EDDE8BC001E660F /* IdentifierPalette.json in Resources */ = {isa = PBXBuildFile; fileRef = E90395472EDDE8BC001E660F /* IdentifierPalette.json */; };
 		E90395542EDF9826001E660F /* SwiftParser in Frameworks */ = {isa = PBXBuildFile; productRef = E90395532EDF9826001E660F /* SwiftParser */; };
 		E90395562EDF9826001E660F /* SwiftSyntax in Frameworks */ = {isa = PBXBuildFile; productRef = E90395552EDF9826001E660F /* SwiftSyntax */; };
-		E903956B2EE04026001E660F /* CommonCollection in Frameworks */ = {isa = PBXBuildFile; productRef = E903956A2EE04026001E660F /* CommonCollection */; };
 		E903956D2EE04037001E660F /* UsefulExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = E903956C2EE04037001E660F /* UsefulExtensions */; };
 		E92C9B142DDF1FD800750AB4 /* SettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B132DDF1FD800750AB4 /* SettingsController.swift */; };
 		E92C9B162DDF4B4C00750AB4 /* SettingViewController+PDF.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */; };
@@ -51,6 +50,8 @@
 		E9A940842DC4ECA6004501E6 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406E2DC4ECA6004501E6 /* SceneDelegate.swift */; };
 		E9A940852DC4ECA6004501E6 /* MarkdownViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406F2DC4ECA6004501E6 /* MarkdownViewController.swift */; };
 		E9A940882DC4EE4D004501E6 /* MarkdownParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */; };
+		E9BF66272FD061A000096230 /* CommonCollection in Frameworks */ = {isa = PBXBuildFile; productRef = E9BF66262FD061A000096230 /* CommonCollection */; };
+		E9BF66292FD16F7400096230 /* SettingViewController+CodeBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BF66282FD16F7400096230 /* SettingViewController+CodeBlock.swift */; };
 		E9C218EB2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C218EA2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift */; };
 /* End PBXBuildFile section */
 
@@ -110,6 +111,7 @@
 		E9A9406E2DC4ECA6004501E6 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		E9A9406F2DC4ECA6004501E6 /* MarkdownViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownViewController.swift; sourceTree = "<group>"; };
 		E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownParser.swift; sourceTree = "<group>"; };
+		E9BF66282FD16F7400096230 /* SettingViewController+CodeBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+CodeBlock.swift"; sourceTree = "<group>"; };
 		E9C218EA2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+RulerSetting.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -127,9 +129,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				E903956D2EE04037001E660F /* UsefulExtensions in Frameworks */,
+				E9BF66272FD061A000096230 /* CommonCollection in Frameworks */,
 				E90395542EDF9826001E660F /* SwiftParser in Frameworks */,
 				E90395562EDF9826001E660F /* SwiftSyntax in Frameworks */,
-				E903956B2EE04026001E660F /* CommonCollection in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -198,6 +200,7 @@
 				E9C218EA2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift */,
 				E97E5FB02FCF17050014B599 /* SettingViewController+DefaultSetting.swift */,
 				E97E5FB22FCF18CB0014B599 /* SettingViewController+HelpSetting.swift */,
+				E9BF66282FD16F7400096230 /* SettingViewController+CodeBlock.swift */,
 			);
 			path = DetailViewController;
 			sourceTree = "<group>";
@@ -275,14 +278,13 @@
 				E903955D2EDF9994001E660F /* PBXTargetDependency */,
 				E903955A2EDF9962001E660F /* PBXTargetDependency */,
 				E90395582EDF995C001E660F /* PBXTargetDependency */,
-				E903954C2EDF967E001E660F /* PBXTargetDependency */,
 			);
 			name = CoreTextTableExample;
 			packageProductDependencies = (
 				E90395532EDF9826001E660F /* SwiftParser */,
 				E90395552EDF9826001E660F /* SwiftSyntax */,
-				E903956A2EE04026001E660F /* CommonCollection */,
 				E903956C2EE04037001E660F /* UsefulExtensions */,
+				E9BF66262FD061A000096230 /* CommonCollection */,
 			);
 			productName = CoreTextTableExample;
 			productReference = E928C3912DBA315C006D071D /* CoreTextTableExample.app */;
@@ -340,9 +342,9 @@
 			mainGroup = E928C3882DBA315C006D071D;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				E903954A2EDF9611001E660F /* XCRemoteSwiftPackageReference "CommonCollection" */,
 				E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */,
 				E903955B2EDF9987001E660F /* XCRemoteSwiftPackageReference "UsefulExtensions" */,
+				E9BF66252FD0617D00096230 /* XCLocalSwiftPackageReference "../CommonCollection" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E928C3922DBA315C006D071D /* Products */;
@@ -387,6 +389,7 @@
 				E9A940762DC4ECA6004501E6 /* String.swift in Sources */,
 				E9A940772DC4ECA6004501E6 /* AppDelegate.swift in Sources */,
 				E9C218EB2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift in Sources */,
+				E9BF66292FD16F7400096230 /* SettingViewController+CodeBlock.swift in Sources */,
 				E9A940782DC4ECA6004501E6 /* CoreTextTableView.swift in Sources */,
 				E9A940792DC4ECA6004501E6 /* MarkdownContentView.swift in Sources */,
 				E9A940882DC4EE4D004501E6 /* MarkdownParser.swift in Sources */,
@@ -431,10 +434,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		E903954C2EDF967E001E660F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = E903954B2EDF967E001E660F /* CommonCollection */;
-		};
 		E90395582EDF995C001E660F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			productRef = E90395572EDF995C001E660F /* SwiftSyntax */;
@@ -727,15 +726,14 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		E903954A2EDF9611001E660F /* XCRemoteSwiftPackageReference "CommonCollection" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Thomas1956/CommonCollection";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		E9BF66252FD0617D00096230 /* XCLocalSwiftPackageReference "../CommonCollection" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../CommonCollection;
 		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
 		E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/swiftlang/swift-syntax.git";
@@ -755,11 +753,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		E903954B2EDF967E001E660F /* CommonCollection */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E903954A2EDF9611001E660F /* XCRemoteSwiftPackageReference "CommonCollection" */;
-			productName = CommonCollection;
-		};
 		E90395532EDF9826001E660F /* SwiftParser */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */;
@@ -785,15 +778,15 @@
 			package = E903955B2EDF9987001E660F /* XCRemoteSwiftPackageReference "UsefulExtensions" */;
 			productName = UsefulExtensions;
 		};
-		E903956A2EE04026001E660F /* CommonCollection */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E903954A2EDF9611001E660F /* XCRemoteSwiftPackageReference "CommonCollection" */;
-			productName = CommonCollection;
-		};
 		E903956C2EE04037001E660F /* UsefulExtensions */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E903955B2EDF9987001E660F /* XCRemoteSwiftPackageReference "UsefulExtensions" */;
 			productName = UsefulExtensions;
+		};
+		E9BF66262FD061A000096230 /* CommonCollection */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E9BF66252FD0617D00096230 /* XCLocalSwiftPackageReference "../CommonCollection" */;
+			productName = CommonCollection;
 		};
 /* End XCSwiftPackageProductDependency section */
 

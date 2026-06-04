@@ -98,6 +98,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             elementKind : SupplementaryKind.topPinned,
             input     : .init(
                 [.text  ("Anzeige",                      toolTip: "Anzeige der Elemente"),
+                 .text  ("Code",                         toolTip: "CodeBlock-Parameter einstellen"),
                  .text  ("PDF",                          toolTip: "PDF-Parameter einstellen"),
                  .text  ("Block",                        toolTip: "Blockparameter einstellen"),
                  .text  ("Ruler",                        toolTip: "Trennstrich einstellen"),
@@ -164,17 +165,11 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         }
 
         else if key == ViewSettings.viewColor.key {
-            let color = value as? UIColor ?? .label
+            let color = value as? UIColor ?? .black
             setting.pushProperty(value: color, key: key)
             print("Color", setting.isChanged, key, value)
         }
-        else if key == PdfSettings.pdfTextColor.key {
-            let color = value as? UIColor ?? .label
-            setting.pushProperty(value: color, key: key)
-//            ItemType.reloadIfNeeded(on: self.dataSource, PdfSettings.pdfColorSelect.key)
-            print("Color", setting.isChanged, key, value)
-        }
-       else {
+        else {
             /// Die Attribute werden als ihre ursprünglichen Datentypen gespeichert
             setting.pushProperty(value: value, key: key)
             print("Änderungen", setting.isChanged, key, value)
@@ -195,33 +190,6 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         }
         
         typealias C = ViewSettings
-        typealias P = PdfSettings
-
-//        if key == C.viewColorSelect.key {
-//            /// Das Image aus der Entity heraus ermitteln und in einen Image-Namen umwandeln.
-//            if let color = entity?.property(forKey: C.viewColor.key) as? UIColor
-//            {
-//                /// Die Liste aller auswählbaren Images holen und den aktuellen Eintrag suchen.
-//                guard var select = colorSelectContent.first(where: {$0.value as? UIColor == color} )
-//                else { return nil }
-//                
-//                select.value = nil
-//                return select
-//            }
-//        }
-        
-//        if key == P.pdfColorSelect.key {
-//            /// Das Image aus der Entity heraus ermitteln und in einen Image-Namen umwandeln.
-//            if let color = entity?.property(forKey: P.pdfTextColor.key) as? UIColor
-//            {
-//                /// Die Liste aller auswählbaren Images holen und den aktuellen Eintrag suchen.
-//                guard var select = colorSelectContent.first(where: {$0.value as? UIColor == color} )
-//                else { return nil }
-//                
-//                select.value = nil
-//                return select
-//            }
-//        }
 
         if key == C.message.key, let settings = entity {
             
@@ -279,8 +247,8 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
 
         /// Beispiel für Aufruf des Druckens
-        if item == linkPrint?   .itemType { actionShare(linkPrint) }
-        if item == linkDefaults?.itemType { actionSetDefaults()    }
+        if item == linkPrint?    .itemType { actionShare(linkPrint) }
+        if item == linkDefaults? .itemType { actionSetDefaults() }
     }
     
     /// Abfrage, ob eine Zelle ausgewählt werden kann
@@ -288,8 +256,8 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return false }
 
         /// Beispiel für Aufruf des Druckens
-        if item == linkPrint?   .itemType  { return true }
-        if item == linkDefaults?.itemType  { return true }
+        if item == linkPrint?    .itemType { return true }
+        if item == linkDefaults? .itemType { return true }
 
         collectionView.deselectItem(at: indexPath, animated: false)
         return false

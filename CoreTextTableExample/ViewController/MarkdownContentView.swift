@@ -119,7 +119,7 @@ class MarkdownContentView: UIView {
         let end = DispatchTime.now()
         let nano = end.uptimeNanoseconds - start.uptimeNanoseconds
         let seconds = Double(nano) / 1_000_000_000
-        print("draw dauerte \(seconds) Sekunden")
+//        print("draw dauerte \(seconds) Sekunden")
     }
 }
 

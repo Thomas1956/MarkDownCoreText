@@ -153,7 +153,9 @@ struct MarkdownTypography {
     // MARK: Code Block
     
     var codeBlock: CodeBlockMetrics {
-        let size = bodyFont.pointSize * 0.85
+        typealias MC = Markdown.CodeBlock
+        
+        let size = bodyFont.pointSize * CGFloat(MC.codeTextSizeFactor / 100)
         let font = UIFont.monospacedSystemFont(ofSize: size, weight: .regular)
         
         let spacing = scaled(10)
@@ -161,14 +163,14 @@ struct MarkdownTypography {
         let rectInsetBottom = spacing - rectInsetTop
         let rectInsetLeft = scaled(Markdown.Block.contentIndent)
         let rectInsetRight = scaled(Markdown.Block.contentIndent)
-        let headIndent = rectInsetLeft + scaled(Markdown.Block.headIndent)
-        let tailIndent = rectInsetRight + scaled(Markdown.Block.tailIndent)
+        let headIndent = rectInsetLeft + scaled(CGFloat(MC.headIndent))
+        let tailIndent = rectInsetRight + scaled(CGFloat(MC.tailIndent))
         
         return CodeBlockMetrics(
             font: font,
-            lineHeightMultiple: paragraph.lineHeightMultiple * 0.85,
-            paragraphSpacingBefore: scaled(Markdown.Block.spacingBefore),
-            paragraphSpacing: scaled(Markdown.Block.spacing),
+            lineHeightMultiple: CGFloat(MC.lineHeightMultiple),
+            paragraphSpacingBefore: scaled(CGFloat(MC.spacingBefore)),
+            paragraphSpacing: scaled(CGFloat(MC.spacing)),
             firstLineHeadIndent: headIndent,
             headIndent: headIndent,
             tailIndent: tailIndent,
