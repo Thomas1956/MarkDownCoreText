@@ -61,7 +61,7 @@ extension SettingViewController  {
                     .start.fraction(0).symbol("Pt").minimumValue(5).maximumValue(100).stepValue(1)
 
             case .viewColor:
-                    .start.blockAlignment(.trailing)
+                    .start.blockAlignment(.leading).list(Settings.textColorPalette)
 
             case .viewLineHeight:
                     .start.fraction(2).symbol("").minimumValue(1).maximumValue(5).stepValue(0.1)
@@ -79,7 +79,7 @@ extension SettingViewController  {
             case .viewHeadIndent, .viewTailIndent, .viewLineHeight,
                  .viewSpacing,    .viewSpacingBefore, .viewTextSize: .stepper
             case .viewSoftBreaks: .button
-            case .viewColor:      .colorwell
+            case .viewColor:      .colorpalettewell
             default: .number
             }
         }
