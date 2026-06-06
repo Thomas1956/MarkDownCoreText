@@ -155,7 +155,7 @@ public extension UIColor {
         var satura = CGFloat.zero
         var light  = CGFloat.zero
         getHSL(&hue, saturation: &satura, lightness: &light, alpha: nil)
-        return UIColor(hue: hue, saturation: satura * 0.35, lightness: light * 0.12 + 0.88, alpha: 0.18)
+        return UIColor(hue: hue, saturation: satura * 0.35, lightness: light * 0.12 + 0.88, alpha: 0.8)
     }
     
     /// Aus der Textfarbe abgeleitete Rahmenfarbe für CodeBlocks.

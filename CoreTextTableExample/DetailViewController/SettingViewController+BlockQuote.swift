@@ -30,22 +30,15 @@ extension SettingViewController  {
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .blockHorizIndent:    "Horizontale Einzüge".markdown(size: 15)
-            case .blockBarIndent:      "Abstand zum Balken".markdown(size: 15)
-            case .blockContentIndent:  "Abstand zum Inhalt".markdown(size: 15)
-            case .blockBarWidth:       "Balkenbreite".markdown(size: 15)
-            case .blockVerticalOffset:     "Vertikaler Offset".markdown(size: 15)
-            case .blockBarStandardColor:   "Standardfarbe"
-            case .blockBarColor:           "Eigene Farbe"
-            case .blockBackStandardColor:  "Standardfarbe"
-            case .blockBackColor:          "Eigene Farbe"
-            }
-        }
-        
-        /// Platzhalter bei Texteingaben
-        var placeholder: String? {
-            switch self {            
-            default: nil
+            case .blockHorizIndent:        "Horizontale Einzüge (A)".markdown(size: 15)
+            case .blockBarIndent:          "Abstand zum Balken (B)" .markdown(size: 15)
+            case .blockContentIndent:      "Abstand zum Inhalt (D)" .markdown(size: 15)
+            case .blockBarWidth:           "Balkenbreite (C)"       .markdown(size: 15)
+            case .blockVerticalOffset:     "Vertikaler Offset"      .markdown(size: 15)
+            case .blockBarStandardColor:   "Standardfarbe"          .markdown(size: 15)
+            case .blockBarColor:           "Eigene Farbe"           .markdown(size: 15)
+            case .blockBackStandardColor:  "Standardfarbe"          .markdown(size: 15)
+            case .blockBackColor:          "Eigene Farbe"           .markdown(size: 15)
             }
         }
                 
@@ -53,16 +46,16 @@ extension SettingViewController  {
         var parameter: [KeyText]? {
             switch self {
             case .blockHorizIndent, .blockContentIndent:
-                    .start.blockAlignment(.leading).fraction(1).symbol("Pt").minimumValue(0).maximumValue(80).stepValue(1)
+                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(80).stepValue(1)
             case .blockBarIndent, .blockVerticalOffset:
-                    .start.blockAlignment(.leading).fraction(1).symbol("Pt").minimumValue(0).maximumValue(40).stepValue(1)
+                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(40).stepValue(1)
             case .blockBarWidth:
-                    .start.blockAlignment(.leading).fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
+                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
 
             case .blockBarStandardColor, .blockBackStandardColor:
                     .alignLeading
             case .blockBarColor, .blockBackColor:
-                    .start.blockAlignment(.leading)
+                    .start
                     .list(self == .blockBarColor ? Settings.blockBarColorPalette : Settings.blockBackColorPalette)
             }
         }
@@ -76,32 +69,6 @@ extension SettingViewController  {
             case .blockBarColor, .blockBackColor: .colorpalettewell
             }
         }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Textstil und Größen für die Positionierung
-        ///
-        var textstyle            : UIFont.TextStyle?       { .body }
-        var configurationWidth   : CGFloat?                {  nil  }
-        var configurationHeight  : CGFloat?                {  nil  }
-        var configurationMargins : NSDirectionalEdgeInsets { .zero }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Zusätzliche Daten für BasicType für  Parametrierungen
-        ///
-        var image: ImageSourceConvertible? {
-            switch self {
-            default: nil
-            }
-        }
-        
-//        var presentation: ContentPresentation? {       /// Defaultmäßig wird TITLE verwendet
-//            switch self {
-//            case .blockBarColor, .blockBackColor: .line
-//            default: nil
-//            }
-//        }
-//
-//        var widthUsage: WidthUsage?  { nil }           /// Defaultmäßig wirkt die Breite auf LABEL
     }
     
     //----------------------------------------------------------------------------------------
@@ -112,7 +79,8 @@ extension SettingViewController  {
         typealias Content = BlockQuoteSetting
 
         let layoutMargins = NSDirectionalEdgeInsets(top: 12, leading: 8, bottom:  0, trailing: 8)
-
+        let w : CGFloat = 180
+        
         ///-----------------------------------------------------------------------------------
         /// items als BasicType anlegen
         var items = [BasicType]()
@@ -121,8 +89,12 @@ extension SettingViewController  {
         info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
         items.append(.basic(info1))
         
-        items.append(.basic(Content.blockHorizIndent  .line(setting, .rw, labelWidth: 120)))
-        items.append(.basic(Content.blockContentIndent.line(setting, .rw, labelWidth: 120)))
+        /// Zeichnung mit den Maßen für BlockQuote
+        let image = UIImage.maßeFürBlockQuote.aspectFillToSize(scaledToFill: CGSize(width: 300, height: 120))
+        items.append(.info(" ", image: image))
+
+        items.append(.basic(Content.blockHorizIndent  .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic(Content.blockContentIndent.line(setting, .rw, labelWidth: w).leadingMargin(10)))
         
         let textBalken = "Balken".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkBalken = BasicType.stdItem(textBalken, presentation: .outlineDisclosure)
@@ -130,10 +102,10 @@ extension SettingViewController  {
         items.append(linkBalken)
         
         let itemsBalken: [BasicType] = [
-            .basic(Content.blockBarIndent       .line(setting, .rw, labelWidth: 120)),
-            .basic(Content.blockBarWidth        .line(setting, .rw, labelWidth: 120)),
-            .basic(Content.blockBarStandardColor.line(setting, .rw, labelWidth: 120)),
-            .basic(Content.blockBarColor        .line(setting, .rw, labelWidth: 120)),
+            .basic( Content.blockBarIndent       .line(setting, .rw, labelWidth: w)),
+            .basic( Content.blockBarWidth        .line(setting, .rw, labelWidth: w)),
+            .basic([Content.blockBarStandardColor.line(setting, .rw, contentWidth: 92, labelWidth: w),
+                    Content.blockBarColor        .line(setting, .rw, labelWidth: w)]),
         ]
 
         let textHintergrund = "Hintergrund".markdown(size: 17, weight: .semibold, textcolor: .textGray)
@@ -142,9 +114,9 @@ extension SettingViewController  {
         items.append(linkHintergrund)
         
         let itemsHintergrund: [BasicType] = [
-            .basic(Content.blockVerticalOffset    .line(setting, .rw, labelWidth: 120)),
-            .basic(Content.blockBackStandardColor .line(setting, .rw, labelWidth: 120)),
-            .basic(Content.blockBackColor         .line(setting, .rw, labelWidth: 120)),
+            .basic( Content.blockVerticalOffset    .line(setting, .rw, labelWidth: w)),
+            .basic([Content.blockBackStandardColor .line(setting, .rw, contentWidth: 92, labelWidth: w),
+                    Content.blockBackColor         .line(setting, .rw, labelWidth: w)]),
             .vSpace(20),
         ]
 

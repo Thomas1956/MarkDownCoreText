@@ -56,15 +56,16 @@ extension BlockRenderer {
     
     ///---------------------------------------------------------------------------------------
     /// Umranden des Rechteckes für Paragraph Spacing (danach)
-    var blockQouteSpacings: (paddingBefore: CGFloat, paddingAfter: CGFloat, paddingHorz: CGFloat) {
-        guard let block = blockContent.block else { return (0, 0, 0) }
+    var blockQouteSpacings: (paddingBefore: CGFloat, paddingAfter: CGFloat, paddingLeft: CGFloat, paddingRight: CGFloat) {
+        guard let block = blockContent.block else { return (0, 0, 0, 0) }
         let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize))
         let blockQuote = typography.blockQuote
         let attachment = blockQuote.rectAttachment
         let paddingBefore = blockContent.isFirstBlockQuote ? attachment.rectInsetTop : 0
         let paddingAfter = blockContent.isLastBlockQuote ? attachment.rectInsetBottom : 0
-        let paddingHorz = block.hasBlockQuote ? blockQuote.blockQuoteContentIndent : 0
-        return (paddingBefore, paddingAfter, paddingHorz)
+        let paddingLeft = block.hasBlockQuote ? blockQuote.blockQuoteContentIndent : 0
+        let paddingRight = block.hasBlockQuote ? blockQuote.blockQuoteRightIndent : 0
+        return (paddingBefore, paddingAfter, paddingLeft, paddingRight)
     }
     
     ///---------------------------------------------------------------------------------------
@@ -87,14 +88,14 @@ extension BlockRenderer {
         
         /// Im Block Quote muss abgefragt werden, ob der Absatz der erste und/oder der letzte im Block Quote ist. Auch hier
         /// müssen die Abstände ermittelt und die Y-Position sowie die Höhe korrigiert werden.
-        let (paddingBefore, paddingAfter, paddingHorz) = self.blockQouteSpacings
-        
+        let (paddingBefore, paddingAfter, paddingLeft, paddingRight) = self.blockQouteSpacings
+
         /// Rechteck für das Zeichnen des Inhaltes
-        return CGRect( x:      paddingHorz,                     /// Linker Einzug beim Block Quote
-                       y:      after + paddingAfter,            /// Y-Position nach oben verschieben
-                       width:  frame.width  - 2 * paddingHorz,  /// Breite beim Block Quote reduzieren
-                       height: frame.height - after - before -  /// Höhe beim Block Quote und/oder
-                               paddingBefore - paddingAfter)    /// bem Paragraph Spacing reduzieren
+        return CGRect( x:      paddingLeft,                                /// Linker Einzug beim Block Quote
+                       y:      after + paddingAfter,                       /// Y-Position nach oben verschieben
+                       width:  frame.width  - paddingLeft - paddingRight,  /// Breite beim Block Quote reduzieren
+                       height: frame.height - after - before -             /// Höhe beim Block Quote und/oder
+                               paddingBefore - paddingAfter)               /// bem Paragraph Spacing reduzieren
     }
         
     ///---------------------------------------------------------------------------------------
@@ -112,9 +113,9 @@ extension BlockRenderer {
         
         /// Im Block Quote muss abgefragt werden, ob der Absatz der erste und/oder der letzte im Block Quote ist. Auch hier
         /// müssen die Abstände ermittelt und die Y-Position sowie die Höhe korrigiert werden.
-        let (paddingBefore, paddingAfter, paddingHorz) = self.blockQouteSpacings
+        let (paddingBefore, paddingAfter, paddingLeft, paddingRight) = self.blockQouteSpacings
 
-        let height = self.contentHeight(width - 2 * paddingHorz) + after + before + paddingBefore + paddingAfter
+        let height = self.contentHeight(width - paddingLeft - paddingRight) + after + before + paddingBefore + paddingAfter
         self.frame = CGRect(x: 0, y: y, width: width, height: height)
         return height
     }

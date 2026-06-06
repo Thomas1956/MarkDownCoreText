@@ -411,12 +411,13 @@ struct BlockContent {
             font = block.hasCodeBlock ? typography.codeBlock.font : font
             
             let paragraphMetrics = typography.paragraph
-            let blockQuoteMetrics = typography.blockQuote
-            
+
             var attrText = NSMutableAttributedString(attributedString: blockContent.attrText)
             var tabulators         : [NSTextTab]  =  []
-            var firstLineHeadIndent    : CGFloat  =  block.hasBlockQuote ? blockQuoteMetrics.blockQuoteContentIndent : CGFloat(M.headIndent)
-            var headIndent             : CGFloat  =  block.hasBlockQuote ? blockQuoteMetrics.blockQuoteContentIndent : CGFloat(M.headIndent)
+            /// Im Block Quote setzt bereits `contentRect` den linken Einzug. Die Paragraph-Indents bleiben
+            /// daher auf dem Standardwert, damit sich der Einzug nicht verdoppelt.
+            var firstLineHeadIndent    : CGFloat  =  CGFloat(M.headIndent)
+            var headIndent             : CGFloat  =  CGFloat(M.headIndent)
             var tailIndent             : CGFloat  =  CGFloat(M.tailIndent)
             var paragraphSpacing       : CGFloat  =  paragraphMetrics.paragraphSpacing
             var paragraphSpacingBefore : CGFloat  =  paragraphMetrics.paragraphSpacingBefore

@@ -56,16 +56,6 @@ public class MarkdownParser {
         attr.font = .systemFont(ofSize: size, weight: weight)
         attr.uiKit.foregroundColor = textColor
          
-        /// Setzen der Werte für Semi Globale Blöcke (wie Block Quote)
-        /// Notwendig, damit innerhalb des Blockes (normalerweise graue Textfarbe) auch andere Farbe zulässig ist
-        for (intentBlock, intentRange) in attr.runs[\.presentationIntent] {
-            guard let intentKinds = intentBlock?.components.compactMap({$0.kind}),
-                  intentKinds.contains(.blockQuote)
-            else { continue }
-            
-            attr[intentRange].foregroundColor = .secondaryLabel
-        }
-        
         /// Die User-Atribute in die Formatierungsinformation ändern.
         attr.userAttributes(size: size, weight: weight)
         

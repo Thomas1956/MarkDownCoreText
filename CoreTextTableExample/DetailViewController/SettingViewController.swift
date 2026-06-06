@@ -75,7 +75,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         }
         
         /// Aktualisierung der Meldung veranlassen
-        dataSource.reloadIfNeeded([ViewSettings.message.key])
+        dataSource.reloadIfNeeded([ViewSetting.message.key])
  
         let changed = setting.changedValues()
         changed.forEach( { print($0.key, $0.value) } )
@@ -98,9 +98,9 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             elementKind : SupplementaryKind.topPinned,
             input     : .init(
                 [.text  ("Anzeige",                      toolTip: "Anzeige der Elemente"),
-                 .text  ("Code",                         toolTip: "CodeBlock-Parameter einstellen"),
                  .text  ("PDF",                          toolTip: "PDF-Parameter einstellen"),
                  .text  ("Block",                        toolTip: "Blockparameter einstellen"),
+                 .text  ("Code",                         toolTip: "CodeBlock-Parameter einstellen"),
                  .text  ("Ruler",                        toolTip: "Trennstrich einstellen"),
                  .symbol("printer",             "Druck", toolTip: "Drucken"),
                  .symbol("questionmark.circle", "Hilfe", toolTip: "Hilfe")
@@ -141,6 +141,28 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     }
     
     ///---------------------------------------------------------------------------------------
+    /// Konfiguration von Zellen, die nicht vom BasicType abgedeckt sind (z.B. Summen, Statistik, Liste von Objekten)
+    ///
+    override func cellConfiguration(cell: CommonCollectionViewCell, itemIdentifier: ItemType, indexPath: IndexPath) {
+        
+        ///-----------------------------------------------------------------------------------
+        /// Spezielles Item zur Anzeige des Bildes mit dem Layout
+        ///
+        if itemIdentifier.stringContent(for: "Maße") {
+            
+            /// Berechnung der Größe anhand der Bounds des Views
+            let width  = min(380, (view.bounds.width - 80))
+            let height = width * 303 / 570
+            
+            var configuration = cell.defaultContentConfiguration()
+            configuration.image = UIImage.maßeFürBlockQuote
+            configuration.imageProperties.maximumSize = CGSize(width: width, height: height)
+            cell.contentConfiguration = configuration
+            cell.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0)
+        }
+    }
+    
+    ///---------------------------------------------------------------------------------------
     /// CLOSURE - Funktion für die Rückmeldung von Änderungen
     ///
     override func onEditChange(value: Any, key: String?) {
@@ -153,18 +175,18 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             return
         }
 
-        if key == ViewSettings.viewHeadIndent.key {
+        if key == ViewSetting.viewHeadIndent.key {
             print("HeadIndent \(value) ")
             setting.pushProperty(value: value as? Double, key: key)
 //            ItemType.reconfigureIfNeeded(on: self.dataSource, ViewSettings.viewHeadIndent_1.key)
         }
-        else if key == ViewSettings.viewTailIndent.key {
+        else if key == ViewSetting.viewTailIndent.key {
             print("TailIndent \(value) ")
             setting.pushProperty(value: value as? Double, key: key)
 //            ItemType.reconfigureIfNeeded(on: self.dataSource, ViewSettings.viewTailIndent_1.key)
         }
 
-        else if key == ViewSettings.viewColor.key {
+        else if key == ViewSetting.viewColor.key {
             let color = value as? UIColor ?? .black
             setting.pushProperty(value: color, key: key)
             print("Color", setting.isChanged, key, value)
@@ -189,7 +211,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             return Self.activeSection[item]
         }
         
-        typealias C = ViewSettings
+        typealias C = ViewSetting
 
         if key == C.message.key, let settings = entity {
             

@@ -29,23 +29,16 @@ extension SettingViewController  {
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .codeTextSizeFactor:      "Textfaktor".markdown(size: 15)
-            case .codeBackStandardColor:   "Standardfarbe"
-            case .codeBackColor:           "Eigene Farbe"
-            case .codeBorderStandardColor: "Standardfarbe"
-            case .codeBorderColor:         "Eigene Farbe"
-            case .codeLineHeight:          "Zeilen".markdown(size: 15)
-            case .codeSpacing:             "nach Block".markdown(size: 15)
-            case .codeSpacingBefore:       "vor Block".markdown(size: 15)
-            case .codeHeadIndent:          "Linker Rand".markdown(size: 15)
-            case .codeTailIndent:          "Rechter Rand".markdown(size: 15)
-            }
-        }
-        
-        /// Platzhalter bei Texteingaben
-        var placeholder: String? {
-            switch self {
-            default: nil
+            case .codeTextSizeFactor:      "Textfaktor"   .markdown(size: 15)
+            case .codeBackStandardColor:   "Standardfarbe".markdown(size: 15)
+            case .codeBackColor:           "Eigene Farbe" .markdown(size: 15)
+            case .codeBorderStandardColor: "Standardfarbe".markdown(size: 15)
+            case .codeBorderColor:         "Eigene Farbe" .markdown(size: 15)
+            case .codeLineHeight:          "Zeilen"       .markdown(size: 15)
+            case .codeSpacing:             "nach Block"   .markdown(size: 15)
+            case .codeSpacingBefore:       "vor Block"    .markdown(size: 15)
+            case .codeHeadIndent:          "Linker Rand"  .markdown(size: 15)
+            case .codeTailIndent:          "Rechter Rand" .markdown(size: 15)
             }
         }
         
@@ -82,12 +75,6 @@ extension SettingViewController  {
             case .codeBackColor, .codeBorderColor: .colorpalettewell
             }
         }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Textstil und Größen für die Positionierung
-        var textstyle            : UIFont.TextStyle?       { .body }
-        var configurationHeight  : CGFloat?                {  nil  }
-        var configurationMargins : NSDirectionalEdgeInsets { .zero }
     }
     
     //----------------------------------------------------------------------------------------
@@ -97,13 +84,17 @@ extension SettingViewController  {
         typealias Content = CodeBlockSetting
         
         let layoutMargins = NSDirectionalEdgeInsets(top: 12, leading: 8, bottom:  0, trailing: 8)
+        let w : CGFloat = 120
 
+        ///-----------------------------------------------------------------------------------
+        /// items als BasicType anlegen
         var items = [BasicType]()
         
         var info1 = "Schrift".markdown(size: 17, weight: .semibold, textcolor: .textGray).asContentDataLayout()
         info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
         items.append(.basic(info1))
-        items.append(.basic(Content.codeTextSizeFactor.line(setting, .rw, labelWidth: 120)))
+        
+        items.append(.basic(Content.codeTextSizeFactor.line(setting, .rw, labelWidth: w).leadingMargin(10)))
         
         let textHintergrund = "Hintergrund".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkHintergrund = BasicType.stdItem(textHintergrund, presentation: .outlineDisclosure)
@@ -111,8 +102,8 @@ extension SettingViewController  {
         items.append(linkHintergrund)
         
         let itemsHintergrund: [BasicType] = [
-            .basic(Content.codeBackStandardColor.line(setting, .rw, labelWidth: 120)),
-            .basic(Content.codeBackColor        .line(setting, .rw, labelWidth: 120)),
+            .basic([Content.codeBackStandardColor.line(setting, .rw, contentWidth: 37, labelWidth: w),
+                    Content.codeBackColor        .line(setting, .rw, labelWidth: 100), HSPACE]),
         ]
         
         let textRahmen = "Rahmen".markdown(size: 17, weight: .semibold, textcolor: .textGray)
@@ -121,8 +112,8 @@ extension SettingViewController  {
         items.append(linkRahmen)
         
         let itemsRahmen: [BasicType] = [
-            .basic(Content.codeBorderStandardColor.line(setting, .rw, labelWidth: 120)),
-            .basic(Content.codeBorderColor        .line(setting, .rw, labelWidth: 120)),
+            .basic([Content.codeBorderStandardColor.line(setting, .rw, contentWidth: 37, labelWidth: w),
+                    Content.codeBorderColor        .line(setting, .rw, labelWidth: 100), HSPACE]),
         ]
         
         let textAbstand = "Abstände".markdown(size: 17, weight: .semibold, textcolor: .textGray)
@@ -131,9 +122,9 @@ extension SettingViewController  {
         items.append(linkAbstand)
         
         let itemsAbstand: [BasicType] = [
-            .basic(Content.codeLineHeight   .line(setting, .rw, labelWidth: 120)),
-            .basic(Content.codeSpacing      .line(setting, .rw, labelWidth: 120)),
-            .basic(Content.codeSpacingBefore.line(setting, .rw, labelWidth: 120)),
+            .basic(Content.codeLineHeight   .line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeSpacing      .line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeSpacingBefore.line(setting, .rw, labelWidth: w)),
         ]
         
         let textEinzug = "Einzüge".markdown(size: 17, weight: .semibold, textcolor: .textGray)
@@ -142,8 +133,8 @@ extension SettingViewController  {
         items.append(linkEinzug)
         
         let itemsEinzug: [BasicType] = [
-            .basic(Content.codeHeadIndent.line(setting, .rw, labelWidth: 120)),
-            .basic(Content.codeTailIndent.line(setting, .rw, labelWidth: 120)),
+            .basic(Content.codeHeadIndent.line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeTailIndent.line(setting, .rw, labelWidth: w)),
             .vSpace(20),
         ]
 

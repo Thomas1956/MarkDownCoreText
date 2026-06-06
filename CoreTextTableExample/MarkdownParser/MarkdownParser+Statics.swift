@@ -101,7 +101,7 @@ public struct Markdown {
     
     /// Konstanten für den Hintergrund des Block Quote
     struct BlockQuote {
-        static var contentIndent    : Double = 20               /// Abstand des Inhaltes vom Rand des Block Quote
+        static var contentIndent    : Double = 20               /// Abstand des Inhaltes vom Balken
         static var horizontalIndent : Double = 0                /// Ränder Hintergrund links und rechts
         static var verticalOffset   : Double = 5                /// Verschiebung des  Hintergrunds nach unten
         static var useDefaultBackgroundColor: Bool = true       /// Hintergrundfarbe aus Textfarbe ableiten

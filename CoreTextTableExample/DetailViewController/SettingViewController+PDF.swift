@@ -27,45 +27,27 @@ extension SettingViewController  {
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .pdfTextSize:     "Textgröße".markdown(size: 15)
-            case .pdfMarginLeft:   "Linker Rand".markdown(size: 15)
+            case .pdfTextSize:     "Textgröße"   .markdown(size: 15)
+            case .pdfMarginLeft:   "Linker Rand" .markdown(size: 15)
             case .pdfMarginRight:  "Rechter Rand".markdown(size: 15)
-            case .pdfMarginTop:    "Oberer Rand".markdown(size: 15)
+            case .pdfMarginTop:    "Oberer Rand" .markdown(size: 15)
             case .pdfMarginBottom: "Unterer Rand".markdown(size: 15)
             }
         }
-        
-        /// Platzhalter bei Texteingaben
-        var placeholder: String? { nil }
                 
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
         var parameter: [KeyText]? {
             switch self {
             case .pdfTextSize:
-                    .start.blockAlignment(.leading).fraction(0).symbol("Pt")
-                    .minimumValue(5.0).maximumValue(100.0).stepValue(1)
+                    .start.fraction(0).symbol("Pt").minimumValue(5).maximumValue(100).stepValue(1)
  
             case .pdfMarginLeft, .pdfMarginRight, .pdfMarginTop, .pdfMarginBottom:
-                    .start.blockAlignment(.leading).fraction(1).symbol("cm")
-                    .minimumValue(0).maximumValue(10.0).stepValue(0.1)
+                    .start.fraction(1).symbol("cm").minimumValue(0).maximumValue(10).stepValue(0.1)
             }
         }
         
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType { .stepper }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Textstil und Größen für die Positionierung
-        ///
-        var textstyle            : UIFont.TextStyle?       { .body }
-        var configurationWidth   : CGFloat?                {  nil  }
-        var configurationHeight  : CGFloat?                {  nil  }
-        var configurationMargins : NSDirectionalEdgeInsets { .zero }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Zusätzliche Daten für BasicType für  Parametrierungen
-        ///
-        var image: ImageSourceConvertible? { nil }
     }
     
     //----------------------------------------------------------------------------------------
@@ -76,7 +58,8 @@ extension SettingViewController  {
         typealias C = PdfSettings
 
         let layoutMargins = NSDirectionalEdgeInsets(top: 12, leading: 8, bottom:  0, trailing: 8)
-        
+        let w : CGFloat = 120
+
         ///-----------------------------------------------------------------------------------
         /// items als BasicType anlegen
         var items = [BasicType]()
@@ -85,7 +68,7 @@ extension SettingViewController  {
         info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
         items.append(.basic(info1))
         
-        items.append(.basic(C.pdfTextSize .line(setting, .rw, labelWidth: 120)))
+        items.append(.basic(C.pdfTextSize .line(setting, .rw, labelWidth: w).leadingMargin(10)))
         
         let textRaender = "Seitenränder".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkRaender = BasicType.stdItem(textRaender, presentation: .outlineDisclosure)
@@ -93,10 +76,10 @@ extension SettingViewController  {
         items.append(linkRaender)
         
         let itemsRaender: [BasicType] = [
-            .basic(C.pdfMarginLeft  .line(setting, .rw, labelWidth: 120)),
-            .basic(C.pdfMarginRight .line(setting, .rw, labelWidth: 120)),
-            .basic(C.pdfMarginTop   .line(setting, .rw, labelWidth: 120)),
-            .basic(C.pdfMarginBottom.line(setting, .rw, labelWidth: 120)),
+            .basic(C.pdfMarginLeft  .line(setting, .rw, labelWidth: w)),
+            .basic(C.pdfMarginRight .line(setting, .rw, labelWidth: w)),
+            .basic(C.pdfMarginTop   .line(setting, .rw, labelWidth: w)),
+            .basic(C.pdfMarginBottom.line(setting, .rw, labelWidth: w)),
             .vSpace(20),
         ]
         

@@ -7,17 +7,17 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "89B12E5A-E224-4442-A286-45965D7FC885"
+            uuid = "87E83FEC-1052-4AAD-97BC-1BE661E1C3C4"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "CoreTextTableExample/DetailViewController/SettingViewController.swift"
+            filePath = "CoreTextTableExample/DetailViewController/SettingViewController+BlockQuote.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "110"
-            endingLineNumber = "110"
-            landmarkName = "capsuleRepresentedHeader"
-            landmarkType = "24">
+            startingLineNumber = "104"
+            endingLineNumber = "104"
+            landmarkName = "sectionBlockQuoteSetting(_:forEditing:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

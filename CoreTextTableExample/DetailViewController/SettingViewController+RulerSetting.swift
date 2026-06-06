@@ -36,13 +36,6 @@ extension SettingViewController  {
             }
         }
         
-        /// Platzhalter bei Texteingaben
-        var placeholder: String? {
-            switch self {            
-            default: nil
-            }
-        }
-                
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
         var parameter: [KeyText]? {
             switch self {
@@ -75,6 +68,8 @@ extension SettingViewController  {
     func sectionRulerSetting(_ setting: Settings, forEditing: Bool) {
         typealias Content = RulerSetting
 
+        let w : CGFloat = 120
+
         ///-----------------------------------------------------------------------------------
         /// items als BasicType anlegen
         var items = [BasicType]()
@@ -83,11 +78,11 @@ extension SettingViewController  {
         info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
         items.append(.basic(info1))
         
-        items.append(.basic(Content.rulerHeight        .line(setting, .rw, labelWidth: 120)))
-        items.append(.basic(Content.rulerLineHeight    .line(setting, .rw, labelWidth: 120)))
-        items.append(.basic(Content.rulerRightIndent   .line(setting, .rw, labelWidth: 120)))
-        items.append(.basic(Content.rulerHighlightColor.line(setting, .rw, labelWidth: 120)))
-        items.append(.basic(Content.rulerColor         .line(setting, .rw, labelWidth: 120)))
+        items.append(.basic( Content.rulerHeight        .line(setting, .rw, labelWidth: w)))
+        items.append(.basic( Content.rulerLineHeight    .line(setting, .rw, labelWidth: w)))
+        items.append(.basic( Content.rulerRightIndent   .line(setting, .rw, labelWidth: w)))
+        items.append(.basic([Content.rulerHighlightColor.line(setting, .rw, contentWidth: 37, labelWidth: w),
+                             Content.rulerColor         .line(setting, .rw, labelWidth: 100), HSPACE]))
 
         ///-----------------------------------------------------------------------------------
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen

@@ -46,6 +46,7 @@ struct MarkdownTypography {
     
     struct BlockQuoteMetrics {
         let blockQuoteContentIndent: CGFloat
+        let blockQuoteRightIndent: CGFloat
         let lineHeightMultiple: CGFloat
         let paragraphSpacingBefore: CGFloat
         let paragraphSpacing: CGFloat
@@ -205,9 +206,17 @@ struct MarkdownTypography {
         let rectInsetRight = rectInsetLeft
         let headIndent = scaled(Markdown.Block.headIndent)
         let tailIndent = rectInsetRight + scaled(Markdown.Block.tailIndent)
-        
+
+        /// `contentIndent` ist der Abstand vom Balken zum Inhalt. Der linke Einzug des Inhaltes
+        /// ergibt sich daher aus dem horizontalen Einzug des Block Quote, dem Abstand zum Balken,
+        /// der Balkenbreite und dem Abstand vom Balken zum Inhalt. Rechts gibt es keinen Balken,
+        /// daher entfällt dort der Anteil von Balkenabstand und Balkenbreite.
+        let leftContentIndent = rectInsetLeft + stripeGap + stripeWidth + contentIndent
+        let rightContentIndent = rectInsetRight + contentIndent
+
         return BlockQuoteMetrics(
-            blockQuoteContentIndent: contentIndent,
+            blockQuoteContentIndent: leftContentIndent,
+            blockQuoteRightIndent: rightContentIndent,
             lineHeightMultiple: paragraph.lineHeightMultiple,
             paragraphSpacingBefore: scaled(Markdown.Block.spacingBefore),
             paragraphSpacing: scaled(Markdown.Block.spacing),

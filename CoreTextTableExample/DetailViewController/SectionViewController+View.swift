@@ -21,7 +21,7 @@ extension SettingViewController  {
     /// Alle Attribute von BasicDetail sind in der Extension des Protokolls mit Defaultwerten vorbelegt. Demzufolge können alle
     /// standardmäßig genutzten, nicht benötigten Attribute aus dem ENUM gelöscht werden.
     ///
-    enum ViewSettings: String, @MainActor BasicDetail, CaseIterable {
+    enum ViewSetting: String, @MainActor BasicDetail, CaseIterable {
  
         /// Die Strings sollen den Namen der Properties entsprechen (Beispiel löschen und EIGENE Case's ergänzen)
         case viewTextSize,
@@ -33,23 +33,16 @@ extension SettingViewController  {
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .viewTextSize:       "Textgröße".markdown(size: 15)
-            case .viewColor:          "Textfarbe"
-            case .viewSoftBreaks:     "Soft-Breaks"
+            case .viewTextSize:       "Textgröße"   .markdown(size: 15)
+            case .viewColor:          "Textfarbe"   .markdown(size: 15)
+            case .viewSoftBreaks:     "Soft-Breaks" .markdown(size: 15)
 
-            case .viewLineHeight:     "Zeilen".markdown(size: 15)
-            case .viewSpacing:        "nach Absatz".markdown(size: 15)
-            case .viewSpacingBefore:  "vor Absatz".markdown(size: 15)
+            case .viewLineHeight:     "Zeilen"      .markdown(size: 15)
+            case .viewSpacing:        "nach Absatz" .markdown(size: 15)
+            case .viewSpacingBefore:  "vor Absatz"  .markdown(size: 15)
 
-            case .viewHeadIndent:     "Linker Rand".markdown(size: 15)
+            case .viewHeadIndent:     "Linker Rand" .markdown(size: 15)
             case .viewTailIndent:     "Rechter Rand".markdown(size: 15)
-            default: nil
-            }
-        }
-        
-        /// Platzhalter bei Texteingaben
-        var placeholder: String? {
-            switch self {            
             default: nil
             }
         }
@@ -61,7 +54,7 @@ extension SettingViewController  {
                     .start.fraction(0).symbol("Pt").minimumValue(5).maximumValue(100).stepValue(1)
 
             case .viewColor:
-                    .start.blockAlignment(.leading).list(Settings.textColorPalette)
+                    .start.list(Settings.textColorPalette)
 
             case .viewLineHeight:
                     .start.fraction(2).symbol("").minimumValue(1).maximumValue(5).stepValue(0.1)
@@ -83,22 +76,6 @@ extension SettingViewController  {
             default: .number
             }
         }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Textstil und Größen für die Positionierung
-        ///
-        var textstyle            : UIFont.TextStyle?       { .body }
-        var configurationHeight  : CGFloat?                {  nil  }
-        var configurationMargins : NSDirectionalEdgeInsets { .zero }
-        
-        ///-----------------------------------------------------------------------------------
-        /// Zusätzliche Daten für BasicType für  Parametrierungen
-        ///
-        var image: ImageSourceConvertible? {
-            switch self {
-            default: nil
-            }
-        }
     }
     
     //----------------------------------------------------------------------------------------
@@ -106,9 +83,10 @@ extension SettingViewController  {
     
     /// Der Name der Sektion MUSS manuell im SectionContent definiert werden
     func sectionViewSetting(_ setting: Settings, forEditing: Bool) {
-        typealias Content = ViewSettings
+        typealias Content = ViewSetting
         
         let layoutMargins = NSDirectionalEdgeInsets(top: 12, leading: 8, bottom:  0, trailing: 8)
+        let w : CGFloat = 120
 
         ///-----------------------------------------------------------------------------------
         /// items als BasicType anlegen
@@ -118,9 +96,9 @@ extension SettingViewController  {
         info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
         items.append(.basic(info1))
 
-        items.append(.basic( Content.viewTextSize      .line(setting, .rw, labelWidth: 120)))
-        items.append(.basic( Content.viewColor         .line(setting, .rw, labelWidth: 120)))
-        items.append(.basic( Content.viewSoftBreaks    .line(setting, .rw, labelWidth: 120)))
+        items.append(.basic( Content.viewTextSize  .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic( Content.viewColor     .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic( Content.viewSoftBreaks.line(setting, .rw, labelWidth: w).leadingMargin(10)))
         
         let textAbstand = "Abstände".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkAbstand = BasicType.stdItem(textAbstand, presentation: .outlineDisclosure)
@@ -128,9 +106,9 @@ extension SettingViewController  {
         items.append(linkAbstand)
         
         let itemsAbstand: [BasicType] = [
-            .basic( Content.viewLineHeight   .line(setting, .rw, labelWidth: 120)),
-            .basic( Content.viewSpacing      .line(setting, .rw, labelWidth: 120)),
-            .basic( Content.viewSpacingBefore.line(setting, .rw, labelWidth: 120)),
+            .basic( Content.viewLineHeight   .line(setting, .rw, labelWidth: w)),
+            .basic( Content.viewSpacing      .line(setting, .rw, labelWidth: w)),
+            .basic( Content.viewSpacingBefore.line(setting, .rw, labelWidth: w)),
         ]
         
         let textEinzug = "Einzüge".markdown(size: 17, weight: .semibold, textcolor: .textGray)
@@ -139,8 +117,8 @@ extension SettingViewController  {
         items.append(linkEinzug)
         
         let itemsEinzug: [BasicType] = [
-            .basic(Content.viewHeadIndent.line(setting, .rw, labelWidth: 120)),
-            .basic(Content.viewTailIndent.line(setting, .rw, labelWidth: 120)),
+            .basic(Content.viewHeadIndent.line(setting, .rw, labelWidth: w)),
+            .basic(Content.viewTailIndent.line(setting, .rw, labelWidth: w)),
             .vSpace(20),
         ]
 

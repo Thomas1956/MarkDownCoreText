@@ -58,7 +58,7 @@ class EditViewController: UIViewController {
         let deleteButton  = ImageBarButtonItem(systemName: "trash", action: didPressDeleteButton(_:))
         let settingButton = ImageBarButtonItem(systemName: "gearshape", action: didPressSettingButton(_:))
 
-        navigationItem.rightBarButtonItems = [settingButton, deleteButton, exportButton, importButton]
+        navigationItem.leftBarButtonItems = [settingButton, deleteButton, exportButton, importButton]
         
         /// Auf Hintergrund / Terminate achten und speichern
         NotificationCenter.default.addObserver(self, selector: #selector(saveTextToDefaults),
