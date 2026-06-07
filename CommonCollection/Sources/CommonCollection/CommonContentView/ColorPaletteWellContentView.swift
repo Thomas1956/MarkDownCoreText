@@ -96,9 +96,9 @@ public class ColorPaletteWellContentView: CommonContentView {
     /// Controls und Variablen im Content
     
     private let stackView = UIStackView()
+    private let backgroundView = UIView()
     private let paletteButton = UIButton(type: .custom)
     private let swatchView = UIView()
-    private let separatorView = UIView()
     private let colorWell = UIColorWell()
     
     private var selectedColor: UIColor = .black
@@ -129,33 +129,32 @@ public class ColorPaletteWellContentView: CommonContentView {
         stackView.alignment = .center
         stackView.spacing = 0
         stackView.translatesAutoresizingMaskIntoConstraints = false
-        
+
+        /// Gemeinsame Kapsel-Hülle hinter Swatch und ColorWell (analog zum Pages-Control).
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundView.backgroundColor = .tertiarySystemFill
+        backgroundView.isUserInteractionEnabled = false
+        backgroundView.layer.cornerCurve = .continuous
+
         paletteButton.translatesAutoresizingMaskIntoConstraints = false
-        paletteButton.backgroundColor = .secondarySystemBackground
-        paletteButton.layer.borderColor = UIColor.separator.cgColor
-        paletteButton.layer.borderWidth = 1
-        paletteButton.layer.cornerRadius = 8
-        paletteButton.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner]
+        paletteButton.backgroundColor = .clear
         paletteButton.addTarget(self, action: #selector(actionPalette(_:)), for: .touchUpInside)
-        
+
         swatchView.translatesAutoresizingMaskIntoConstraints = false
         swatchView.isUserInteractionEnabled = false
-        swatchView.layer.cornerRadius = 4
-        
-        separatorView.translatesAutoresizingMaskIntoConstraints = false
-        separatorView.backgroundColor = .separator
-        separatorView.isUserInteractionEnabled = false
-        
+        swatchView.layer.cornerRadius = 6
+        swatchView.layer.cornerCurve = .continuous
+
         colorWell.setContentCompressionResistancePriority(.required, for: .horizontal)
         colorWell.setContentCompressionResistancePriority(.required, for: .vertical)
         colorWell.translatesAutoresizingMaskIntoConstraints = false
         colorWell.addTarget(self, action: #selector(actionColorChanged(_:)), for: .valueChanged)
-        
+
+        addSubview(backgroundView)
         addSubview(stackView)
         stackView.addArrangedSubview(paletteButton)
         stackView.addArrangedSubview(colorWell)
         paletteButton.addSubview(swatchView)
-        paletteButton.addSubview(separatorView)
         
         let layoutMargins = contentConfiguration.layoutMargins
         let offset = (layoutMargins.top - layoutMargins.bottom) / 2
@@ -177,16 +176,17 @@ public class ColorPaletteWellContentView: CommonContentView {
             paletteWidthConstraint,
             paletteHeightConstraint,
             contentWidthConstraint,
-            
-            swatchView.leadingAnchor.constraint(equalTo: paletteButton.leadingAnchor, constant: 6),
-            swatchView.trailingAnchor.constraint(equalTo: paletteButton.trailingAnchor, constant: -6),
-            swatchView.topAnchor.constraint(equalTo: paletteButton.topAnchor, constant: 5),
-            swatchView.bottomAnchor.constraint(equalTo: paletteButton.bottomAnchor, constant: -5),
-            
-            separatorView.widthAnchor.constraint(equalToConstant: 1),
-            separatorView.trailingAnchor.constraint(equalTo: paletteButton.trailingAnchor),
-            separatorView.topAnchor.constraint(equalTo: paletteButton.topAnchor),
-            separatorView.bottomAnchor.constraint(equalTo: paletteButton.bottomAnchor)
+
+            /// Kapsel-Hülle umschließt Swatch und ColorWell mit etwas Spiel.
+            backgroundView.leadingAnchor.constraint(equalTo: stackView.leadingAnchor, constant: -2),
+            backgroundView.trailingAnchor.constraint(equalTo: stackView.trailingAnchor, constant: 2),
+            backgroundView.topAnchor.constraint(equalTo: stackView.topAnchor, constant: -1),
+            backgroundView.bottomAnchor.constraint(equalTo: stackView.bottomAnchor, constant: 1),
+
+            swatchView.leadingAnchor.constraint(equalTo: paletteButton.leadingAnchor, constant: 4),
+            swatchView.trailingAnchor.constraint(equalTo: paletteButton.trailingAnchor, constant: -4),
+            swatchView.topAnchor.constraint(equalTo: paletteButton.topAnchor, constant: 4),
+            swatchView.bottomAnchor.constraint(equalTo: paletteButton.bottomAnchor, constant: -4),
         ])
         
         if alignment == .leading {
@@ -203,12 +203,19 @@ public class ColorPaletteWellContentView: CommonContentView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
+    ///---------------------------------------------------------------------------------------
+    /// Kapsel-Eckenradius dynamisch an die Höhe anpassen
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        backgroundView.layer.cornerRadius = backgroundView.bounds.height / 2
+    }
+
     ///---------------------------------------------------------------------------------------
     /// Darstellung des Swatches aktualisieren
     private func updateSwatch() {
         paletteButton.isEnabled = isEditable
-        paletteButton.alpha = isEditable ? 1 : 0.45
+        backgroundView.alpha = isEditable ? 1 : 0.45
         swatchView.backgroundColor = selectedColor
     }
     

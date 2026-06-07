@@ -29,12 +29,12 @@ extension SettingViewController  {
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .rulerHeight:            "Höhe des Absatzes"
-            case .rulerLineHeight:        "Höhe des Trennstriches"
-            case .rulerPaddingLeft:       "Linker Abstand"
-            case .rulerPaddingRight:      "Rechter Abstand"
-            case .rulerUseHighlightColor: "Standardfarbe"
-            case .rulerColor:             "Eigene Farbe"
+            case .rulerHeight:            "Höhe des Absatzes"      .markdown(size: 15)
+            case .rulerLineHeight:        "Höhe des Trennstriches" .markdown(size: 15)
+            case .rulerPaddingLeft:       "Linker Innenabstand"    .markdown(size: 15)
+            case .rulerPaddingRight:      "Rechter Innenabstand"   .markdown(size: 15)
+            case .rulerUseHighlightColor: "Standardfarbe"          .markdown(size: 15)
+            case .rulerColor:             "Eigene Farbe"           .markdown(size: 15)
             }
         }
 

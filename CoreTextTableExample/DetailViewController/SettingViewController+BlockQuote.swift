@@ -33,12 +33,12 @@ extension SettingViewController  {
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .blockIndentLeft:                "Linke Einrückung"       .markdown(size: 15)
-            case .blockIndentRight:               "Rechte Einrückung"      .markdown(size: 15)
-            case .blockBarIndent:                 "Abstand zum Balken"     .markdown(size: 15)
+            case .blockIndentLeft:                "Linker Einzug"          .markdown(size: 15)
+            case .blockIndentRight:               "Rechter Einzug"         .markdown(size: 15)
+            case .blockBarIndent:                 "Einzug des Balkens"     .markdown(size: 15)
             case .blockBarWidth:                  "Balkenbreite"           .markdown(size: 15)
-            case .blockPaddingLeft:               "Polster Balken → Text"  .markdown(size: 15)
-            case .blockPaddingRight:              "Polster Text → BG-Rand" .markdown(size: 15)
+            case .blockPaddingLeft:               "Linker Innenabstand"    .markdown(size: 15)
+            case .blockPaddingRight:              "Rechter Innenabstand"   .markdown(size: 15)
             case .blockVerticalOffset:            "Vertikaler Offset"      .markdown(size: 15)
             case .blockUseDefaultBarColor:        "Standardfarbe"          .markdown(size: 15)
             case .blockBarColor:                  "Eigene Farbe"           .markdown(size: 15)
@@ -87,7 +87,7 @@ extension SettingViewController  {
         typealias Content = BlockQuoteSetting
 
         let layoutMargins = NSDirectionalEdgeInsets(top: 12, leading: 8, bottom:  0, trailing: 8)
-        let w : CGFloat = 180
+        let w : CGFloat = 120
         
         ///-----------------------------------------------------------------------------------
         /// items als BasicType anlegen
@@ -114,8 +114,8 @@ extension SettingViewController  {
         let itemsBalken: [BasicType] = [
             .basic( Content.blockBarIndent          .line(setting, .rw, labelWidth: w)),
             .basic( Content.blockBarWidth           .line(setting, .rw, labelWidth: w)),
-            .basic([Content.blockUseDefaultBarColor .line(setting, .rw, contentWidth: 92, labelWidth: w),
-                    Content.blockBarColor           .line(setting, .rw, labelWidth: w)]),
+            .basic([Content.blockUseDefaultBarColor .line(setting, .rw, contentWidth: 37, labelWidth: w),
+                    Content.blockBarColor           .line(setting, .rw, labelWidth: w), HSPACE]),
         ]
 
         let textHintergrund = "Hintergrund".markdown(size: 17, weight: .semibold, textcolor: .textGray)
@@ -125,8 +125,8 @@ extension SettingViewController  {
         
         let itemsHintergrund: [BasicType] = [
             .basic( Content.blockVerticalOffset            .line(setting, .rw, labelWidth: w)),
-            .basic([Content.blockUseDefaultBackgroundColor .line(setting, .rw, contentWidth: 92, labelWidth: w),
-                    Content.blockBackgroundColor           .line(setting, .rw, labelWidth: w)]),
+            .basic([Content.blockUseDefaultBackgroundColor .line(setting, .rw, contentWidth: 37, labelWidth: w),
+                    Content.blockBackgroundColor           .line(setting, .rw, labelWidth: w), HSPACE]),
             .vSpace(20),
         ]
 

@@ -39,10 +39,10 @@ extension SettingViewController  {
             case .codeLineHeightMultiple:        "Zeilen"                .markdown(size: 15)
             case .codeSpacing:                   "nach Block"            .markdown(size: 15)
             case .codeSpacingBefore:             "vor Block"             .markdown(size: 15)
-            case .codeIndentLeft:                "Linke Einrückung"      .markdown(size: 15)
-            case .codeIndentRight:               "Rechte Einrückung"     .markdown(size: 15)
-            case .codePaddingLeft:               "Polster BG → Text"     .markdown(size: 15)
-            case .codePaddingRight:              "Polster Text → BG"     .markdown(size: 15)
+            case .codeIndentLeft:                "Linker Einzug"         .markdown(size: 15)
+            case .codeIndentRight:               "Rechter Einzug"        .markdown(size: 15)
+            case .codePaddingLeft:               "Linker Innenabstand"   .markdown(size: 15)
+            case .codePaddingRight:              "Rechter Innenabstand"  .markdown(size: 15)
             }
         }
 
