@@ -414,11 +414,12 @@ struct BlockContent {
 
             var attrText = NSMutableAttributedString(attributedString: blockContent.attrText)
             var tabulators         : [NSTextTab]  =  []
-            /// Im Block Quote setzt bereits `contentRect` den linken Einzug. Die Paragraph-Indents bleiben
-            /// daher auf dem Standardwert, damit sich der Einzug nicht verdoppelt.
-            var firstLineHeadIndent    : CGFloat  =  CGFloat(M.headIndent)
-            var headIndent             : CGFloat  =  CGFloat(M.headIndent)
-            var tailIndent             : CGFloat  =  CGFloat(M.tailIndent)
+            /// Im Block Quote liefert `contentRect` bereits die vollständige Textposition
+            /// (inkl. `viewHeadIndent` / `viewTailIndent`). Die Paragraph-Indents sind dort 0,
+            /// damit die Werte nicht doppelt wirken. Außerhalb gelten die globalen Dokument-Einzüge.
+            var firstLineHeadIndent    : CGFloat  =  block.hasBlockQuote ? 0 : CGFloat(M.headIndent)
+            var headIndent             : CGFloat  =  block.hasBlockQuote ? 0 : CGFloat(M.headIndent)
+            var tailIndent             : CGFloat  =  block.hasBlockQuote ? 0 : CGFloat(M.tailIndent)
             var paragraphSpacing       : CGFloat  =  paragraphMetrics.paragraphSpacing
             var paragraphSpacingBefore : CGFloat  =  paragraphMetrics.paragraphSpacingBefore
             var lineHeightMultiple     : CGFloat  =  paragraphMetrics.lineHeightMultiple
@@ -463,15 +464,14 @@ struct BlockContent {
             }
             
             ///-------------------------------------------------------------------------------
-            /// Code Block  erkennen und den Font des Code Block ergänzen
+            /// Code Block erkennen und den Font des Code Block ergänzen.
+            /// Die horizontalen Einzüge werden vom `CodeBlockRenderer` direkt aus den Metrics
+            /// gesetzt; hier braucht es nur Font und vertikale Abstände.
             if block.hasCodeBlock {
                 let codeMetrics = typography.codeBlock
                 attrText.addAttributes([.font: font])
                 paragraphSpacingBefore = codeMetrics.paragraphSpacingBefore
                 paragraphSpacing       = codeMetrics.paragraphSpacing
-                headIndent             = codeMetrics.headIndent
-                firstLineHeadIndent    = codeMetrics.firstLineHeadIndent
-                tailIndent             = codeMetrics.tailIndent
                 lineHeightMultiple     = codeMetrics.lineHeightMultiple
             }
             

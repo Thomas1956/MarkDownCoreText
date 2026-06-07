@@ -21,58 +21,68 @@ extension SettingViewController  {
     enum CodeBlockSetting: String, @MainActor BasicDetail, CaseIterable {
 
         case codeTextSizeFactor,
-             codeBackStandardColor, codeBackColor,
-             codeBorderStandardColor, codeBorderColor,
-             codeLineHeight, codeSpacing, codeSpacingBefore,
-             codeHeadIndent, codeTailIndent
-        
+             codeUseDefaultBackgroundColor, codeBackgroundColor,
+             codeUseDefaultBorderColor, codeBorderColor, codeBorderWidth,
+             codeLineHeightMultiple, codeSpacing, codeSpacingBefore,
+             codeLeftIndent, codeRightIndent,
+             codeContentLeftIndent, codeContentRightIndent
+
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .codeTextSizeFactor:      "Textfaktor"   .markdown(size: 15)
-            case .codeBackStandardColor:   "Standardfarbe".markdown(size: 15)
-            case .codeBackColor:           "Eigene Farbe" .markdown(size: 15)
-            case .codeBorderStandardColor: "Standardfarbe".markdown(size: 15)
-            case .codeBorderColor:         "Eigene Farbe" .markdown(size: 15)
-            case .codeLineHeight:          "Zeilen"       .markdown(size: 15)
-            case .codeSpacing:             "nach Block"   .markdown(size: 15)
-            case .codeSpacingBefore:       "vor Block"    .markdown(size: 15)
-            case .codeHeadIndent:          "Linker Rand"  .markdown(size: 15)
-            case .codeTailIndent:          "Rechter Rand" .markdown(size: 15)
+            case .codeTextSizeFactor:            "Textfaktor"            .markdown(size: 15)
+            case .codeUseDefaultBackgroundColor: "Standardfarbe"         .markdown(size: 15)
+            case .codeBackgroundColor:           "Eigene Farbe"          .markdown(size: 15)
+            case .codeUseDefaultBorderColor:     "Standardfarbe"         .markdown(size: 15)
+            case .codeBorderColor:               "Eigene Farbe"          .markdown(size: 15)
+            case .codeBorderWidth:               "Rahmenbreite"          .markdown(size: 15)
+            case .codeLineHeightMultiple:        "Zeilen"                .markdown(size: 15)
+            case .codeSpacing:                   "nach Block"            .markdown(size: 15)
+            case .codeSpacingBefore:             "vor Block"             .markdown(size: 15)
+            case .codeLeftIndent:                "Linker Einzug"         .markdown(size: 15)
+            case .codeRightIndent:               "Rechter Einzug"        .markdown(size: 15)
+            case .codeContentLeftIndent:         "Abstand BG → Text"     .markdown(size: 15)
+            case .codeContentRightIndent:        "Abstand Text → BG"     .markdown(size: 15)
             }
         }
-        
+
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
         var parameter: [KeyText]? {
             switch self {
             case .codeTextSizeFactor:
                     .start.fraction(0).symbol("%").minimumValue(50).maximumValue(120).stepValue(5)
 
-            case .codeLineHeight:
+            case .codeLineHeightMultiple:
                     .start.fraction(2).symbol("").minimumValue(0.7).maximumValue(2.0).stepValue(0.05)
-            
+
             case .codeSpacing, .codeSpacingBefore:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(1)
-                
-            case .codeHeadIndent, .codeTailIndent:
+
+            case .codeLeftIndent, .codeRightIndent,
+                 .codeContentLeftIndent, .codeContentRightIndent:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(80).stepValue(1)
-                
-            case .codeBackStandardColor, .codeBorderStandardColor:
+
+            case .codeBorderWidth:
+                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(10).stepValue(0.5)
+
+            case .codeUseDefaultBackgroundColor, .codeUseDefaultBorderColor:
                     .alignLeading
-                
-            case .codeBackColor, .codeBorderColor:
+
+            case .codeBackgroundColor, .codeBorderColor:
                     .start.blockAlignment(.leading)
-                    .list(self == .codeBackColor ? Settings.codeBackColorPalette : Settings.codeBorderColorPalette)
+                    .list(self == .codeBackgroundColor ? Settings.codeBackgroundColorPalette : Settings.codeBorderColorPalette)
             }
         }
-        
+
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType {
             switch self {
-            case .codeTextSizeFactor, .codeLineHeight, .codeSpacing, .codeSpacingBefore,
-                 .codeHeadIndent, .codeTailIndent: .stepper
-            case .codeBackStandardColor, .codeBorderStandardColor: .button
-            case .codeBackColor, .codeBorderColor: .colorpalettewell
+            case .codeTextSizeFactor, .codeLineHeightMultiple, .codeSpacing, .codeSpacingBefore,
+                 .codeLeftIndent, .codeRightIndent,
+                 .codeContentLeftIndent, .codeContentRightIndent,
+                 .codeBorderWidth: .stepper
+            case .codeUseDefaultBackgroundColor, .codeUseDefaultBorderColor: .button
+            case .codeBackgroundColor, .codeBorderColor: .colorpalettewell
             }
         }
     }
@@ -102,18 +112,19 @@ extension SettingViewController  {
         items.append(linkHintergrund)
         
         let itemsHintergrund: [BasicType] = [
-            .basic([Content.codeBackStandardColor.line(setting, .rw, contentWidth: 37, labelWidth: w),
-                    Content.codeBackColor        .line(setting, .rw, labelWidth: 100), HSPACE]),
+            .basic([Content.codeUseDefaultBackgroundColor.line(setting, .rw, contentWidth: 37, labelWidth: w),
+                    Content.codeBackgroundColor          .line(setting, .rw, labelWidth: 100), HSPACE]),
         ]
-        
+
         let textRahmen = "Rahmen".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkRahmen = BasicType.stdItem(textRahmen, presentation: .outlineDisclosure)
         items.append(.vDivider(6, color: .systemGray5, layoutMargins: layoutMargins))
         items.append(linkRahmen)
-        
+
         let itemsRahmen: [BasicType] = [
-            .basic([Content.codeBorderStandardColor.line(setting, .rw, contentWidth: 37, labelWidth: w),
-                    Content.codeBorderColor        .line(setting, .rw, labelWidth: 100), HSPACE]),
+            .basic([Content.codeUseDefaultBorderColor.line(setting, .rw, contentWidth: 37, labelWidth: w),
+                    Content.codeBorderColor          .line(setting, .rw, labelWidth: 100), HSPACE]),
+            .basic(Content.codeBorderWidth.line(setting, .rw, labelWidth: w)),
         ]
         
         let textAbstand = "Abstände".markdown(size: 17, weight: .semibold, textcolor: .textGray)
@@ -122,9 +133,9 @@ extension SettingViewController  {
         items.append(linkAbstand)
         
         let itemsAbstand: [BasicType] = [
-            .basic(Content.codeLineHeight   .line(setting, .rw, labelWidth: w)),
-            .basic(Content.codeSpacing      .line(setting, .rw, labelWidth: w)),
-            .basic(Content.codeSpacingBefore.line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeLineHeightMultiple.line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeSpacing           .line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeSpacingBefore     .line(setting, .rw, labelWidth: w)),
         ]
         
         let textEinzug = "Einzüge".markdown(size: 17, weight: .semibold, textcolor: .textGray)
@@ -133,8 +144,10 @@ extension SettingViewController  {
         items.append(linkEinzug)
         
         let itemsEinzug: [BasicType] = [
-            .basic(Content.codeHeadIndent.line(setting, .rw, labelWidth: w)),
-            .basic(Content.codeTailIndent.line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeLeftIndent         .line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeRightIndent        .line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeContentLeftIndent  .line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeContentRightIndent .line(setting, .rw, labelWidth: w)),
             .vSpace(20),
         ]
 

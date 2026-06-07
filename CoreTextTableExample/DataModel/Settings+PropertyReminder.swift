@@ -98,12 +98,12 @@ extension Settings {
         ("Purpur"    , .systemPurple.withAlphaComponent(0.12))
     ]
     
-    static let textColorPalette       = makeColorPalette(textColorDefinitions)
-    static let blockBarColorPalette   = makeColorPalette(barColorDefinitions)
-    static let blockBackColorPalette  = makeColorPalette(backgroundColorDefinitions)
-    static let rulerColorPalette      = makeColorPalette(barColorDefinitions)
-    static let codeBackColorPalette   = makeColorPalette(backgroundColorDefinitions)
-    static let codeBorderColorPalette = makeColorPalette(barColorDefinitions)
+    static let textColorPalette             = makeColorPalette(textColorDefinitions)
+    static let blockBarColorPalette         = makeColorPalette(barColorDefinitions)
+    static let blockBackgroundColorPalette  = makeColorPalette(backgroundColorDefinitions)
+    static let rulerColorPalette            = makeColorPalette(barColorDefinitions)
+    static let codeBackgroundColorPalette   = makeColorPalette(backgroundColorDefinitions)
+    static let codeBorderColorPalette       = makeColorPalette(barColorDefinitions)
     
     private static var completeColorPalette: [UIColor] {
         (textColorDefinitions + barColorDefinitions + backgroundColorDefinitions).map(\.1)
@@ -121,77 +121,40 @@ extension Settings {
     
     ///---------------------------------------------------------------------------------------
     /// Gemeinsame Textfarbe für LiveView und PDF.
-    @objc dynamic public var viewColor: UIColor {
-        get { viewRawColor as? UIColor ?? .black }
-        set { viewRawColor = newValue }
-    }
-    
-    /// Farbe für den Edit-Text
-    @objc dynamic public var editColor: UIColor? {
-        get { editRawColor as? UIColor }
-        set { editRawColor = newValue  }
+    @objc dynamic public var viewTextColor: UIColor {
+        get { viewRawTextColor as? UIColor ?? .black }
+        set { viewRawTextColor = newValue }
     }
 
-    /// Farbe für die Box der Tabelle
-    @objc dynamic public var tableBoxColor: UIColor? {
-        get { tableRawBoxColor as? UIColor }
-        set { tableRawBoxColor = newValue  }
-    }
-    
-    /// Standardfarbe für die Balken im BlockQuote aus der Textfarbe ableiten.
-    @objc dynamic public var blockBarUsesStandardColor: Bool {
-        get { value(forKey: "blockBarStandardColor") as? Bool ?? true }
-        set { setValue(newValue, forKey: "blockBarStandardColor") }
-    }
-    
-    /// Farbe für die Balken im BlockQuote
+    /// Eigene Farbe für die Balken im BlockQuote.
     @objc dynamic public var blockBarColor: UIColor? {
         get { Self.defaultedColor(blockRawBarColor as? UIColor, default: .systemGray4) }
         set { blockRawBarColor = Self.defaultedColor(newValue, default: .systemGray4) }
     }
 
-    /// Standardfarbe für den Hintergrund im BlockQuote aus der Textfarbe ableiten.
-    @objc dynamic public var blockBackUsesStandardColor: Bool {
-        get { value(forKey: "blockBackStandardColor") as? Bool ?? true }
-        set { setValue(newValue, forKey: "blockBackStandardColor") }
-    }
-    
-    /// Farbe für die Hintergrund im BlockQuote
-    @objc dynamic public var blockBackColor: UIColor? {
-        get { Self.defaultedColor(blockRawBackColor as? UIColor, default: .systemGray6) }
-        set { blockRawBackColor = Self.defaultedColor(newValue, default: .systemGray6) }
-    }
-    
-    /// Eigene Farbe für die Trennlinie, wenn die Standardfarbe deaktiviert ist.
-    @objc dynamic public var rulerColor: UIColor? {
-        get { Self.defaultedColor(value(forKey: "rulerRawColor") as? UIColor, default: .systemGray4) }
-        set { setValue(Self.defaultedColor(newValue, default: .systemGray4), forKey: "rulerRawColor") }
-    }
-    
-    /// Standardfarbe für den CodeBlock-Hintergrund aus der Textfarbe ableiten.
-    @objc dynamic public var codeBackUsesStandardColor: Bool {
-        get { value(forKey: "codeBackStandardColor") as? Bool ?? true }
-        set { setValue(newValue, forKey: "codeBackStandardColor") }
-    }
-    
-    /// Eigene Farbe für den CodeBlock-Hintergrund.
-    @objc dynamic public var codeBackColor: UIColor? {
-        get { Self.defaultedColor(value(forKey: "codeRawBackColor") as? UIColor, default: .systemGray6) }
-        set { setValue(Self.defaultedColor(newValue, default: .systemGray6), forKey: "codeRawBackColor") }
-    }
-    
-    /// Standardfarbe für den CodeBlock-Rahmen aus der Textfarbe ableiten.
-    @objc dynamic public var codeBorderUsesStandardColor: Bool {
-        get { value(forKey: "codeBorderStandardColor") as? Bool ?? true }
-        set { setValue(newValue, forKey: "codeBorderStandardColor") }
-    }
-    
-    /// Eigene Farbe für den CodeBlock-Rahmen.
-    @objc dynamic public var codeBorderColor: UIColor? {
-        get { Self.defaultedColor(value(forKey: "codeRawBorderColor") as? UIColor, default: .systemGray4) }
-        set { setValue(Self.defaultedColor(newValue, default: .systemGray4), forKey: "codeRawBorderColor") }
+    /// Eigene Farbe für den Hintergrund im BlockQuote.
+    @objc dynamic public var blockBackgroundColor: UIColor? {
+        get { Self.defaultedColor(blockRawBackgroundColor as? UIColor, default: .systemGray6) }
+        set { blockRawBackgroundColor = Self.defaultedColor(newValue, default: .systemGray6) }
     }
 
+    /// Eigene Farbe für die Trennlinie, wenn `rulerUseHighlightColor` aus ist.
+    @objc dynamic public var rulerColor: UIColor? {
+        get { Self.defaultedColor(rulerRawColor as? UIColor, default: .systemGray4) }
+        set { rulerRawColor = Self.defaultedColor(newValue, default: .systemGray4) }
+    }
+
+    /// Eigene Farbe für den CodeBlock-Hintergrund.
+    @objc dynamic public var codeBackgroundColor: UIColor? {
+        get { Self.defaultedColor(codeRawBackgroundColor as? UIColor, default: .systemGray6) }
+        set { codeRawBackgroundColor = Self.defaultedColor(newValue, default: .systemGray6) }
+    }
+
+    /// Eigene Farbe für den CodeBlock-Rahmen.
+    @objc dynamic public var codeBorderColor: UIColor? {
+        get { Self.defaultedColor(codeRawBorderColor as? UIColor, default: .systemGray4) }
+        set { codeRawBorderColor = Self.defaultedColor(newValue, default: .systemGray4) }
+    }
 }
 
 @objc(ColorTransformer)

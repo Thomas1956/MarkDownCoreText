@@ -447,7 +447,7 @@ final class CodeBlockRenderer: BlockRenderer {
     
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
 
-        let availableWidth = width - M.headIndent + M.tailIndent
+        let availableWidth = width - metrics.outerLeftIndent - metrics.outerRightIndent
         let innerWidth = availableWidth - padding.left - padding.right
 
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
@@ -463,7 +463,7 @@ final class CodeBlockRenderer: BlockRenderer {
         let textHeight = ceil(size.height)
         let totalHeight = textHeight + padding.top + padding.bottom
 
-        self.frame = CGRect(x: M.headIndent,
+        self.frame = CGRect(x: metrics.outerLeftIndent,
                             y: y,
                             width: availableWidth,
                             height: totalHeight)
@@ -472,23 +472,26 @@ final class CodeBlockRenderer: BlockRenderer {
     }
 
     func draw(in context: CGContext) {
-        
+
         // Hintergrund
         let textColor = text.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor ?? M.textColor
         let backgroundColor = MC.useDefaultBackgroundColor ? textColor.codeBlockBackgroundColor : MC.backgroundColor
         let borderColor = MC.useDefaultBorderColor ? textColor.codeBlockBorderColor : MC.borderColor
+        let borderWidth = metrics.rectAttachment.borderWidth
         context.setFillColor(backgroundColor.cgColor)
         context.setStrokeColor(borderColor.cgColor)
-        context.setLineWidth(1)
+        context.setLineWidth(borderWidth)
 
+        /// Den Rahmen um die halbe Linienbreite nach innen ziehen, damit er vollständig im Frame liegt.
+        let inset = max(borderWidth / 2, 0)
         let rectBackground = CGRect(origin: .zero, size: frame.size)
         context.addPath(
             UIBezierPath(
-                roundedRect: rectBackground.insetBy(dx: 2, dy: 2),
+                roundedRect: rectBackground.insetBy(dx: inset, dy: inset),
                 cornerRadius: metrics.rectAttachment.rectCornerRadius
             ).cgPath
         )
-        context.drawPath(using: .fillStroke)
+        context.drawPath(using: borderWidth > 0 ? .fillStroke : .fill)
 
         // Text
         let textRect = rectBackground.inset(by: padding)
@@ -532,7 +535,7 @@ final class TableRenderer: BlockRenderer {
         let typography = MarkdownTypography(bodyFont: font)
         let inset = max(4, typography.scaled(Markdown.Block.contentIndent * 0.5))
         self.padding = UIEdgeInsets(top: inset * 0.75, left: inset, bottom: inset * 0.75, right: inset)
-        self.gridLineWidth = max(0.5, typography.thematicBreak.rulerLineHeight * 0.5)
+        self.gridLineWidth = max(0.5, typography.thematicBreak.lineHeight * 0.5)
         self.minimumColumnWidth = max(36, typography.scaled(44))
         self.minimumRowHeight = max(typography.scaled(24), firstBlock.attrText.size().height + padding.top + padding.bottom)
         self.columnWidths = Self.preferredColumnWidths(from: tableBlock.columns,
@@ -762,36 +765,48 @@ final class HorizontalRuleRenderer: BlockRenderer {
     }
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         let metrics = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).thematicBreak
-        let h = metrics.rulerHeight
+        let h = metrics.height
         self.frame = CGRect(x: 0, y: y, width: width, height: h)
         return h
     }
     
     func draw(in context: CGContext) {
         guard let block = blockContent.block else { return }
-        
-        var leftIndent = CGFloat.zero
+
+        let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize))
+        let metrics = typography.thematicBreak
+
+        /// Linker und rechter Rand des Absatztextes ermitteln. Innerhalb eines BlockQuote
+        /// gelten die Block-internen Ränder, sonst die globalen Dokument-Einzüge.
+        let textLeft: CGFloat
+        let textRight: CGFloat
         if block.hasBlockQuote {
             let rect = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             drawBlockQuote(in: context, rect: rect)
-            
-            leftIndent = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).blockQuote.blockQuoteContentIndent
+
+            let bq = typography.blockQuote
+            textLeft  = bq.blockQuoteContentIndent
+            textRight = frame.width - bq.blockQuoteRightIndent
+        } else {
+            textLeft  = CGFloat(M.headIndent)
+            textRight = frame.width + CGFloat(M.tailIndent)
         }
 
         let color: UIColor
-        if MR.colorHighLight {
+        if MR.useHighlightColor {
             /// Die Standardfarbe wird aus der Textfarbe abgeleitet.
             let textColor = text.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor ?? M.textColor
             color = textColor.highlight
         } else {
             color = MR.color
         }
-        
-        let metrics = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).thematicBreak
-        let y = CGFloat(frame.height/2)
-        context.move(to: CGPoint(x: leftIndent, y: y))
-        context.addLine(to: CGPoint(x: self.frame.width - metrics.rulerRightIndent, y: y))
-        context.setLineWidth(metrics.rulerLineHeight)
+
+        let y  = CGFloat(frame.height/2)
+        let x1 = textLeft  + metrics.leftIndent
+        let x2 = textRight - metrics.rightIndent
+        context.move(to: CGPoint(x: x1, y: y))
+        context.addLine(to: CGPoint(x: x2, y: y))
+        context.setLineWidth(metrics.lineHeight)
         context.setStrokeColor(color.cgColor)
         context.strokePath()
     }

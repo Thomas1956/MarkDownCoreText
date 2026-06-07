@@ -38,9 +38,10 @@ struct MarkdownTypography {
         let lineHeightMultiple: CGFloat
         let paragraphSpacingBefore: CGFloat
         let paragraphSpacing: CGFloat
-        let firstLineHeadIndent: CGFloat
-        let headIndent: CGFloat
-        let tailIndent: CGFloat
+        /// Abstand der BG-Box vom linken Frame-Rand (= `viewHeadIndent` + `codeLeftIndent`).
+        let outerLeftIndent: CGFloat
+        /// Abstand der BG-Box vom rechten Frame-Rand (= `viewTailIndent` + `codeRightIndent`).
+        let outerRightIndent: CGFloat
         let rectAttachment: RectAttachment
     }
     
@@ -56,9 +57,10 @@ struct MarkdownTypography {
     }
     
     struct RulerMetrics {
-        let rulerRightIndent: CGFloat
-        let rulerHeight: CGFloat
-        let rulerLineHeight: CGFloat
+        let leftIndent: CGFloat
+        let rightIndent: CGFloat
+        let height: CGFloat
+        let lineHeight: CGFloat
     }
     
     /// Rechteck-Parameter fuer Hintergruende in BlockQuote und CodeBlock.
@@ -70,6 +72,7 @@ struct MarkdownTypography {
         let stripeWidth: CGFloat
         let stripeGap: CGFloat
         let rectCornerRadius: CGFloat
+        let borderWidth: CGFloat
     }
     
     //----------------------------------------------------------------------------------------
@@ -155,26 +158,33 @@ struct MarkdownTypography {
     
     var codeBlock: CodeBlockMetrics {
         typealias MC = Markdown.CodeBlock
-        
-        let size = bodyFont.pointSize * CGFloat(MC.codeTextSizeFactor / 100)
+
+        let size = bodyFont.pointSize * CGFloat(MC.textSizeFactor / 100)
         let font = UIFont.monospacedSystemFont(ofSize: size, weight: .regular)
-        
+
         let spacing = scaled(10)
-        let rectInsetTop = 0.40 * spacing
+        let rectInsetTop    = 0.40 * spacing
         let rectInsetBottom = spacing - rectInsetTop
-        let rectInsetLeft = scaled(Markdown.Block.contentIndent)
-        let rectInsetRight = scaled(Markdown.Block.contentIndent)
-        let headIndent = rectInsetLeft + scaled(CGFloat(MC.headIndent))
-        let tailIndent = rectInsetRight + scaled(CGFloat(MC.tailIndent))
-        
+
+        /// Globale Dokument-Einzüge (`viewHeadIndent` / `viewTailIndent`).
+        let viewLeft  = CGFloat(Markdown.headIndent)
+        let viewRight = -CGFloat(Markdown.tailIndent)
+
+        /// Die BG-Box ist additiv zu den Dokument-Einzügen eingerückt.
+        let outerLeftIndent  = viewLeft  + scaled(CGFloat(MC.leftIndent))
+        let outerRightIndent = viewRight + scaled(CGFloat(MC.rightIndent))
+
+        /// Innenabstände vom BG-Rand zum Text.
+        let rectInsetLeft  = scaled(CGFloat(MC.contentLeftIndent))
+        let rectInsetRight = scaled(CGFloat(MC.contentRightIndent))
+
         return CodeBlockMetrics(
             font: font,
             lineHeightMultiple: CGFloat(MC.lineHeightMultiple),
             paragraphSpacingBefore: scaled(CGFloat(MC.spacingBefore)),
             paragraphSpacing: scaled(CGFloat(MC.spacing)),
-            firstLineHeadIndent: headIndent,
-            headIndent: headIndent,
-            tailIndent: tailIndent,
+            outerLeftIndent: outerLeftIndent,
+            outerRightIndent: outerRightIndent,
             rectAttachment: RectAttachment(
                 rectInsetTop: rectInsetTop,
                 rectInsetBottom: rectInsetBottom,
@@ -182,7 +192,8 @@ struct MarkdownTypography {
                 rectInsetRight: rectInsetRight,
                 stripeWidth: 0,
                 stripeGap: 0,
-                rectCornerRadius: scaled(8)
+                rectCornerRadius: scaled(8),
+                borderWidth: scaled(CGFloat(MC.borderWidth))
             )
         )
     }
@@ -197,26 +208,32 @@ struct MarkdownTypography {
         let size = scaled(refSize, rounded: true)
         let spacing = 2 * Markdown.headerSpacing(level: 0, size: size).after
         
-        let contentIndent = scaled(CGFloat(MB.contentIndent))
-        let stripeWidth = scaled(CGFloat(MB.barWidth))
-        let stripeGap = scaled(CGFloat(MB.barIndent))
-        let rectInsetTop = scaled(CGFloat(MB.verticalOffset))
-        let rectInsetBottom = max(0, spacing - rectInsetTop)
-        let rectInsetLeft = scaled(CGFloat(MB.horizontalIndent))
-        let rectInsetRight = rectInsetLeft
+        let stripeWidth        = scaled(CGFloat(MB.barWidth))
+        let stripeGap          = scaled(CGFloat(MB.barIndent))
+        let rectInsetTop       = scaled(CGFloat(MB.verticalOffset))
+        let rectInsetBottom    = max(0, spacing - rectInsetTop)
+        let contentLeftIndent  = scaled(CGFloat(MB.contentLeftIndent))
+        let contentRightIndent = scaled(CGFloat(MB.contentRightIndent))
+
+        /// Globale Dokument-Einzüge (`viewHeadIndent` / `viewTailIndent`). `Markdown.tailIndent`
+        /// ist negativ gespeichert, deshalb steht hier `-tailIndent` für den positiven Rechts-Rand.
+        let viewLeft  = CGFloat(Markdown.headIndent)
+        let viewRight = -CGFloat(Markdown.tailIndent)
+
+        /// Der Hintergrund des BlockQuote ist additiv zu den Dokument-Einzügen eingerückt.
+        let rectInsetLeft  = viewLeft  + scaled(CGFloat(MB.leftIndent))
+        let rectInsetRight = viewRight + scaled(CGFloat(MB.rightIndent))
+
         let headIndent = scaled(Markdown.Block.headIndent)
         let tailIndent = rectInsetRight + scaled(Markdown.Block.tailIndent)
 
-        /// `contentIndent` ist der Abstand vom Balken zum Inhalt. Der linke Einzug des Inhaltes
-        /// ergibt sich daher aus dem horizontalen Einzug des Block Quote, dem Abstand zum Balken,
-        /// der Balkenbreite und dem Abstand vom Balken zum Inhalt. Rechts gibt es keinen Balken,
-        /// daher entfällt dort der Anteil von Balkenabstand und Balkenbreite.
-        let leftContentIndent = rectInsetLeft + stripeGap + stripeWidth + contentIndent
-        let rightContentIndent = rectInsetRight + contentIndent
+        /// Linke und rechte Position des BlockQuote-Textes (absolut, vom Frame-Ursprung).
+        let leftTextIndent  = rectInsetLeft  + stripeGap + stripeWidth + contentLeftIndent
+        let rightTextIndent = rectInsetRight + contentRightIndent
 
         return BlockQuoteMetrics(
-            blockQuoteContentIndent: leftContentIndent,
-            blockQuoteRightIndent: rightContentIndent,
+            blockQuoteContentIndent: leftTextIndent,
+            blockQuoteRightIndent:   rightTextIndent,
             lineHeightMultiple: paragraph.lineHeightMultiple,
             paragraphSpacingBefore: scaled(Markdown.Block.spacingBefore),
             paragraphSpacing: scaled(Markdown.Block.spacing),
@@ -229,7 +246,8 @@ struct MarkdownTypography {
                 rectInsetRight: rectInsetRight,
                 stripeWidth: stripeWidth,
                 stripeGap: stripeGap,
-                rectCornerRadius: 0
+                rectCornerRadius: 0,
+                borderWidth: 0
             )
         )
     }
@@ -239,9 +257,10 @@ struct MarkdownTypography {
     
     var thematicBreak: RulerMetrics {
         RulerMetrics(
-            rulerRightIndent: scaled(CGFloat(Markdown.Ruler.rightIndent)),
-            rulerHeight     : scaled(CGFloat(Markdown.Ruler.height)),
-            rulerLineHeight : scaled(CGFloat(Markdown.Ruler.lineHeight))
+            leftIndent : scaled(CGFloat(Markdown.Ruler.leftIndent)),
+            rightIndent: scaled(CGFloat(Markdown.Ruler.rightIndent)),
+            height     : scaled(CGFloat(Markdown.Ruler.height)),
+            lineHeight : scaled(CGFloat(Markdown.Ruler.lineHeight))
         )
     }
 }

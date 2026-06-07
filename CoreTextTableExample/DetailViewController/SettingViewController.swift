@@ -186,7 +186,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
 //            ItemType.reconfigureIfNeeded(on: self.dataSource, ViewSettings.viewTailIndent_1.key)
         }
 
-        else if key == ViewSetting.viewColor.key {
+        else if key == ViewSetting.viewTextColor.key {
             let color = value as? UIColor ?? .black
             setting.pushProperty(value: color, key: key)
             print("Color", setting.isChanged, key, value)
@@ -224,7 +224,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             
             if  let headIndent = settings.property(forKey: C.viewHeadIndent.key) as? CGFloat,
                 let tailIndent = settings.property(forKey: C.viewTailIndent.key) as? CGFloat,
-                let lineHeight = settings.property(forKey: C.viewLineHeight.key) as? CGFloat
+                let lineHeight = settings.property(forKey: C.viewLineHeightMultiple.key) as? CGFloat
             {
                 if headIndent > 100.0 {
                     text = "Der linke Einzug darf **nicht größer** als 100 sein."

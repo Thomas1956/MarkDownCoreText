@@ -90,42 +90,57 @@ public struct Markdown {
         static var leftIndent       : Double = 10               /// Linker Rand der untersten Hierarchie
     }
     
-    /// Konstanten für den vertikalen Trennstrich (Ruler)
+    /// Konstanten für den vertikalen Trennstrich (Ruler).
+    /// `leftIndent` / `rightIndent` werden vom linken/rechten Rand des Absatztextes gemessen.
     struct Ruler {
-        static var rightIndent      : Double = 0                /// rechter Rand der Trennlinie
-        static var height           : Double = 10               /// Höhe des Hintergrundes der Trennlinie
-        static var lineHeight       : Double = 1.5              /// Strichdicke der Trennlinie
-        static var colorHighLight   : Bool   = true             /// Die Farbe der Trennlinie wird etwas heller
-        static var color            : UIColor = .systemGray4    /// Eigene Farbe, wenn colorHighLight aus ist
-    }                                                           /// als die Textfarbe dargestellt
-    
-    /// Konstanten für den Hintergrund des Block Quote
-    struct BlockQuote {
-        static var contentIndent    : Double = 20               /// Abstand des Inhaltes vom Balken
-        static var horizontalIndent : Double = 0                /// Ränder Hintergrund links und rechts
-        static var verticalOffset   : Double = 5                /// Verschiebung des  Hintergrunds nach unten
-        static var useDefaultBackgroundColor: Bool = true       /// Hintergrundfarbe aus Textfarbe ableiten
-        static var backgroundColor  : UIColor = .systemGray6    /// Eigene Farbe für den Hintergrund
-            
-        static var barIndent        : Double = 5                /// Linker Rand des Balkens
-        static var barWidth         : Double = 6                /// Breite des Balkens
-        static var useDefaultBarColor: Bool = true              /// Balkenfarbe aus Textfarbe ableiten
-        static var barColor         : UIColor = .systemGray4    /// Eigene Farbe für den Balken
+        static var leftIndent        : Double = 0                /// Abstand vom linken Textrand des Absatzes
+        static var rightIndent       : Double = 0                /// Abstand vom rechten Textrand des Absatzes
+        static var height            : Double = 10               /// Höhe des Hintergrundes der Trennlinie
+        static var lineHeight        : Double = 1.5              /// Strichdicke der Trennlinie
+        static var useHighlightColor : Bool   = true             /// Farbe wird aus der Textfarbe abgeleitet (heller)
+        static var color             : UIColor = .systemGray4    /// Eigene Farbe, wenn `useHighlightColor` aus ist
     }
     
-    /// Konstanten für den Code Block
+    /// Konstanten für den Hintergrund des Block Quote.
+    /// `leftIndent` / `rightIndent` werden additiv zum globalen `headIndent` / `tailIndent`
+    /// auf die Hintergrundbox angewendet. `contentLeftIndent` / `contentRightIndent` sind
+    /// die Innenabstände vom Balken zum Text (links) bzw. vom Text zur BG-Rechtsseite.
+    struct BlockQuote {
+        static var leftIndent          : Double = 0              /// Abstand der BG-Box vom linken Textrand
+        static var rightIndent         : Double = 0              /// Abstand der BG-Box vom rechten Textrand
+        static var verticalOffset      : Double = 5              /// Verschiebung des Hintergrunds nach unten
+        static var useDefaultBackgroundColor: Bool = true        /// Hintergrundfarbe aus Textfarbe ableiten
+        static var backgroundColor     : UIColor = .systemGray6  /// Eigene Farbe für den Hintergrund
+
+        static var barIndent           : Double = 5              /// Abstand der BG-Linken zum Balken
+        static var barWidth            : Double = 6              /// Breite des Balkens
+        static var useDefaultBarColor  : Bool   = true           /// Balkenfarbe aus Textfarbe ableiten
+        static var barColor            : UIColor = .systemGray4  /// Eigene Farbe für den Balken
+
+        static var contentLeftIndent   : Double = 20             /// Abstand vom Balken zum Text
+        static var contentRightIndent  : Double = 10             /// Abstand vom Text zur BG-Rechtsseite
+    }
+    
+    /// Konstanten für den Code Block.
+    /// `leftIndent` / `rightIndent` werden additiv zum globalen `headIndent` / `tailIndent` auf
+    /// die Hintergrundbox angewendet. `contentLeftIndent` / `contentRightIndent` sind die
+    /// Innenabstände vom BG-Rand zum Text.
     struct CodeBlock {
-        static var codeTextSizeFactor : Double = 80.0           /// Prozentuale Größe des Textfonts im Code Block
-        static var lineHeightMultiple : Double = 1.0            /// Zeilenabstand im Code Block
-        static var spacing            : Double = 6.0            /// Abstand nach dem Code Block
-        static var spacingBefore      : Double = 6.0            /// Abstand vor dem Code Block
-        static var headIndent         : Double = 10.0           /// Linker Einzug des Code Blocks
-        static var tailIndent         : Double = 10.0           /// Rechter Einzug des Code Blocks
-        static var useDefaultBackgroundColor: Bool = true       /// Hintergrundfarbe aus Textfarbe ableiten
-        static var backgroundColor    : UIColor = .systemGray6  /// Eigene Farbe für den Hintergrund
-        static var useDefaultBorderColor: Bool = true           /// Rahmenfarbe aus Textfarbe ableiten
-        static var borderColor        : UIColor = .systemGray4  /// Eigene Farbe für den Rahmen
-        static var padding            = UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
+        static var textSizeFactor            : Double  = 80.0           /// Prozentuale Größe des Textfonts
+        static var lineHeightMultiple        : Double  = 1.0            /// Zeilenabstand im Code Block
+        static var spacing                   : Double  = 6.0            /// Abstand nach dem Code Block
+        static var spacingBefore             : Double  = 6.0            /// Abstand vor dem Code Block
+
+        static var leftIndent                : Double  = 0              /// BG-Box-Abstand vom linken Textrand
+        static var rightIndent               : Double  = 0              /// BG-Box-Abstand vom rechten Textrand
+        static var contentLeftIndent         : Double  = 10             /// Innenabstand BG-Links → Text
+        static var contentRightIndent        : Double  = 10             /// Innenabstand Text → BG-Rechts
+
+        static var useDefaultBackgroundColor : Bool    = true           /// Hintergrundfarbe aus Textfarbe ableiten
+        static var backgroundColor           : UIColor = .systemGray6   /// Eigene Farbe für den Hintergrund
+        static var useDefaultBorderColor     : Bool    = true           /// Rahmenfarbe aus Textfarbe ableiten
+        static var borderColor               : UIColor = .systemGray4   /// Eigene Farbe für den Rahmen
+        static var borderWidth               : Double  = 1              /// Breite der Rahmenlinie
     }
 }
 

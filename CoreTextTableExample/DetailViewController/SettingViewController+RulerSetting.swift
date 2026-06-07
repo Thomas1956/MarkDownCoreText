@@ -23,19 +23,21 @@ extension SettingViewController  {
     ///
     enum RulerSetting: String, @MainActor BasicDetail, CaseIterable {
 
-        case rulerHeight, rulerLineHeight, rulerRightIndent, rulerHighlightColor, rulerColor
-        
+        case rulerHeight, rulerLineHeight, rulerLeftIndent, rulerRightIndent,
+             rulerUseHighlightColor, rulerColor
+
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .rulerHeight:         "Höhe des Absatzes"
-            case .rulerLineHeight:     "Höhe des Trennstriches"
-            case .rulerRightIndent:    "Rechter Abstand"
-            case .rulerHighlightColor: "Standardfarbe"
-            case .rulerColor:          "Eigene Farbe"
+            case .rulerHeight:            "Höhe des Absatzes"
+            case .rulerLineHeight:        "Höhe des Trennstriches"
+            case .rulerLeftIndent:        "Linker Abstand"
+            case .rulerRightIndent:       "Rechter Abstand"
+            case .rulerUseHighlightColor: "Standardfarbe"
+            case .rulerColor:             "Eigene Farbe"
             }
         }
-        
+
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
         var parameter: [KeyText]? {
             switch self {
@@ -43,19 +45,19 @@ extension SettingViewController  {
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
             case .rulerLineHeight:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
-            case .rulerRightIndent: 
-                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(1)
+            case .rulerLeftIndent, .rulerRightIndent:
+                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(80).stepValue(1)
 
-            case .rulerHighlightColor: .alignLeading
+            case .rulerUseHighlightColor: .alignLeading
             case .rulerColor: .start.blockAlignment(.leading).list(Settings.rulerColorPalette)
             }
         }
-        
+
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType {
             switch self {
-            case .rulerHeight, .rulerLineHeight, .rulerRightIndent: .stepper
-            case .rulerHighlightColor: .button
+            case .rulerHeight, .rulerLineHeight, .rulerLeftIndent, .rulerRightIndent: .stepper
+            case .rulerUseHighlightColor: .button
             case .rulerColor: .colorpalettewell
             }
         }
@@ -78,11 +80,12 @@ extension SettingViewController  {
         info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
         items.append(.basic(info1))
         
-        items.append(.basic( Content.rulerHeight        .line(setting, .rw, labelWidth: w)))
-        items.append(.basic( Content.rulerLineHeight    .line(setting, .rw, labelWidth: w)))
-        items.append(.basic( Content.rulerRightIndent   .line(setting, .rw, labelWidth: w)))
-        items.append(.basic([Content.rulerHighlightColor.line(setting, .rw, contentWidth: 37, labelWidth: w),
-                             Content.rulerColor         .line(setting, .rw, labelWidth: 100), HSPACE]))
+        items.append(.basic( Content.rulerHeight     .line(setting, .rw, labelWidth: w)))
+        items.append(.basic( Content.rulerLineHeight .line(setting, .rw, labelWidth: w)))
+        items.append(.basic( Content.rulerLeftIndent .line(setting, .rw, labelWidth: w)))
+        items.append(.basic( Content.rulerRightIndent.line(setting, .rw, labelWidth: w)))
+        items.append(.basic([Content.rulerUseHighlightColor.line(setting, .rw, contentWidth: 37, labelWidth: w),
+                             Content.rulerColor            .line(setting, .rw, labelWidth: 100), HSPACE]))
 
         ///-----------------------------------------------------------------------------------
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen

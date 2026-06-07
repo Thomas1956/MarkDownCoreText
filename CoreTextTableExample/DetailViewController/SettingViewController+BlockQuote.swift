@@ -23,50 +23,58 @@ extension SettingViewController  {
     ///
     enum BlockQuoteSetting: String, @MainActor BasicDetail, CaseIterable {
 
-        case blockHorizIndent, blockBarIndent, blockContentIndent, blockBarWidth,
-             blockVerticalOffset, blockBarStandardColor, blockBarColor,
-             blockBackStandardColor, blockBackColor
-        
+        case blockLeftIndent, blockRightIndent,
+             blockBarIndent, blockBarWidth,
+             blockContentLeftIndent, blockContentRightIndent,
+             blockVerticalOffset,
+             blockUseDefaultBarColor, blockBarColor,
+             blockUseDefaultBackgroundColor, blockBackgroundColor
+
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .blockHorizIndent:        "Horizontale Einzüge (A)".markdown(size: 15)
-            case .blockBarIndent:          "Abstand zum Balken (B)" .markdown(size: 15)
-            case .blockContentIndent:      "Abstand zum Inhalt (D)" .markdown(size: 15)
-            case .blockBarWidth:           "Balkenbreite (C)"       .markdown(size: 15)
-            case .blockVerticalOffset:     "Vertikaler Offset"      .markdown(size: 15)
-            case .blockBarStandardColor:   "Standardfarbe"          .markdown(size: 15)
-            case .blockBarColor:           "Eigene Farbe"           .markdown(size: 15)
-            case .blockBackStandardColor:  "Standardfarbe"          .markdown(size: 15)
-            case .blockBackColor:          "Eigene Farbe"           .markdown(size: 15)
+            case .blockLeftIndent:                "Linker Einzug"          .markdown(size: 15)
+            case .blockRightIndent:               "Rechter Einzug"         .markdown(size: 15)
+            case .blockBarIndent:                 "Abstand zum Balken"     .markdown(size: 15)
+            case .blockBarWidth:                  "Balkenbreite"           .markdown(size: 15)
+            case .blockContentLeftIndent:         "Abstand Balken → Text"  .markdown(size: 15)
+            case .blockContentRightIndent:        "Abstand Text → BG-Rand" .markdown(size: 15)
+            case .blockVerticalOffset:            "Vertikaler Offset"      .markdown(size: 15)
+            case .blockUseDefaultBarColor:        "Standardfarbe"          .markdown(size: 15)
+            case .blockBarColor:                  "Eigene Farbe"           .markdown(size: 15)
+            case .blockUseDefaultBackgroundColor: "Standardfarbe"          .markdown(size: 15)
+            case .blockBackgroundColor:           "Eigene Farbe"           .markdown(size: 15)
             }
         }
-                
+
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
         var parameter: [KeyText]? {
             switch self {
-            case .blockHorizIndent, .blockContentIndent:
+            case .blockLeftIndent, .blockRightIndent,
+                 .blockContentLeftIndent, .blockContentRightIndent:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(80).stepValue(1)
             case .blockBarIndent, .blockVerticalOffset:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(40).stepValue(1)
             case .blockBarWidth:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
 
-            case .blockBarStandardColor, .blockBackStandardColor:
+            case .blockUseDefaultBarColor, .blockUseDefaultBackgroundColor:
                     .alignLeading
-            case .blockBarColor, .blockBackColor:
+            case .blockBarColor, .blockBackgroundColor:
                     .start
-                    .list(self == .blockBarColor ? Settings.blockBarColorPalette : Settings.blockBackColorPalette)
+                    .list(self == .blockBarColor ? Settings.blockBarColorPalette : Settings.blockBackgroundColorPalette)
             }
         }
-        
+
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType {
             switch self {
-            case .blockHorizIndent, .blockBarIndent, .blockContentIndent,
-                 .blockBarWidth, .blockVerticalOffset: .stepper
-            case .blockBarStandardColor, .blockBackStandardColor: .button
-            case .blockBarColor, .blockBackColor: .colorpalettewell
+            case .blockLeftIndent, .blockRightIndent,
+                 .blockBarIndent, .blockBarWidth,
+                 .blockContentLeftIndent, .blockContentRightIndent,
+                 .blockVerticalOffset: .stepper
+            case .blockUseDefaultBarColor, .blockUseDefaultBackgroundColor: .button
+            case .blockBarColor, .blockBackgroundColor: .colorpalettewell
             }
         }
     }
@@ -93,8 +101,10 @@ extension SettingViewController  {
         let image = UIImage.maßeFürBlockQuote.aspectFillToSize(scaledToFill: CGSize(width: 300, height: 120))
         items.append(.info(" ", image: image))
 
-        items.append(.basic(Content.blockHorizIndent  .line(setting, .rw, labelWidth: w).leadingMargin(10)))
-        items.append(.basic(Content.blockContentIndent.line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic(Content.blockLeftIndent         .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic(Content.blockRightIndent        .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic(Content.blockContentLeftIndent  .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic(Content.blockContentRightIndent .line(setting, .rw, labelWidth: w).leadingMargin(10)))
         
         let textBalken = "Balken".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkBalken = BasicType.stdItem(textBalken, presentation: .outlineDisclosure)
@@ -102,10 +112,10 @@ extension SettingViewController  {
         items.append(linkBalken)
         
         let itemsBalken: [BasicType] = [
-            .basic( Content.blockBarIndent       .line(setting, .rw, labelWidth: w)),
-            .basic( Content.blockBarWidth        .line(setting, .rw, labelWidth: w)),
-            .basic([Content.blockBarStandardColor.line(setting, .rw, contentWidth: 92, labelWidth: w),
-                    Content.blockBarColor        .line(setting, .rw, labelWidth: w)]),
+            .basic( Content.blockBarIndent          .line(setting, .rw, labelWidth: w)),
+            .basic( Content.blockBarWidth           .line(setting, .rw, labelWidth: w)),
+            .basic([Content.blockUseDefaultBarColor .line(setting, .rw, contentWidth: 92, labelWidth: w),
+                    Content.blockBarColor           .line(setting, .rw, labelWidth: w)]),
         ]
 
         let textHintergrund = "Hintergrund".markdown(size: 17, weight: .semibold, textcolor: .textGray)
@@ -114,9 +124,9 @@ extension SettingViewController  {
         items.append(linkHintergrund)
         
         let itemsHintergrund: [BasicType] = [
-            .basic( Content.blockVerticalOffset    .line(setting, .rw, labelWidth: w)),
-            .basic([Content.blockBackStandardColor .line(setting, .rw, contentWidth: 92, labelWidth: w),
-                    Content.blockBackColor         .line(setting, .rw, labelWidth: w)]),
+            .basic( Content.blockVerticalOffset            .line(setting, .rw, labelWidth: w)),
+            .basic([Content.blockUseDefaultBackgroundColor .line(setting, .rw, contentWidth: 92, labelWidth: w),
+                    Content.blockBackgroundColor           .line(setting, .rw, labelWidth: w)]),
             .vSpace(20),
         ]
 

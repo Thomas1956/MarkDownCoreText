@@ -90,26 +90,6 @@ final class SettingsController {
     
     
     
-    private static func assignDefaults(to s: Settings) -> Bool {
-        var didChange = false
-
-        func set<V: Equatable>(_ keyPath: ReferenceWritableKeyPath<Settings,V>, _ new: V) {
-            if s[keyPath: keyPath] != new {
-                s[keyPath: keyPath] = new
-                didChange = true
-            }
-        }
-
-        set(\.viewTextSize,   17)
-        set(\.viewHeadIndent, 0)
-        // ...
-        return didChange
-    }
-/*
-    if assignDefaults(to: defaultSettings) {
-        try? ctx.save()   // nur wenn wirklich etwas anders war
-    }
- */
 }
 
 // MARK: - Settings ⇆ Markdown Synchronisation
@@ -134,38 +114,13 @@ extension SettingsController {
     // ------------------------------------------------------------
     //  2)  Zuordnungen (3 Listen = 3 Typen)
     // ------------------------------------------------------------
-    // Double-Felder  (Markdown & Markdown.PDF)
+    // Double-Felder
     private static let doubleMaps: [FieldMap<Double>] = [
 
-        // ── Markdown ────────────────────────────────────────────
+        // ── View / allgemein ───────────────────────────────────
         FieldMap(settingsKey: \Settings.viewTextSize,
                  getMarkdown: { Markdown.textSize },
                  setMarkdown: { Markdown.textSize = $0 }),
-
-        // ── Markdown.CodeBlock ─────────────────────────────────
-        FieldMap(settingsKey: \Settings.codeTextSizeFactor,
-                 getMarkdown: { Markdown.CodeBlock.codeTextSizeFactor },
-                 setMarkdown: { Markdown.CodeBlock.codeTextSizeFactor = $0 }),
-        
-        FieldMap(settingsKey: \Settings.codeLineHeight,
-                 getMarkdown: { Markdown.CodeBlock.lineHeightMultiple },
-                 setMarkdown: { Markdown.CodeBlock.lineHeightMultiple = $0 }),
-        
-        FieldMap(settingsKey: \Settings.codeSpacing,
-                 getMarkdown: { Markdown.CodeBlock.spacing },
-                 setMarkdown: { Markdown.CodeBlock.spacing = $0 }),
-        
-        FieldMap(settingsKey: \Settings.codeSpacingBefore,
-                 getMarkdown: { Markdown.CodeBlock.spacingBefore },
-                 setMarkdown: { Markdown.CodeBlock.spacingBefore = $0 }),
-        
-        FieldMap(settingsKey: \Settings.codeHeadIndent,
-                 getMarkdown: { Markdown.CodeBlock.headIndent },
-                 setMarkdown: { Markdown.CodeBlock.headIndent = $0 }),
-        
-        FieldMap(settingsKey: \Settings.codeTailIndent,
-                 getMarkdown: { Markdown.CodeBlock.tailIndent },
-                 setMarkdown: { Markdown.CodeBlock.tailIndent = $0 }),
 
         FieldMap(settingsKey: \Settings.viewHeadIndent,
                  getMarkdown: { Markdown.headIndent },
@@ -177,57 +132,106 @@ extension SettingsController {
                  toMarkdown: { -$0 },   // Vorzeichenwechsel beachten
                  toSettings: { -$0 }),
 
-        FieldMap(settingsKey: \Settings.viewLineHeight,
+        FieldMap(settingsKey: \Settings.viewLineHeightMultiple,
                  getMarkdown: { Markdown.lineHeightMultiple },
                  setMarkdown: { Markdown.lineHeightMultiple = $0 }),
 
-        FieldMap(settingsKey: \Settings.viewSpacing,
+        FieldMap(settingsKey: \Settings.viewParagraphSpacing,
                  getMarkdown: { Markdown.paragraphSpacing },
                  setMarkdown: { Markdown.paragraphSpacing = $0 }),
 
-        FieldMap(settingsKey: \Settings.viewSpacingBefore,
+        FieldMap(settingsKey: \Settings.viewParagraphSpacingBefore,
                  getMarkdown: { Markdown.paragraphSpacingBefore },
                  setMarkdown: { Markdown.paragraphSpacingBefore = $0 }),
 
-        // ── Markdown.BlockQuote ────────────────────────────────────────
-        FieldMap(settingsKey: \Settings.blockHorizIndent,
-                 getMarkdown: { Markdown.BlockQuote.horizontalIndent },
-                 setMarkdown: { Markdown.BlockQuote.horizontalIndent = $0 }),
-        
+        // ── Markdown.BlockQuote ────────────────────────────────
+        FieldMap(settingsKey: \Settings.blockLeftIndent,
+                 getMarkdown: { Markdown.BlockQuote.leftIndent },
+                 setMarkdown: { Markdown.BlockQuote.leftIndent = $0 }),
+
+        FieldMap(settingsKey: \Settings.blockRightIndent,
+                 getMarkdown: { Markdown.BlockQuote.rightIndent },
+                 setMarkdown: { Markdown.BlockQuote.rightIndent = $0 }),
+
         FieldMap(settingsKey: \Settings.blockBarIndent,
                  getMarkdown: { Markdown.BlockQuote.barIndent },
                  setMarkdown: { Markdown.BlockQuote.barIndent = $0 }),
-
-        FieldMap(settingsKey: \Settings.blockContentIndent,
-                 getMarkdown: { Markdown.BlockQuote.contentIndent },
-                 setMarkdown: { Markdown.BlockQuote.contentIndent = $0 }),
 
         FieldMap(settingsKey: \Settings.blockBarWidth,
                  getMarkdown: { Markdown.BlockQuote.barWidth },
                  setMarkdown: { Markdown.BlockQuote.barWidth = $0 }),
 
+        FieldMap(settingsKey: \Settings.blockContentLeftIndent,
+                 getMarkdown: { Markdown.BlockQuote.contentLeftIndent },
+                 setMarkdown: { Markdown.BlockQuote.contentLeftIndent = $0 }),
+
+        FieldMap(settingsKey: \Settings.blockContentRightIndent,
+                 getMarkdown: { Markdown.BlockQuote.contentRightIndent },
+                 setMarkdown: { Markdown.BlockQuote.contentRightIndent = $0 }),
+
         FieldMap(settingsKey: \Settings.blockVerticalOffset,
                  getMarkdown: { Markdown.BlockQuote.verticalOffset },
                  setMarkdown: { Markdown.BlockQuote.verticalOffset = $0 }),
-        
-        // ── Markdown.Ruler ────────────────────────────────────────
+
+        // ── Markdown.CodeBlock ─────────────────────────────────
+        FieldMap(settingsKey: \Settings.codeTextSizeFactor,
+                 getMarkdown: { Markdown.CodeBlock.textSizeFactor },
+                 setMarkdown: { Markdown.CodeBlock.textSizeFactor = $0 }),
+
+        FieldMap(settingsKey: \Settings.codeLineHeightMultiple,
+                 getMarkdown: { Markdown.CodeBlock.lineHeightMultiple },
+                 setMarkdown: { Markdown.CodeBlock.lineHeightMultiple = $0 }),
+
+        FieldMap(settingsKey: \Settings.codeSpacing,
+                 getMarkdown: { Markdown.CodeBlock.spacing },
+                 setMarkdown: { Markdown.CodeBlock.spacing = $0 }),
+
+        FieldMap(settingsKey: \Settings.codeSpacingBefore,
+                 getMarkdown: { Markdown.CodeBlock.spacingBefore },
+                 setMarkdown: { Markdown.CodeBlock.spacingBefore = $0 }),
+
+        FieldMap(settingsKey: \Settings.codeLeftIndent,
+                 getMarkdown: { Markdown.CodeBlock.leftIndent },
+                 setMarkdown: { Markdown.CodeBlock.leftIndent = $0 }),
+
+        FieldMap(settingsKey: \Settings.codeRightIndent,
+                 getMarkdown: { Markdown.CodeBlock.rightIndent },
+                 setMarkdown: { Markdown.CodeBlock.rightIndent = $0 }),
+
+        FieldMap(settingsKey: \Settings.codeContentLeftIndent,
+                 getMarkdown: { Markdown.CodeBlock.contentLeftIndent },
+                 setMarkdown: { Markdown.CodeBlock.contentLeftIndent = $0 }),
+
+        FieldMap(settingsKey: \Settings.codeContentRightIndent,
+                 getMarkdown: { Markdown.CodeBlock.contentRightIndent },
+                 setMarkdown: { Markdown.CodeBlock.contentRightIndent = $0 }),
+
+        FieldMap(settingsKey: \Settings.codeBorderWidth,
+                 getMarkdown: { Markdown.CodeBlock.borderWidth },
+                 setMarkdown: { Markdown.CodeBlock.borderWidth = $0 }),
+
+        // ── Markdown.Ruler ─────────────────────────────────────
         FieldMap(settingsKey: \Settings.rulerHeight,
                  getMarkdown: { Markdown.Ruler.height },
                  setMarkdown: { Markdown.Ruler.height = $0 }),
-        
+
         FieldMap(settingsKey: \Settings.rulerLineHeight,
                  getMarkdown: { Markdown.Ruler.lineHeight },
                  setMarkdown: { Markdown.Ruler.lineHeight = $0 }),
-        
+
+        FieldMap(settingsKey: \Settings.rulerLeftIndent,
+                 getMarkdown: { Markdown.Ruler.leftIndent },
+                 setMarkdown: { Markdown.Ruler.leftIndent = $0 }),
+
         FieldMap(settingsKey: \Settings.rulerRightIndent,
                  getMarkdown: { Markdown.Ruler.rightIndent },
                  setMarkdown: { Markdown.Ruler.rightIndent = $0 }),
 
-        // ── Markdown.PDF ────────────────────────────────────────
+        // ── Markdown.PDF ───────────────────────────────────────
         FieldMap(settingsKey: \Settings.pdfTextSize,
                  getMarkdown: { Markdown.PDF.textSize },
                  setMarkdown: { Markdown.PDF.textSize = $0 }),
-        
+
         FieldMap(settingsKey: \Settings.pdfMarginLeft,
                  getMarkdown: { Markdown.PDF.marginLeft },
                  setMarkdown: { Markdown.PDF.marginLeft = $0 },
@@ -251,64 +255,62 @@ extension SettingsController {
                  setMarkdown: { Markdown.PDF.marginBottom = $0 },
                  toMarkdown: { $0 * Markdown._1cm },
                  toSettings: { $0 / Markdown._1cm }),
-
     ]
 
     // Bool-Felder
     private static let boolMaps: [FieldMap<Bool>] = [
-        FieldMap(settingsKey: \Settings.viewSoftBreaks,
+        FieldMap(settingsKey: \Settings.viewUseSoftBreaks,
                  getMarkdown: { Markdown.useSoftBreaks },
                  setMarkdown: { Markdown.useSoftBreaks = $0 }),
-        
-        FieldMap(settingsKey: \Settings.rulerHighlightColor,
-                 getMarkdown: { Markdown.Ruler.colorHighLight },
-                 setMarkdown: { Markdown.Ruler.colorHighLight = $0 }),
-        
-        FieldMap(settingsKey: \Settings.blockBarUsesStandardColor,
+
+        FieldMap(settingsKey: \Settings.blockUseDefaultBarColor,
                  getMarkdown: { Markdown.BlockQuote.useDefaultBarColor },
                  setMarkdown: { Markdown.BlockQuote.useDefaultBarColor = $0 }),
-        
-        FieldMap(settingsKey: \Settings.blockBackUsesStandardColor,
+
+        FieldMap(settingsKey: \Settings.blockUseDefaultBackgroundColor,
                  getMarkdown: { Markdown.BlockQuote.useDefaultBackgroundColor },
                  setMarkdown: { Markdown.BlockQuote.useDefaultBackgroundColor = $0 }),
-        
-        FieldMap(settingsKey: \Settings.codeBackUsesStandardColor,
+
+        FieldMap(settingsKey: \Settings.codeUseDefaultBackgroundColor,
                  getMarkdown: { Markdown.CodeBlock.useDefaultBackgroundColor },
                  setMarkdown: { Markdown.CodeBlock.useDefaultBackgroundColor = $0 }),
-        
-        FieldMap(settingsKey: \Settings.codeBorderUsesStandardColor,
+
+        FieldMap(settingsKey: \Settings.codeUseDefaultBorderColor,
                  getMarkdown: { Markdown.CodeBlock.useDefaultBorderColor },
-                 setMarkdown: { Markdown.CodeBlock.useDefaultBorderColor = $0 })
+                 setMarkdown: { Markdown.CodeBlock.useDefaultBorderColor = $0 }),
+
+        FieldMap(settingsKey: \Settings.rulerUseHighlightColor,
+                 getMarkdown: { Markdown.Ruler.useHighlightColor },
+                 setMarkdown: { Markdown.Ruler.useHighlightColor = $0 }),
     ]
 
     // Farb-Felder
     private static let colorMaps: [FieldMap<UIColor>] = [
-
-        FieldMap(settingsKey: \Settings.viewColor,
+        FieldMap(settingsKey: \Settings.viewTextColor,
                  getMarkdown: { Markdown.textColor },
                  setMarkdown: { Markdown.textColor = $0 })
     ]
-    
+
     private static let optionalColorMaps: [FieldMap<UIColor?>] = [
         FieldMap(settingsKey: \Settings.blockBarColor,
                  getMarkdown: { Markdown.BlockQuote.barColor },
                  setMarkdown: { if let color = $0 { Markdown.BlockQuote.barColor = color } }),
-        
-        FieldMap(settingsKey: \Settings.blockBackColor,
+
+        FieldMap(settingsKey: \Settings.blockBackgroundColor,
                  getMarkdown: { Markdown.BlockQuote.backgroundColor },
                  setMarkdown: { if let color = $0 { Markdown.BlockQuote.backgroundColor = color } }),
-        
+
+        FieldMap(settingsKey: \Settings.codeBackgroundColor,
+                 getMarkdown: { Markdown.CodeBlock.backgroundColor },
+                 setMarkdown: { if let color = $0 { Markdown.CodeBlock.backgroundColor = color } }),
+
+        FieldMap(settingsKey: \Settings.codeBorderColor,
+                 getMarkdown: { Markdown.CodeBlock.borderColor },
+                 setMarkdown: { if let color = $0 { Markdown.CodeBlock.borderColor = color } }),
+
         FieldMap(settingsKey: \Settings.rulerColor,
                  getMarkdown: { Markdown.Ruler.color },
                  setMarkdown: { if let color = $0 { Markdown.Ruler.color = color } }),
-        
-        FieldMap(settingsKey: \Settings.codeBackColor,
-                 getMarkdown: { Markdown.CodeBlock.backgroundColor },
-                 setMarkdown: { if let color = $0 { Markdown.CodeBlock.backgroundColor = color } }),
-        
-        FieldMap(settingsKey: \Settings.codeBorderColor,
-                 getMarkdown: { Markdown.CodeBlock.borderColor },
-                 setMarkdown: { if let color = $0 { Markdown.CodeBlock.borderColor = color } })
     ]
 
     // ------------------------------------------------------------
