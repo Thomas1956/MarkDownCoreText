@@ -19,8 +19,8 @@ public struct Markdown {
     static var textSize               : Double = 17             /// Eingestellte Fontgröße für View
     static var textColor              : UIColor = .black        /// Eingestellte Textfarbe
 
-    static var headIndent             : Double = 0.0
-    static var tailIndent             : Double = 0.0
+    static var marginLeft             : Double = 0.0            /// Linker Seitenrand des Dokumentes (positiv)
+    static var marginRight            : Double = 0.0            /// Rechter Seitenrand des Dokumentes (positiv)
     static var useSoftBreaks          : Bool    = true          /// Soft Breaks aktivieren / deaktivieren
 
     
@@ -91,10 +91,10 @@ public struct Markdown {
     }
     
     /// Konstanten für den vertikalen Trennstrich (Ruler).
-    /// `leftIndent` / `rightIndent` werden vom linken/rechten Rand des Absatztextes gemessen.
+    /// `paddingLeft` / `paddingRight` werden vom linken/rechten Rand des Absatztextes gemessen.
     struct Ruler {
-        static var leftIndent        : Double = 0                /// Abstand vom linken Textrand des Absatzes
-        static var rightIndent       : Double = 0                /// Abstand vom rechten Textrand des Absatzes
+        static var paddingLeft       : Double = 0                /// Abstand vom linken Textrand zum Ruler
+        static var paddingRight      : Double = 0                /// Abstand vom rechten Textrand zum Ruler
         static var height            : Double = 10               /// Höhe des Hintergrundes der Trennlinie
         static var lineHeight        : Double = 1.5              /// Strichdicke der Trennlinie
         static var useHighlightColor : Bool   = true             /// Farbe wird aus der Textfarbe abgeleitet (heller)
@@ -102,12 +102,12 @@ public struct Markdown {
     }
     
     /// Konstanten für den Hintergrund des Block Quote.
-    /// `leftIndent` / `rightIndent` werden additiv zum globalen `headIndent` / `tailIndent`
-    /// auf die Hintergrundbox angewendet. `contentLeftIndent` / `contentRightIndent` sind
-    /// die Innenabstände vom Balken zum Text (links) bzw. vom Text zur BG-Rechtsseite.
+    /// `indentLeft` / `indentRight` werden additiv zum globalen `marginLeft` / `marginRight`
+    /// auf die Hintergrundbox angewendet. `paddingLeft` / `paddingRight` sind die
+    /// Innenabstände vom Balken zum Text (links) bzw. vom Text zur BG-Rechtsseite.
     struct BlockQuote {
-        static var leftIndent          : Double = 0              /// Abstand der BG-Box vom linken Textrand
-        static var rightIndent         : Double = 0              /// Abstand der BG-Box vom rechten Textrand
+        static var indentLeft          : Double = 0              /// Abstand der BG-Box vom linken Textrand
+        static var indentRight         : Double = 0              /// Abstand der BG-Box vom rechten Textrand
         static var verticalOffset      : Double = 5              /// Verschiebung des Hintergrunds nach unten
         static var useDefaultBackgroundColor: Bool = true        /// Hintergrundfarbe aus Textfarbe ableiten
         static var backgroundColor     : UIColor = .systemGray6  /// Eigene Farbe für den Hintergrund
@@ -117,13 +117,13 @@ public struct Markdown {
         static var useDefaultBarColor  : Bool   = true           /// Balkenfarbe aus Textfarbe ableiten
         static var barColor            : UIColor = .systemGray4  /// Eigene Farbe für den Balken
 
-        static var contentLeftIndent   : Double = 20             /// Abstand vom Balken zum Text
-        static var contentRightIndent  : Double = 10             /// Abstand vom Text zur BG-Rechtsseite
+        static var paddingLeft         : Double = 20             /// Abstand vom Balken zum Text
+        static var paddingRight        : Double = 10             /// Abstand vom Text zur BG-Rechtsseite
     }
     
     /// Konstanten für den Code Block.
-    /// `leftIndent` / `rightIndent` werden additiv zum globalen `headIndent` / `tailIndent` auf
-    /// die Hintergrundbox angewendet. `contentLeftIndent` / `contentRightIndent` sind die
+    /// `indentLeft` / `indentRight` werden additiv zum globalen `marginLeft` / `marginRight`
+    /// auf die Hintergrundbox angewendet. `paddingLeft` / `paddingRight` sind die
     /// Innenabstände vom BG-Rand zum Text.
     struct CodeBlock {
         static var textSizeFactor            : Double  = 80.0           /// Prozentuale Größe des Textfonts
@@ -131,10 +131,10 @@ public struct Markdown {
         static var spacing                   : Double  = 6.0            /// Abstand nach dem Code Block
         static var spacingBefore             : Double  = 6.0            /// Abstand vor dem Code Block
 
-        static var leftIndent                : Double  = 0              /// BG-Box-Abstand vom linken Textrand
-        static var rightIndent               : Double  = 0              /// BG-Box-Abstand vom rechten Textrand
-        static var contentLeftIndent         : Double  = 10             /// Innenabstand BG-Links → Text
-        static var contentRightIndent        : Double  = 10             /// Innenabstand Text → BG-Rechts
+        static var indentLeft                : Double  = 0              /// BG-Box-Abstand vom linken Textrand
+        static var indentRight               : Double  = 0              /// BG-Box-Abstand vom rechten Textrand
+        static var paddingLeft               : Double  = 10             /// Innenabstand BG-Links → Text
+        static var paddingRight              : Double  = 10             /// Innenabstand Text → BG-Rechts
 
         static var useDefaultBackgroundColor : Bool    = true           /// Hintergrundfarbe aus Textfarbe ableiten
         static var backgroundColor           : UIColor = .systemGray6   /// Eigene Farbe für den Hintergrund

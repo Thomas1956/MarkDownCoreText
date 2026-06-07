@@ -122,15 +122,13 @@ extension SettingsController {
                  getMarkdown: { Markdown.textSize },
                  setMarkdown: { Markdown.textSize = $0 }),
 
-        FieldMap(settingsKey: \Settings.viewHeadIndent,
-                 getMarkdown: { Markdown.headIndent },
-                 setMarkdown: { Markdown.headIndent = $0 }),
+        FieldMap(settingsKey: \Settings.viewMarginLeft,
+                 getMarkdown: { Markdown.marginLeft },
+                 setMarkdown: { Markdown.marginLeft = $0 }),
 
-        FieldMap(settingsKey: \Settings.viewTailIndent,
-                 getMarkdown: { Markdown.tailIndent },
-                 setMarkdown: { Markdown.tailIndent = $0 },
-                 toMarkdown: { -$0 },   // Vorzeichenwechsel beachten
-                 toSettings: { -$0 }),
+        FieldMap(settingsKey: \Settings.viewMarginRight,
+                 getMarkdown: { Markdown.marginRight },
+                 setMarkdown: { Markdown.marginRight = $0 }),
 
         FieldMap(settingsKey: \Settings.viewLineHeightMultiple,
                  getMarkdown: { Markdown.lineHeightMultiple },
@@ -145,13 +143,13 @@ extension SettingsController {
                  setMarkdown: { Markdown.paragraphSpacingBefore = $0 }),
 
         // ── Markdown.BlockQuote ────────────────────────────────
-        FieldMap(settingsKey: \Settings.blockLeftIndent,
-                 getMarkdown: { Markdown.BlockQuote.leftIndent },
-                 setMarkdown: { Markdown.BlockQuote.leftIndent = $0 }),
+        FieldMap(settingsKey: \Settings.blockIndentLeft,
+                 getMarkdown: { Markdown.BlockQuote.indentLeft },
+                 setMarkdown: { Markdown.BlockQuote.indentLeft = $0 }),
 
-        FieldMap(settingsKey: \Settings.blockRightIndent,
-                 getMarkdown: { Markdown.BlockQuote.rightIndent },
-                 setMarkdown: { Markdown.BlockQuote.rightIndent = $0 }),
+        FieldMap(settingsKey: \Settings.blockIndentRight,
+                 getMarkdown: { Markdown.BlockQuote.indentRight },
+                 setMarkdown: { Markdown.BlockQuote.indentRight = $0 }),
 
         FieldMap(settingsKey: \Settings.blockBarIndent,
                  getMarkdown: { Markdown.BlockQuote.barIndent },
@@ -161,13 +159,13 @@ extension SettingsController {
                  getMarkdown: { Markdown.BlockQuote.barWidth },
                  setMarkdown: { Markdown.BlockQuote.barWidth = $0 }),
 
-        FieldMap(settingsKey: \Settings.blockContentLeftIndent,
-                 getMarkdown: { Markdown.BlockQuote.contentLeftIndent },
-                 setMarkdown: { Markdown.BlockQuote.contentLeftIndent = $0 }),
+        FieldMap(settingsKey: \Settings.blockPaddingLeft,
+                 getMarkdown: { Markdown.BlockQuote.paddingLeft },
+                 setMarkdown: { Markdown.BlockQuote.paddingLeft = $0 }),
 
-        FieldMap(settingsKey: \Settings.blockContentRightIndent,
-                 getMarkdown: { Markdown.BlockQuote.contentRightIndent },
-                 setMarkdown: { Markdown.BlockQuote.contentRightIndent = $0 }),
+        FieldMap(settingsKey: \Settings.blockPaddingRight,
+                 getMarkdown: { Markdown.BlockQuote.paddingRight },
+                 setMarkdown: { Markdown.BlockQuote.paddingRight = $0 }),
 
         FieldMap(settingsKey: \Settings.blockVerticalOffset,
                  getMarkdown: { Markdown.BlockQuote.verticalOffset },
@@ -190,21 +188,21 @@ extension SettingsController {
                  getMarkdown: { Markdown.CodeBlock.spacingBefore },
                  setMarkdown: { Markdown.CodeBlock.spacingBefore = $0 }),
 
-        FieldMap(settingsKey: \Settings.codeLeftIndent,
-                 getMarkdown: { Markdown.CodeBlock.leftIndent },
-                 setMarkdown: { Markdown.CodeBlock.leftIndent = $0 }),
+        FieldMap(settingsKey: \Settings.codeIndentLeft,
+                 getMarkdown: { Markdown.CodeBlock.indentLeft },
+                 setMarkdown: { Markdown.CodeBlock.indentLeft = $0 }),
 
-        FieldMap(settingsKey: \Settings.codeRightIndent,
-                 getMarkdown: { Markdown.CodeBlock.rightIndent },
-                 setMarkdown: { Markdown.CodeBlock.rightIndent = $0 }),
+        FieldMap(settingsKey: \Settings.codeIndentRight,
+                 getMarkdown: { Markdown.CodeBlock.indentRight },
+                 setMarkdown: { Markdown.CodeBlock.indentRight = $0 }),
 
-        FieldMap(settingsKey: \Settings.codeContentLeftIndent,
-                 getMarkdown: { Markdown.CodeBlock.contentLeftIndent },
-                 setMarkdown: { Markdown.CodeBlock.contentLeftIndent = $0 }),
+        FieldMap(settingsKey: \Settings.codePaddingLeft,
+                 getMarkdown: { Markdown.CodeBlock.paddingLeft },
+                 setMarkdown: { Markdown.CodeBlock.paddingLeft = $0 }),
 
-        FieldMap(settingsKey: \Settings.codeContentRightIndent,
-                 getMarkdown: { Markdown.CodeBlock.contentRightIndent },
-                 setMarkdown: { Markdown.CodeBlock.contentRightIndent = $0 }),
+        FieldMap(settingsKey: \Settings.codePaddingRight,
+                 getMarkdown: { Markdown.CodeBlock.paddingRight },
+                 setMarkdown: { Markdown.CodeBlock.paddingRight = $0 }),
 
         FieldMap(settingsKey: \Settings.codeBorderWidth,
                  getMarkdown: { Markdown.CodeBlock.borderWidth },
@@ -219,13 +217,13 @@ extension SettingsController {
                  getMarkdown: { Markdown.Ruler.lineHeight },
                  setMarkdown: { Markdown.Ruler.lineHeight = $0 }),
 
-        FieldMap(settingsKey: \Settings.rulerLeftIndent,
-                 getMarkdown: { Markdown.Ruler.leftIndent },
-                 setMarkdown: { Markdown.Ruler.leftIndent = $0 }),
+        FieldMap(settingsKey: \Settings.rulerPaddingLeft,
+                 getMarkdown: { Markdown.Ruler.paddingLeft },
+                 setMarkdown: { Markdown.Ruler.paddingLeft = $0 }),
 
-        FieldMap(settingsKey: \Settings.rulerRightIndent,
-                 getMarkdown: { Markdown.Ruler.rightIndent },
-                 setMarkdown: { Markdown.Ruler.rightIndent = $0 }),
+        FieldMap(settingsKey: \Settings.rulerPaddingRight,
+                 getMarkdown: { Markdown.Ruler.paddingRight },
+                 setMarkdown: { Markdown.Ruler.paddingRight = $0 }),
 
         // ── Markdown.PDF ───────────────────────────────────────
         FieldMap(settingsKey: \Settings.pdfTextSize,

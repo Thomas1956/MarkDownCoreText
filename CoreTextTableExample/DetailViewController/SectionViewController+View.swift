@@ -27,7 +27,7 @@ extension SettingViewController  {
         case viewTextSize,
              viewTextColor, viewUseSoftBreaks,
              viewLineHeightMultiple, viewParagraphSpacing, viewParagraphSpacingBefore,
-             viewHeadIndent, viewTailIndent,
+             viewMarginLeft, viewMarginRight,
              message
 
         /// Titel des Items
@@ -41,8 +41,8 @@ extension SettingViewController  {
             case .viewParagraphSpacing:       "nach Absatz" .markdown(size: 15)
             case .viewParagraphSpacingBefore: "vor Absatz"  .markdown(size: 15)
 
-            case .viewHeadIndent:             "Linker Rand" .markdown(size: 15)
-            case .viewTailIndent:             "Rechter Rand".markdown(size: 15)
+            case .viewMarginLeft:             "Linker Rand" .markdown(size: 15)
+            case .viewMarginRight:            "Rechter Rand".markdown(size: 15)
             default: nil
             }
         }
@@ -59,7 +59,7 @@ extension SettingViewController  {
             case .viewLineHeightMultiple:
                     .start.fraction(2).symbol("").minimumValue(1).maximumValue(5).stepValue(0.1)
 
-            case .viewHeadIndent, .viewTailIndent, .viewParagraphSpacing, .viewParagraphSpacingBefore:
+            case .viewMarginLeft, .viewMarginRight, .viewParagraphSpacing, .viewParagraphSpacingBefore:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(1)
 
             default: .einsNachkomma
@@ -69,7 +69,7 @@ extension SettingViewController  {
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType {
             switch self {
-            case .viewHeadIndent, .viewTailIndent, .viewLineHeightMultiple,
+            case .viewMarginLeft, .viewMarginRight, .viewLineHeightMultiple,
                  .viewParagraphSpacing, .viewParagraphSpacingBefore, .viewTextSize: .stepper
             case .viewUseSoftBreaks: .button
             case .viewTextColor:     .colorpalettewell
@@ -117,8 +117,8 @@ extension SettingViewController  {
         items.append(linkEinzug)
         
         let itemsEinzug: [BasicType] = [
-            .basic(Content.viewHeadIndent.line(setting, .rw, labelWidth: w)),
-            .basic(Content.viewTailIndent.line(setting, .rw, labelWidth: w)),
+            .basic(Content.viewMarginLeft .line(setting, .rw, labelWidth: w)),
+            .basic(Content.viewMarginRight.line(setting, .rw, labelWidth: w)),
             .vSpace(20),
         ]
 

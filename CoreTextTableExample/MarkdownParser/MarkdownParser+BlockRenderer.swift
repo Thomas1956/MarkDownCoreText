@@ -570,8 +570,8 @@ final class TableRenderer: BlockRenderer {
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         let hasBlockQuote = blockContent.block?.hasBlockQuote ?? false
         let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize))
-        let leftIndent = hasBlockQuote ? typography.blockQuote.blockQuoteContentIndent : CGFloat(M.headIndent)
-        let availableWidth = max(0, width - leftIndent + CGFloat(M.tailIndent))
+        let leftIndent = hasBlockQuote ? typography.blockQuote.blockQuoteContentIndent : CGFloat(M.marginLeft)
+        let availableWidth = max(0, width - leftIndent - CGFloat(M.marginRight))
         columnWidths = Self.fittedColumnWidths(from: tableBlock.columns,
                                                availableWidth: availableWidth,
                                                padding: padding,
@@ -777,7 +777,7 @@ final class HorizontalRuleRenderer: BlockRenderer {
         let metrics = typography.thematicBreak
 
         /// Linker und rechter Rand des Absatztextes ermitteln. Innerhalb eines BlockQuote
-        /// gelten die Block-internen Ränder, sonst die globalen Dokument-Einzüge.
+        /// gelten die Block-internen Ränder, sonst die globalen Dokument-Ränder.
         let textLeft: CGFloat
         let textRight: CGFloat
         if block.hasBlockQuote {
@@ -788,8 +788,8 @@ final class HorizontalRuleRenderer: BlockRenderer {
             textLeft  = bq.blockQuoteContentIndent
             textRight = frame.width - bq.blockQuoteRightIndent
         } else {
-            textLeft  = CGFloat(M.headIndent)
-            textRight = frame.width + CGFloat(M.tailIndent)
+            textLeft  = CGFloat(M.marginLeft)
+            textRight = frame.width - CGFloat(M.marginRight)
         }
 
         let color: UIColor
@@ -802,8 +802,8 @@ final class HorizontalRuleRenderer: BlockRenderer {
         }
 
         let y  = CGFloat(frame.height/2)
-        let x1 = textLeft  + metrics.leftIndent
-        let x2 = textRight - metrics.rightIndent
+        let x1 = textLeft  + metrics.paddingLeft
+        let x2 = textRight - metrics.paddingRight
         context.move(to: CGPoint(x: x1, y: y))
         context.addLine(to: CGPoint(x: x2, y: y))
         context.setLineWidth(metrics.lineHeight)

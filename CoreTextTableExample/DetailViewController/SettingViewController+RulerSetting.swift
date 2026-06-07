@@ -23,7 +23,7 @@ extension SettingViewController  {
     ///
     enum RulerSetting: String, @MainActor BasicDetail, CaseIterable {
 
-        case rulerHeight, rulerLineHeight, rulerLeftIndent, rulerRightIndent,
+        case rulerHeight, rulerLineHeight, rulerPaddingLeft, rulerPaddingRight,
              rulerUseHighlightColor, rulerColor
 
         /// Titel des Items
@@ -31,8 +31,8 @@ extension SettingViewController  {
             switch self {
             case .rulerHeight:            "Höhe des Absatzes"
             case .rulerLineHeight:        "Höhe des Trennstriches"
-            case .rulerLeftIndent:        "Linker Abstand"
-            case .rulerRightIndent:       "Rechter Abstand"
+            case .rulerPaddingLeft:       "Linker Abstand"
+            case .rulerPaddingRight:      "Rechter Abstand"
             case .rulerUseHighlightColor: "Standardfarbe"
             case .rulerColor:             "Eigene Farbe"
             }
@@ -45,7 +45,7 @@ extension SettingViewController  {
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
             case .rulerLineHeight:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
-            case .rulerLeftIndent, .rulerRightIndent:
+            case .rulerPaddingLeft, .rulerPaddingRight:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(80).stepValue(1)
 
             case .rulerUseHighlightColor: .alignLeading
@@ -56,7 +56,7 @@ extension SettingViewController  {
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType {
             switch self {
-            case .rulerHeight, .rulerLineHeight, .rulerLeftIndent, .rulerRightIndent: .stepper
+            case .rulerHeight, .rulerLineHeight, .rulerPaddingLeft, .rulerPaddingRight: .stepper
             case .rulerUseHighlightColor: .button
             case .rulerColor: .colorpalettewell
             }
@@ -80,10 +80,10 @@ extension SettingViewController  {
         info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
         items.append(.basic(info1))
         
-        items.append(.basic( Content.rulerHeight     .line(setting, .rw, labelWidth: w)))
-        items.append(.basic( Content.rulerLineHeight .line(setting, .rw, labelWidth: w)))
-        items.append(.basic( Content.rulerLeftIndent .line(setting, .rw, labelWidth: w)))
-        items.append(.basic( Content.rulerRightIndent.line(setting, .rw, labelWidth: w)))
+        items.append(.basic( Content.rulerHeight      .line(setting, .rw, labelWidth: w)))
+        items.append(.basic( Content.rulerLineHeight  .line(setting, .rw, labelWidth: w)))
+        items.append(.basic( Content.rulerPaddingLeft .line(setting, .rw, labelWidth: w)))
+        items.append(.basic( Content.rulerPaddingRight.line(setting, .rw, labelWidth: w)))
         items.append(.basic([Content.rulerUseHighlightColor.line(setting, .rw, contentWidth: 37, labelWidth: w),
                              Content.rulerColor            .line(setting, .rw, labelWidth: 100), HSPACE]))
 

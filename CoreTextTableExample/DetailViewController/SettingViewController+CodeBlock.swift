@@ -24,8 +24,8 @@ extension SettingViewController  {
              codeUseDefaultBackgroundColor, codeBackgroundColor,
              codeUseDefaultBorderColor, codeBorderColor, codeBorderWidth,
              codeLineHeightMultiple, codeSpacing, codeSpacingBefore,
-             codeLeftIndent, codeRightIndent,
-             codeContentLeftIndent, codeContentRightIndent
+             codeIndentLeft, codeIndentRight,
+             codePaddingLeft, codePaddingRight
 
         /// Titel des Items
         var title: TextSourceConvertible? {
@@ -39,10 +39,10 @@ extension SettingViewController  {
             case .codeLineHeightMultiple:        "Zeilen"                .markdown(size: 15)
             case .codeSpacing:                   "nach Block"            .markdown(size: 15)
             case .codeSpacingBefore:             "vor Block"             .markdown(size: 15)
-            case .codeLeftIndent:                "Linker Einzug"         .markdown(size: 15)
-            case .codeRightIndent:               "Rechter Einzug"        .markdown(size: 15)
-            case .codeContentLeftIndent:         "Abstand BG → Text"     .markdown(size: 15)
-            case .codeContentRightIndent:        "Abstand Text → BG"     .markdown(size: 15)
+            case .codeIndentLeft:                "Linke Einrückung"      .markdown(size: 15)
+            case .codeIndentRight:               "Rechte Einrückung"     .markdown(size: 15)
+            case .codePaddingLeft:               "Polster BG → Text"     .markdown(size: 15)
+            case .codePaddingRight:              "Polster Text → BG"     .markdown(size: 15)
             }
         }
 
@@ -58,8 +58,8 @@ extension SettingViewController  {
             case .codeSpacing, .codeSpacingBefore:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(1)
 
-            case .codeLeftIndent, .codeRightIndent,
-                 .codeContentLeftIndent, .codeContentRightIndent:
+            case .codeIndentLeft, .codeIndentRight,
+                 .codePaddingLeft, .codePaddingRight:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(80).stepValue(1)
 
             case .codeBorderWidth:
@@ -78,8 +78,8 @@ extension SettingViewController  {
         var contentViewType: ContentViewType {
             switch self {
             case .codeTextSizeFactor, .codeLineHeightMultiple, .codeSpacing, .codeSpacingBefore,
-                 .codeLeftIndent, .codeRightIndent,
-                 .codeContentLeftIndent, .codeContentRightIndent,
+                 .codeIndentLeft, .codeIndentRight,
+                 .codePaddingLeft, .codePaddingRight,
                  .codeBorderWidth: .stepper
             case .codeUseDefaultBackgroundColor, .codeUseDefaultBorderColor: .button
             case .codeBackgroundColor, .codeBorderColor: .colorpalettewell
@@ -144,10 +144,10 @@ extension SettingViewController  {
         items.append(linkEinzug)
         
         let itemsEinzug: [BasicType] = [
-            .basic(Content.codeLeftIndent         .line(setting, .rw, labelWidth: w)),
-            .basic(Content.codeRightIndent        .line(setting, .rw, labelWidth: w)),
-            .basic(Content.codeContentLeftIndent  .line(setting, .rw, labelWidth: w)),
-            .basic(Content.codeContentRightIndent .line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeIndentLeft  .line(setting, .rw, labelWidth: w)),
+            .basic(Content.codeIndentRight .line(setting, .rw, labelWidth: w)),
+            .basic(Content.codePaddingLeft .line(setting, .rw, labelWidth: w)),
+            .basic(Content.codePaddingRight.line(setting, .rw, labelWidth: w)),
             .vSpace(20),
         ]
 

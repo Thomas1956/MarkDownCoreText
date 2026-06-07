@@ -3,23 +3,23 @@
     <entity name="Settings" representedClassName="Settings" syncable="YES" codeGenerationType="class">
         <attribute name="blockBarIndent" optional="YES" attributeType="Double" defaultValueString="5.0" usesScalarValueType="YES"/>
         <attribute name="blockBarWidth" optional="YES" attributeType="Double" defaultValueString="6.0" usesScalarValueType="YES"/>
-        <attribute name="blockContentLeftIndent" optional="YES" attributeType="Double" defaultValueString="20.0" usesScalarValueType="YES"/>
-        <attribute name="blockContentRightIndent" optional="YES" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
-        <attribute name="blockLeftIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="blockIndentLeft" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="blockIndentRight" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="blockPaddingLeft" optional="YES" attributeType="Double" defaultValueString="20.0" usesScalarValueType="YES"/>
+        <attribute name="blockPaddingRight" optional="YES" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
         <attribute name="blockRawBackgroundColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="blockRawBarColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
-        <attribute name="blockRightIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="blockUseDefaultBackgroundColor" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
         <attribute name="blockUseDefaultBarColor" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
         <attribute name="blockVerticalOffset" optional="YES" attributeType="Double" defaultValueString="5.0" usesScalarValueType="YES"/>
         <attribute name="codeBorderWidth" optional="YES" attributeType="Double" defaultValueString="1.0" usesScalarValueType="YES"/>
-        <attribute name="codeContentLeftIndent" optional="YES" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
-        <attribute name="codeContentRightIndent" optional="YES" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
-        <attribute name="codeLeftIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="codeIndentLeft" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="codeIndentRight" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="codeLineHeightMultiple" optional="YES" attributeType="Double" defaultValueString="1.0" usesScalarValueType="YES"/>
+        <attribute name="codePaddingLeft" optional="YES" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
+        <attribute name="codePaddingRight" optional="YES" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
         <attribute name="codeRawBackgroundColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="codeRawBorderColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
-        <attribute name="codeRightIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="codeSpacing" optional="YES" attributeType="Double" defaultValueString="6.0" usesScalarValueType="YES"/>
         <attribute name="codeSpacingBefore" optional="YES" attributeType="Double" defaultValueString="6.0" usesScalarValueType="YES"/>
         <attribute name="codeTextSizeFactor" optional="YES" attributeType="Double" defaultValueString="80.0" usesScalarValueType="YES"/>
@@ -34,17 +34,17 @@
         <attribute name="pdfMarginTop" optional="YES" attributeType="Double" defaultValueString="2.0" usesScalarValueType="YES"/>
         <attribute name="pdfTextSize" optional="YES" attributeType="Double" defaultValueString="12.0" usesScalarValueType="YES"/>
         <attribute name="rulerHeight" optional="YES" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
-        <attribute name="rulerLeftIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="rulerLineHeight" optional="YES" attributeType="Double" defaultValueString="1.5" usesScalarValueType="YES"/>
+        <attribute name="rulerPaddingLeft" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="rulerPaddingRight" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="rulerRawColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
-        <attribute name="rulerRightIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="rulerUseHighlightColor" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
-        <attribute name="viewHeadIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="viewLineHeightMultiple" optional="YES" attributeType="Double" defaultValueString="1.1" usesScalarValueType="YES"/>
+        <attribute name="viewMarginLeft" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="viewMarginRight" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="viewParagraphSpacing" optional="YES" attributeType="Double" defaultValueString="0.5" usesScalarValueType="YES"/>
         <attribute name="viewParagraphSpacingBefore" optional="YES" attributeType="Double" defaultValueString="1.2" usesScalarValueType="YES"/>
         <attribute name="viewRawTextColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
-        <attribute name="viewTailIndent" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="viewTextSize" optional="YES" attributeType="Double" defaultValueString="17.0" usesScalarValueType="YES"/>
         <attribute name="viewUseSoftBreaks" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
     </entity>

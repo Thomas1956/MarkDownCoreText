@@ -415,11 +415,12 @@ struct BlockContent {
             var attrText = NSMutableAttributedString(attributedString: blockContent.attrText)
             var tabulators         : [NSTextTab]  =  []
             /// Im Block Quote liefert `contentRect` bereits die vollständige Textposition
-            /// (inkl. `viewHeadIndent` / `viewTailIndent`). Die Paragraph-Indents sind dort 0,
-            /// damit die Werte nicht doppelt wirken. Außerhalb gelten die globalen Dokument-Einzüge.
-            var firstLineHeadIndent    : CGFloat  =  block.hasBlockQuote ? 0 : CGFloat(M.headIndent)
-            var headIndent             : CGFloat  =  block.hasBlockQuote ? 0 : CGFloat(M.headIndent)
-            var tailIndent             : CGFloat  =  block.hasBlockQuote ? 0 : CGFloat(M.tailIndent)
+            /// (inkl. `viewMarginLeft` / `viewMarginRight`). Die Paragraph-Indents sind dort 0,
+            /// damit die Werte nicht doppelt wirken. Außerhalb gelten die globalen Dokument-Ränder.
+            /// NSParagraphStyle.tailIndent erwartet einen negativen Wert (Abstand vom rechten Rand).
+            var firstLineHeadIndent    : CGFloat  =  block.hasBlockQuote ? 0 :  CGFloat(M.marginLeft)
+            var headIndent             : CGFloat  =  block.hasBlockQuote ? 0 :  CGFloat(M.marginLeft)
+            var tailIndent             : CGFloat  =  block.hasBlockQuote ? 0 : -CGFloat(M.marginRight)
             var paragraphSpacing       : CGFloat  =  paragraphMetrics.paragraphSpacing
             var paragraphSpacingBefore : CGFloat  =  paragraphMetrics.paragraphSpacingBefore
             var lineHeightMultiple     : CGFloat  =  paragraphMetrics.lineHeightMultiple

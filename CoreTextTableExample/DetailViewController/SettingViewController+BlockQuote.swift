@@ -23,9 +23,9 @@ extension SettingViewController  {
     ///
     enum BlockQuoteSetting: String, @MainActor BasicDetail, CaseIterable {
 
-        case blockLeftIndent, blockRightIndent,
+        case blockIndentLeft, blockIndentRight,
              blockBarIndent, blockBarWidth,
-             blockContentLeftIndent, blockContentRightIndent,
+             blockPaddingLeft, blockPaddingRight,
              blockVerticalOffset,
              blockUseDefaultBarColor, blockBarColor,
              blockUseDefaultBackgroundColor, blockBackgroundColor
@@ -33,12 +33,12 @@ extension SettingViewController  {
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .blockLeftIndent:                "Linker Einzug"          .markdown(size: 15)
-            case .blockRightIndent:               "Rechter Einzug"         .markdown(size: 15)
+            case .blockIndentLeft:                "Linke Einrückung"       .markdown(size: 15)
+            case .blockIndentRight:               "Rechte Einrückung"      .markdown(size: 15)
             case .blockBarIndent:                 "Abstand zum Balken"     .markdown(size: 15)
             case .blockBarWidth:                  "Balkenbreite"           .markdown(size: 15)
-            case .blockContentLeftIndent:         "Abstand Balken → Text"  .markdown(size: 15)
-            case .blockContentRightIndent:        "Abstand Text → BG-Rand" .markdown(size: 15)
+            case .blockPaddingLeft:               "Polster Balken → Text"  .markdown(size: 15)
+            case .blockPaddingRight:              "Polster Text → BG-Rand" .markdown(size: 15)
             case .blockVerticalOffset:            "Vertikaler Offset"      .markdown(size: 15)
             case .blockUseDefaultBarColor:        "Standardfarbe"          .markdown(size: 15)
             case .blockBarColor:                  "Eigene Farbe"           .markdown(size: 15)
@@ -50,8 +50,8 @@ extension SettingViewController  {
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
         var parameter: [KeyText]? {
             switch self {
-            case .blockLeftIndent, .blockRightIndent,
-                 .blockContentLeftIndent, .blockContentRightIndent:
+            case .blockIndentLeft, .blockIndentRight,
+                 .blockPaddingLeft, .blockPaddingRight:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(80).stepValue(1)
             case .blockBarIndent, .blockVerticalOffset:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(40).stepValue(1)
@@ -69,9 +69,9 @@ extension SettingViewController  {
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType {
             switch self {
-            case .blockLeftIndent, .blockRightIndent,
+            case .blockIndentLeft, .blockIndentRight,
                  .blockBarIndent, .blockBarWidth,
-                 .blockContentLeftIndent, .blockContentRightIndent,
+                 .blockPaddingLeft, .blockPaddingRight,
                  .blockVerticalOffset: .stepper
             case .blockUseDefaultBarColor, .blockUseDefaultBackgroundColor: .button
             case .blockBarColor, .blockBackgroundColor: .colorpalettewell
@@ -101,10 +101,10 @@ extension SettingViewController  {
         let image = UIImage.maßeFürBlockQuote.aspectFillToSize(scaledToFill: CGSize(width: 300, height: 120))
         items.append(.info(" ", image: image))
 
-        items.append(.basic(Content.blockLeftIndent         .line(setting, .rw, labelWidth: w).leadingMargin(10)))
-        items.append(.basic(Content.blockRightIndent        .line(setting, .rw, labelWidth: w).leadingMargin(10)))
-        items.append(.basic(Content.blockContentLeftIndent  .line(setting, .rw, labelWidth: w).leadingMargin(10)))
-        items.append(.basic(Content.blockContentRightIndent .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic(Content.blockIndentLeft  .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic(Content.blockIndentRight .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic(Content.blockPaddingLeft .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic(Content.blockPaddingRight.line(setting, .rw, labelWidth: w).leadingMargin(10)))
         
         let textBalken = "Balken".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkBalken = BasicType.stdItem(textBalken, presentation: .outlineDisclosure)

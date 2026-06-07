@@ -175,15 +175,13 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             return
         }
 
-        if key == ViewSetting.viewHeadIndent.key {
-            print("HeadIndent \(value) ")
+        if key == ViewSetting.viewMarginLeft.key {
+            print("MarginLeft \(value) ")
             setting.pushProperty(value: value as? Double, key: key)
-//            ItemType.reconfigureIfNeeded(on: self.dataSource, ViewSettings.viewHeadIndent_1.key)
         }
-        else if key == ViewSetting.viewTailIndent.key {
-            print("TailIndent \(value) ")
+        else if key == ViewSetting.viewMarginRight.key {
+            print("MarginRight \(value) ")
             setting.pushProperty(value: value as? Double, key: key)
-//            ItemType.reconfigureIfNeeded(on: self.dataSource, ViewSettings.viewTailIndent_1.key)
         }
 
         else if key == ViewSetting.viewTextColor.key {
@@ -222,16 +220,16 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
               """
             var isOk = true
             
-            if  let headIndent = settings.property(forKey: C.viewHeadIndent.key) as? CGFloat,
-                let tailIndent = settings.property(forKey: C.viewTailIndent.key) as? CGFloat,
-                let lineHeight = settings.property(forKey: C.viewLineHeightMultiple.key) as? CGFloat
+            if  let marginLeft  = settings.property(forKey: C.viewMarginLeft.key)  as? CGFloat,
+                let marginRight = settings.property(forKey: C.viewMarginRight.key) as? CGFloat,
+                let lineHeight  = settings.property(forKey: C.viewLineHeightMultiple.key) as? CGFloat
             {
-                if headIndent > 100.0 {
-                    text = "Der linke Einzug darf **nicht größer** als 100 sein."
+                if marginLeft > 100.0 {
+                    text = "Der linke Rand darf **nicht größer** als 100 sein."
                     isOk = false
                 }
-                if tailIndent > 100.0 {
-                    text = "Der rechte Einzug darf **nicht größer** als 100 sein."
+                if marginRight > 100.0 {
+                    text = "Der rechte Rand darf **nicht größer** als 100 sein."
                     isOk = false
                 }
                 if lineHeight < 1.0 {
