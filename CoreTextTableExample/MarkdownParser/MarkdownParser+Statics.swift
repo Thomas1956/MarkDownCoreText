@@ -61,6 +61,12 @@ public struct Markdown {
         }
     }
 
+    /// Feste, nicht parametrierbare Einzüge nur für die Live-Anzeige (nicht für den PDF-Export).
+    struct LiveView {
+        static let extraMarginLeft  : CGFloat = 8
+        static let extraMarginRight : CGFloat = 8
+    }
+
     /// Konstanten für den Edit View Controller
     struct Edit {
         static var textSize     : Double = 17                   /// Eingestellte Fontgröße für View

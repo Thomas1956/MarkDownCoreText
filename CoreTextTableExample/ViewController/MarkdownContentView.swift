@@ -48,13 +48,20 @@ class MarkdownContentView: UIView {
     ///
     @discardableResult
     func layout(width: CGFloat) -> CGFloat {
+        /// Feste Einzüge nur für die Live-Anzeige (greifen nicht beim PDF-Export). Die effektive
+        /// Breite wird hier reduziert; die x-Verschiebung passiert in `draw(_:)` via Context-Translation,
+        /// damit der Frame nicht akkumuliert.
+        let leftInset      = Markdown.LiveView.extraMarginLeft
+        let rightInset     = Markdown.LiveView.extraMarginRight
+        let effectiveWidth = max(0, width - leftInset - rightInset)
+
         /// Anzahl der Renderer ermitteln und das Array für die Höhen anlegen
         let count = renderers.count
         var heights = [CGFloat](repeating: 0, count: count)
-        
+
         /// Parallele Höhen-Berechnung mit dem Aufruf von y = 0 .
         DispatchQueue.concurrentPerform(iterations: count) { i in
-            heights[i] = renderers[i].measure(y: 0, width: width)
+            heights[i] = renderers[i].measure(y: 0, width: effectiveWidth)
         }
 
         /// Serielles Setzen der Y-Position des Frames ohne Neuberechnung
@@ -99,15 +106,17 @@ class MarkdownContentView: UIView {
 
         ///-----------------------------------------------------------------------------------
         /// Zeichnen bis zum ersten Renderer, dessen oberer Rand außerhalb des sichtbaren Bereiches liegt.
-        ///
+        /// `liveLeftInset` verschiebt den Inhalt nur beim Zeichnen nach rechts und akkumuliert nicht.
+        let liveLeftInset = Markdown.LiveView.extraMarginLeft
+
         for i in startIndex..<renderers.count {
             let renderer = renderers[i]
             let frame = renderer.frame
-            
+
             if frame.minY > maxY { break }  /// Abbruch, wenn der Renderer außerhalb liegt
 
             ctx.saveGState()
-            ctx.translateBy(x: frame.minX, y: frame.minY)         /// Ursprung an die Block‑Ecke
+            ctx.translateBy(x: frame.minX + liveLeftInset, y: frame.minY)         /// Ursprung an die Block‑Ecke (+ Live-Einzug)
             ctx.clip(to: CGRect(origin: .zero, size: frame.size)) /// Clipping auf Block‑Rect
             ctx.translateBy(x: 0, y: frame.height)                /// lokal flippen → Core‑Text will (0,0) unten links
             ctx.scaleBy(x: 1, y: -1)
