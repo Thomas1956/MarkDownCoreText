@@ -424,7 +424,9 @@ struct BlockContent {
             var paragraphSpacing       : CGFloat  =  paragraphMetrics.paragraphSpacing
             var paragraphSpacingBefore : CGFloat  =  paragraphMetrics.paragraphSpacingBefore
             var lineHeightMultiple     : CGFloat  =  paragraphMetrics.lineHeightMultiple
-            let alignment      : NSTextAlignment  =  .natural
+            /// Blocksatz wirkt nur auf Fließtext und BlockQuote-Inhalt – nicht auf Header oder Code Block.
+            let useJustification = M.useJustification && !block.hasHeader && !block.hasCodeBlock
+            let alignment      : NSTextAlignment  =  useJustification ? .justified : .natural
             
             ///-------------------------------------------------------------------------------
             /// Blockerkennung, um Abstände nach Bedarf einzustellen

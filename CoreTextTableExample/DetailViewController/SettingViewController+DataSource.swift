@@ -41,6 +41,9 @@ extension SettingViewController  {
         if Self.activeSection[.RulerSetting] ?? false {
             sectionRulerSetting(settings, forEditing: forEditing)
         }
+        if Self.activeSection[.TableSetting] ?? false {
+            sectionTableSetting(settings, forEditing: forEditing)
+        }
         if Self.activeSection[.DefaultSetting] ?? false {
             sectionDefaultSetting()
         }

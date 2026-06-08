@@ -30,6 +30,7 @@
 		E95C52FD2FC9DA170089054B /* MarkdownTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95C52FC2FC9DA170089054B /* MarkdownTypography.swift */; };
 		E97E5FB12FCF17050014B599 /* SettingViewController+DefaultSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97E5FB02FCF17050014B599 /* SettingViewController+DefaultSetting.swift */; };
 		E97E5FB32FCF18CB0014B599 /* SettingViewController+HelpSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97E5FB22FCF18CB0014B599 /* SettingViewController+HelpSetting.swift */; };
+		E9A293D42FD695DC00293BB0 /* SettingViewController+TableSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A293D32FD695DC00293BB0 /* SettingViewController+TableSetting.swift */; };
 		E9A940712DC4ECA6004501E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E9A9405C2DC4ECA6004501E6 /* Assets.xcassets */; };
 		E9A940732DC4ECA6004501E6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9A940602DC4ECA6004501E6 /* LaunchScreen.storyboard */; };
 		E9A940742DC4ECA6004501E6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9A940622DC4ECA6004501E6 /* Main.storyboard */; };
@@ -90,6 +91,7 @@
 		E95C52FC2FC9DA170089054B /* MarkdownTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTypography.swift; sourceTree = "<group>"; };
 		E97E5FB02FCF17050014B599 /* SettingViewController+DefaultSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+DefaultSetting.swift"; sourceTree = "<group>"; };
 		E97E5FB22FCF18CB0014B599 /* SettingViewController+HelpSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+HelpSetting.swift"; sourceTree = "<group>"; };
+		E9A293D32FD695DC00293BB0 /* SettingViewController+TableSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+TableSetting.swift"; sourceTree = "<group>"; };
 		E9A940582DC4ECA6004501E6 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		E9A940592DC4ECA6004501E6 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		E9A9405B2DC4ECA6004501E6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -201,6 +203,7 @@
 				E97E5FB02FCF17050014B599 /* SettingViewController+DefaultSetting.swift */,
 				E97E5FB22FCF18CB0014B599 /* SettingViewController+HelpSetting.swift */,
 				E9BF66282FD16F7400096230 /* SettingViewController+CodeBlock.swift */,
+				E9A293D32FD695DC00293BB0 /* SettingViewController+TableSetting.swift */,
 			);
 			path = DetailViewController;
 			sourceTree = "<group>";
@@ -400,6 +403,7 @@
 				E95C52FD2FC9DA170089054B /* MarkdownTypography.swift in Sources */,
 				E9A9407E2DC4ECA6004501E6 /* MarkdownParser+ImageAttachment.swift in Sources */,
 				E94900892DCB99F600DD7880 /* NSTextTab.swift in Sources */,
+				E9A293D42FD695DC00293BB0 /* SettingViewController+TableSetting.swift in Sources */,
 				E9A9407F2DC4ECA6004501E6 /* MarkdownParser+PresentationIntent.swift in Sources */,
 				E94900A82DCE5C0E00DD7880 /* SettingViewController+Action.swift in Sources */,
 				E90395462EDDE3B9001E660F /* MarkdownParser+Highlight.swift in Sources */,

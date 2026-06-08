@@ -98,12 +98,15 @@ extension Settings {
         ("Purpur"    , .systemPurple.withAlphaComponent(0.12))
     ]
     
-    static let textColorPalette             = makeColorPalette(textColorDefinitions)
-    static let blockBarColorPalette         = makeColorPalette(barColorDefinitions)
-    static let blockBackgroundColorPalette  = makeColorPalette(backgroundColorDefinitions)
-    static let rulerColorPalette            = makeColorPalette(barColorDefinitions)
-    static let codeBackgroundColorPalette   = makeColorPalette(backgroundColorDefinitions)
-    static let codeBorderColorPalette       = makeColorPalette(barColorDefinitions)
+    static let textColorPalette                   = makeColorPalette(textColorDefinitions)
+    static let blockBarColorPalette               = makeColorPalette(barColorDefinitions)
+    static let blockBackgroundColorPalette        = makeColorPalette(backgroundColorDefinitions)
+    static let rulerColorPalette                  = makeColorPalette(barColorDefinitions)
+    static let codeBackgroundColorPalette         = makeColorPalette(backgroundColorDefinitions)
+    static let codeBorderColorPalette             = makeColorPalette(barColorDefinitions)
+    static let tableGridColorPalette              = makeColorPalette(barColorDefinitions)
+    static let tableHeaderBackgroundColorPalette  = makeColorPalette(backgroundColorDefinitions)
+    static let tableBackgroundColorPalette        = makeColorPalette(backgroundColorDefinitions)
     
     private static var completeColorPalette: [UIColor] {
         (textColorDefinitions + barColorDefinitions + backgroundColorDefinitions).map(\.1)
@@ -154,6 +157,24 @@ extension Settings {
     @objc dynamic public var codeBorderColor: UIColor? {
         get { Self.defaultedColor(codeRawBorderColor as? UIColor, default: .systemGray4) }
         set { codeRawBorderColor = Self.defaultedColor(newValue, default: .systemGray4) }
+    }
+
+    /// Eigene Farbe für die Gitterlinien der Tabelle.
+    @objc dynamic public var tableGridColor: UIColor? {
+        get { Self.defaultedColor(tableRawGridColor as? UIColor, default: .systemGray4) }
+        set { tableRawGridColor = Self.defaultedColor(newValue, default: .systemGray4) }
+    }
+
+    /// Eigene Farbe für den Tabellen-Header-Hintergrund.
+    @objc dynamic public var tableHeaderBackgroundColor: UIColor? {
+        get { Self.defaultedColor(tableRawHeaderBackgroundColor as? UIColor, default: .systemGray5) }
+        set { tableRawHeaderBackgroundColor = Self.defaultedColor(newValue, default: .systemGray5) }
+    }
+
+    /// Eigene Farbe für den Tabellen-Body-Hintergrund.
+    @objc dynamic public var tableBackgroundColor: UIColor? {
+        get { Self.defaultedColor(tableRawBackgroundColor as? UIColor, default: .systemGray6) }
+        set { tableRawBackgroundColor = Self.defaultedColor(newValue, default: .systemGray6) }
     }
 }
 

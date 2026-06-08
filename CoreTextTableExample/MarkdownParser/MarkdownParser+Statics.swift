@@ -22,6 +22,8 @@ public struct Markdown {
     static var marginLeft             : Double = 0.0            /// Linker Seitenrand des Dokumentes (positiv)
     static var marginRight            : Double = 0.0            /// Rechter Seitenrand des Dokumentes (positiv)
     static var useSoftBreaks          : Bool    = true          /// Soft Breaks aktivieren / deaktivieren
+    static var useHyphenation         : Bool    = true          /// Silbentrennung am Zeilenende aktivieren
+    static var useJustification       : Bool    = false         /// Blocksatz für Fließtext + BlockQuote
 
     
     /// Abstände und Einzüge in 'em' als Multiplikator zum Text Size
@@ -78,10 +80,16 @@ public struct Markdown {
     
     /// Konstanten für die Tabelle
     struct Table {
-        static var weightText   : UIFont.Weight = .regular      /// Stil des Textes in der Tabelle
-        static var weightHeader : UIFont.Weight = .bold         /// Stil der Überschrift in der Tabelle
-        static var weightBox    : UIFont.Weight = .ultraLight   /// Stil der Balken in der Tabelle
-        static var colorBox     : UIColor       = .clear        /// Farbe der Balken der Tabelle
+        static var weightText                       : UIFont.Weight = .regular      /// Stil des Textes
+        static var weightHeader                     : UIFont.Weight = .bold         /// Stil der Überschrift
+        static var weightBox                        : UIFont.Weight = .ultraLight   /// Stil der Balken
+
+        static var useDefaultGridColor              : Bool    = true                /// Gitterfarbe aus Textfarbe ableiten
+        static var gridColor                        : UIColor = .systemGray4        /// Eigene Farbe für das Gitter
+        static var useDefaultHeaderBackgroundColor  : Bool    = true                /// Header-BG aus Textfarbe ableiten
+        static var headerBackgroundColor            : UIColor = .systemGray5        /// Eigene Farbe Header-BG
+        static var useDefaultBackgroundColor        : Bool    = true                /// Body-BG aus Textfarbe ableiten
+        static var backgroundColor                  : UIColor = .systemGray6        /// Eigene Farbe Body-BG
     }
     
     /// Konstanten für die Liste (Anführungszeichen der Liste in der Hierarchie)

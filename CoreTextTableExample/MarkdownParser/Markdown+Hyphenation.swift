@@ -24,8 +24,20 @@ extension NSAttributedString {
     
     func insertingLineEndHyphens(width: CGFloat) -> NSAttributedString {
         guard width > 0 else { return self }
-        
+
         let mutable = NSMutableAttributedString(attributedString: self)
+
+        /// Silbentrennung komplett deaktiviert: alle Soft-Hyphens entfernen, sodass
+        /// CoreText nur noch an Wortgrenzen umbricht (keine Trennung mitten im Wort).
+        if !Markdown.useHyphenation {
+            let softHyphen = "\u{00AD}"
+            while true {
+                let range = mutable.mutableString.range(of: softHyphen)
+                guard range.location != NSNotFound else { break }
+                mutable.deleteCharacters(in: range)
+            }
+            return mutable
+        }
 
         /// UTF‑16 Codes der beiden Zeichen SHY und HYPHEN
         let softHy: UInt16 = 0x00AD

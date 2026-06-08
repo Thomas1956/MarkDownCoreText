@@ -261,6 +261,14 @@ extension SettingsController {
                  getMarkdown: { Markdown.useSoftBreaks },
                  setMarkdown: { Markdown.useSoftBreaks = $0 }),
 
+        FieldMap(settingsKey: \Settings.viewUseHyphenation,
+                 getMarkdown: { Markdown.useHyphenation },
+                 setMarkdown: { Markdown.useHyphenation = $0 }),
+
+        FieldMap(settingsKey: \Settings.viewUseJustification,
+                 getMarkdown: { Markdown.useJustification },
+                 setMarkdown: { Markdown.useJustification = $0 }),
+
         FieldMap(settingsKey: \Settings.blockUseDefaultBarColor,
                  getMarkdown: { Markdown.BlockQuote.useDefaultBarColor },
                  setMarkdown: { Markdown.BlockQuote.useDefaultBarColor = $0 }),
@@ -280,6 +288,18 @@ extension SettingsController {
         FieldMap(settingsKey: \Settings.rulerUseHighlightColor,
                  getMarkdown: { Markdown.Ruler.useHighlightColor },
                  setMarkdown: { Markdown.Ruler.useHighlightColor = $0 }),
+
+        FieldMap(settingsKey: \Settings.tableUseDefaultGridColor,
+                 getMarkdown: { Markdown.Table.useDefaultGridColor },
+                 setMarkdown: { Markdown.Table.useDefaultGridColor = $0 }),
+
+        FieldMap(settingsKey: \Settings.tableUseDefaultHeaderBackgroundColor,
+                 getMarkdown: { Markdown.Table.useDefaultHeaderBackgroundColor },
+                 setMarkdown: { Markdown.Table.useDefaultHeaderBackgroundColor = $0 }),
+
+        FieldMap(settingsKey: \Settings.tableUseDefaultBackgroundColor,
+                 getMarkdown: { Markdown.Table.useDefaultBackgroundColor },
+                 setMarkdown: { Markdown.Table.useDefaultBackgroundColor = $0 }),
     ]
 
     // Farb-Felder
@@ -309,6 +329,18 @@ extension SettingsController {
         FieldMap(settingsKey: \Settings.rulerColor,
                  getMarkdown: { Markdown.Ruler.color },
                  setMarkdown: { if let color = $0 { Markdown.Ruler.color = color } }),
+
+        FieldMap(settingsKey: \Settings.tableGridColor,
+                 getMarkdown: { Markdown.Table.gridColor },
+                 setMarkdown: { if let color = $0 { Markdown.Table.gridColor = color } }),
+
+        FieldMap(settingsKey: \Settings.tableHeaderBackgroundColor,
+                 getMarkdown: { Markdown.Table.headerBackgroundColor },
+                 setMarkdown: { if let color = $0 { Markdown.Table.headerBackgroundColor = color } }),
+
+        FieldMap(settingsKey: \Settings.tableBackgroundColor,
+                 getMarkdown: { Markdown.Table.backgroundColor },
+                 setMarkdown: { if let color = $0 { Markdown.Table.backgroundColor = color } }),
     ]
 
     // ------------------------------------------------------------

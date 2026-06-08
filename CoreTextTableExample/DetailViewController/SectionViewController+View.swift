@@ -25,7 +25,7 @@ extension SettingViewController  {
 
         /// Die Strings sollen den Namen der Properties entsprechen (Beispiel löschen und EIGENE Case's ergänzen)
         case viewTextSize,
-             viewTextColor, viewUseSoftBreaks,
+             viewTextColor, viewUseSoftBreaks, viewUseHyphenation, viewUseJustification,
              viewLineHeightMultiple, viewParagraphSpacing, viewParagraphSpacingBefore,
              viewMarginLeft, viewMarginRight,
              message
@@ -33,9 +33,11 @@ extension SettingViewController  {
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .viewTextSize:               "Textgröße"   .markdown(size: 15)
-            case .viewTextColor:              "Textfarbe"   .markdown(size: 15)
-            case .viewUseSoftBreaks:          "Soft-Breaks" .markdown(size: 15)
+            case .viewTextSize:               "Textgröße"     .markdown(size: 15)
+            case .viewTextColor:              "Textfarbe"     .markdown(size: 15)
+            case .viewUseSoftBreaks:          "Soft-Breaks"   .markdown(size: 15)
+            case .viewUseHyphenation:         "Silbentrennung".markdown(size: 15)
+            case .viewUseJustification:       "Blocksatz"     .markdown(size: 15)
 
             case .viewLineHeightMultiple:     "Zeilen"      .markdown(size: 15)
             case .viewParagraphSpacing:       "nach Absatz" .markdown(size: 15)
@@ -71,7 +73,7 @@ extension SettingViewController  {
             switch self {
             case .viewMarginLeft, .viewMarginRight, .viewLineHeightMultiple,
                  .viewParagraphSpacing, .viewParagraphSpacingBefore, .viewTextSize: .stepper
-            case .viewUseSoftBreaks: .button
+            case .viewUseSoftBreaks, .viewUseHyphenation, .viewUseJustification: .button
             case .viewTextColor:     .colorpalettewell
             default: .number
             }
@@ -96,9 +98,11 @@ extension SettingViewController  {
         info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
         items.append(.basic(info1))
 
-        items.append(.basic( Content.viewTextSize     .line(setting, .rw, labelWidth: w).leadingMargin(10)))
-        items.append(.basic( Content.viewTextColor    .line(setting, .rw, labelWidth: w).leadingMargin(10)))
-        items.append(.basic( Content.viewUseSoftBreaks.line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic( Content.viewTextSize       .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic( Content.viewTextColor      .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic( Content.viewUseSoftBreaks  .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic( Content.viewUseHyphenation .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic( Content.viewUseJustification.line(setting, .rw, labelWidth: w).leadingMargin(10)))
         
         let textAbstand = "Abstände".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkAbstand = BasicType.stdItem(textAbstand, presentation: .outlineDisclosure)

@@ -144,36 +144,42 @@ public extension UIColor {
         }
     }
     
-    /// Aus der Textfarbe abgeleitete Balkenfarbe für BlockQuotes.
-    var blockQuoteBarColor: UIColor {
-        highlight
+    ///---------------------------------------------------------------------------------------
+    /// Aus der Textfarbe abgeleitete Farbe für Balken / Striche / Rahmen / Ruler
+    /// bzw. für Hintergründe. Beide Properties teilen sich denselben Algorithmus mit
+    /// unterschiedlichen Parameter-Sätzen (Sättigung + Ziel-Helligkeit) und führen bei
+    /// neutralen Textfarben (Original-Sättigung < 5 %) den iOS-typischen leichten
+    /// Blaustich (Hue 240°) ein.
+
+    private func derived(saturation saturationFactor: CGFloat,
+                         minimum    minimumSaturation: CGFloat,
+                         lightness  targetLightness:  CGFloat) -> UIColor {
+        var hue = CGFloat.zero, satura = CGFloat.zero, light = CGFloat.zero, alpha = CGFloat.zero
+        getHSL(&hue, saturation: &satura, lightness: &light, alpha: &alpha)
+
+        let systemHue: CGFloat = 240.0 / 360.0
+        let finalHue = satura < 0.05 ? systemHue : hue
+        let finalSaturation = max(satura * saturationFactor, minimumSaturation)
+        return UIColor(hue: finalHue, saturation: finalSaturation,
+                       lightness: targetLightness, alpha: 1)
     }
-    
-    /// Aus der Textfarbe abgeleitete Hintergrundfarbe für BlockQuotes.
-    var blockQuoteBackgroundColor: UIColor {
-        var hue    = CGFloat.zero
-        var satura = CGFloat.zero
-        var light  = CGFloat.zero
-        getHSL(&hue, saturation: &satura, lightness: &light, alpha: nil)
-        return UIColor(hue: hue, saturation: satura * 0.35, lightness: light * 0.12 + 0.88, alpha: 0.8)
+
+    /// Aus der Textfarbe abgeleitete Farbe für Balken, Striche, Rahmen und den Ruler.
+    /// Ziel-Anker bei neutraler Textfarbe ≈ `systemGray4` (RGB 209, 209, 214).
+    var derivedStrokeColor: UIColor {
+        derived(saturation: 0.30, minimum: 0.06, lightness: 0.83)
     }
-    
-    /// Aus der Textfarbe abgeleitete Rahmenfarbe für CodeBlocks.
-    var codeBlockBorderColor: UIColor {
-        var hue    = CGFloat.zero
-        var satura = CGFloat.zero
-        var light  = CGFloat.zero
-        getHSL(&hue, saturation: &satura, lightness: &light, alpha: nil)
-        return UIColor(hue: hue, saturation: satura * 0.45, lightness: light * 0.25 + 0.65, alpha: 0.85)
+
+    /// Aus der Textfarbe abgeleitete Hintergrundfarbe für BlockQuote und CodeBlock.
+    /// Ziel-Anker bei neutraler Textfarbe ≈ `systemGray6` (RGB 242, 242, 247).
+    var derivedFillColor: UIColor {
+        derived(saturation: 0.20, minimum: 0.238, lightness: 0.96)
     }
-    
-    /// Aus der Textfarbe abgeleitete Hintergrundfarbe für CodeBlocks.
-    var codeBlockBackgroundColor: UIColor {
-        var hue    = CGFloat.zero
-        var satura = CGFloat.zero
-        var light  = CGFloat.zero
-        getHSL(&hue, saturation: &satura, lightness: &light, alpha: nil)
-        return UIColor(hue: hue, saturation: satura * 0.20, lightness: light * 0.08 + 0.92, alpha: 0.20)
+
+    /// Aus der Textfarbe abgeleitete Tabellen-Header-Hintergrundfarbe.
+    /// Ziel-Anker bei neutraler Textfarbe ≈ `systemGray5` (RGB 229, 229, 233).
+    var derivedHeaderFillColor: UIColor {
+        derived(saturation: 0.25, minimum: 0.083, lightness: 0.906)
     }
     
     /// Aufhellung `lightness` (HSL) auf `lightness * 0.5 + 0.5 ` [0.5 ... 1.0]

@@ -138,7 +138,7 @@ extension BlockRenderer {
         rect.size.height -= (blockContent.isLastBlockQuote ? after : 0) + (blockContent.isFirstBlockQuote ? before : 0)
         
         let textColor = blockContent.attrText.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor ?? M.textColor
-        let backgroundColor = MB.useDefaultBackgroundColor ? textColor.blockQuoteBackgroundColor : MB.backgroundColor
+        let backgroundColor = MB.useDefaultBackgroundColor ? textColor.derivedFillColor : MB.backgroundColor
         context.setFillColor(backgroundColor.cgColor)
         context.fill(rect)
         
@@ -146,7 +146,7 @@ extension BlockRenderer {
         var balken = rect
         balken.origin.x  += attachment.stripeGap
         balken.size.width = attachment.stripeWidth
-        let barColor = MB.useDefaultBarColor ? textColor.blockQuoteBarColor : MB.barColor
+        let barColor = MB.useDefaultBarColor ? textColor.derivedStrokeColor : MB.barColor
         context.setFillColor(barColor.cgColor)
         context.fill(balken)
     }
@@ -474,9 +474,9 @@ final class CodeBlockRenderer: BlockRenderer {
     func draw(in context: CGContext) {
 
         // Hintergrund
-        let textColor = text.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor ?? M.textColor
-        let backgroundColor = MC.useDefaultBackgroundColor ? textColor.codeBlockBackgroundColor : MC.backgroundColor
-        let borderColor = MC.useDefaultBorderColor ? textColor.codeBlockBorderColor : MC.borderColor
+        let textColor = M.textColor
+        let backgroundColor = MC.useDefaultBackgroundColor ? textColor.derivedFillColor : MC.backgroundColor
+        let borderColor = MC.useDefaultBorderColor ? textColor.derivedStrokeColor : MC.borderColor
         let borderWidth = metrics.rectAttachment.borderWidth
         context.setFillColor(backgroundColor.cgColor)
         context.setStrokeColor(borderColor.cgColor)
@@ -676,26 +676,33 @@ final class TableRenderer: BlockRenderer {
     }
     
     private func drawBackgrounds(in context: CGContext) {
-        context.setFillColor(UIColor.secondarySystemBackground.cgColor)
+        let textColor = Markdown.textColor
+        let bodyColor = MT.useDefaultBackgroundColor ? textColor.derivedFillColor : MT.backgroundColor
+        let headerColor = MT.useDefaultHeaderBackgroundColor ? textColor.derivedHeaderFillColor : MT.headerBackgroundColor
+
+        context.setFillColor(bodyColor.cgColor)
         context.fill(tableRect)
-        
+
         guard let headerHeight = rowHeights.first else { return }
         let headerRect = CGRect(x: tableRect.minX,
                                 y: tableRect.maxY - headerHeight,
                                 width: tableRect.width,
                                 height: headerHeight)
-        context.setFillColor(UIColor.tertiarySystemFill.cgColor)
+        context.setFillColor(headerColor.cgColor)
         context.fill(headerRect)
     }
-    
+
     private func drawGrid(in context: CGContext) {
         let halfLineWidth = gridLineWidth / 2
         let left = tableRect.minX + halfLineWidth
         let right = tableRect.maxX - halfLineWidth
         let bottom = tableRect.minY + halfLineWidth
         let top = tableRect.maxY - halfLineWidth
-        
-        context.setStrokeColor(UIColor.separator.cgColor)
+
+        let textColor = Markdown.textColor
+        let gridColor = MT.useDefaultGridColor ? textColor.derivedStrokeColor : MT.gridColor
+
+        context.setStrokeColor(gridColor.cgColor)
         context.setLineWidth(gridLineWidth)
         context.setLineCap(.butt)
         
@@ -796,7 +803,7 @@ final class HorizontalRuleRenderer: BlockRenderer {
         if MR.useHighlightColor {
             /// Die Standardfarbe wird aus der Textfarbe abgeleitet.
             let textColor = text.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor ?? M.textColor
-            color = textColor.highlight
+            color = textColor.derivedStrokeColor
         } else {
             color = MR.color
         }

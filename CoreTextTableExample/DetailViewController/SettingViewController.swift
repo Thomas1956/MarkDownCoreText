@@ -99,6 +99,7 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             input     : .init(
                 [.text  ("Anzeige",                      toolTip: "Anzeige der Elemente"),
                  .text  ("PDF",                          toolTip: "PDF-Parameter einstellen"),
+                 .text  ("Tabelle",                      toolTip: "Tabelle einstellen"),
                  .text  ("Block",                        toolTip: "Blockparameter einstellen"),
                  .text  ("Code",                         toolTip: "CodeBlock-Parameter einstellen"),
                  .text  ("Ruler",                        toolTip: "Trennstrich einstellen"),
