@@ -236,60 +236,238 @@ extension BlockRenderer {
         /// Attribute bleiben erhalten
         let mutable = NSMutableAttributedString(attributedString: src)
 
-        mutable.enumerateAttribute(.imageURL, in: mutable.rangeAll, options: [.reverse]) { value, nsRange, _ in
-            let pointSize = CGFloat(20)
-            
-            /// Der `value` ist ein seltsamer objC Datentyp, der nur so in einen String gebracht werden kann.
-            guard let token = (value as? AnyObject)?.description
-            else { return }
+        let pointSize = CGFloat(20)
 
+        func makeImagePlaceholder(for token: String, at location: Int) -> NSAttributedString? {
             /// Den Font entweder aus dem Header, aus dem Paragraph ermitteln oder Standardfont
             /// Aus dem Font xHeight für die Berechnung der Mitte eines `-` ermitteln
-            let font = mutable.attribute(.font, at: nsRange.location) ?? UIFont.systemFont(ofSize: pointSize)
+            let font = (mutable.attribute(.font, at: location, effectiveRange: nil) as? UIFont) ?? UIFont.systemFont(ofSize: pointSize)
 
             /// Image Konfiguration ermitteln
             let config = UIImage.SymbolConfiguration(font: font)
                                 .applying(UIImage.SymbolConfiguration.preferringMulticolor())
 
-          /// Die ImageURL kann mit den Parametern für Höhe und Breite ergänzt sein (getrennt mit `:`)
-            let components = token.components(separatedBy: ":")
-            guard let imagename = components.first,
-                  let image = UIImage(named: imagename) ??
-                              UIImage(systemName: imagename, withConfiguration: config)?
-                                                            .withRenderingMode(.alwaysOriginal)
-            else { return }
+            func splitParameterList(_ string: String) -> [String] {
+                var result: [String] = []
+                var current = ""
+                var quote: Character?
+
+                for character in string {
+                    if character == "'" || character == "\"" {
+                        if quote == character {
+                            quote = nil
+                        } else if quote == nil {
+                            quote = character
+                        }
+                    }
+
+                    if character == "," && quote == nil {
+                        let trimmed = current.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if !trimmed.isEmpty { result.append(trimmed) }
+                        current = ""
+                    } else {
+                        current.append(character)
+                    }
+                }
+
+                let trimmed = current.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty { result.append(trimmed) }
+                return result
+            }
+
+            func stripQuotes(_ string: String) -> String {
+                var string = string.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard string.count >= 2 else { return string }
+
+                if (string.hasPrefix("\"") && string.hasSuffix("\"")) ||
+                   (string.hasPrefix("'") && string.hasSuffix("'")) {
+                    string.removeFirst()
+                    string.removeLast()
+                }
+                return string
+            }
+
+            func parseSize(_ value: String, currentSize: CGSize) -> CGSize {
+                let parts = stripQuotes(value)
+                    .lowercased()
+                    .split(separator: "x", maxSplits: 1)
+                    .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+                guard !parts.isEmpty else { return currentSize }
+
+                let aspect = currentSize.width / currentSize.height
+
+                if parts.count == 1,
+                   let height = Double(parts[0]),
+                   height > 0 {
+                    return CGSize(width: CGFloat(height) * aspect, height: CGFloat(height))
+                }
+
+                guard parts.count == 2 else { return currentSize }
+                let width = Double(parts[0]).map { CGFloat($0) } ?? currentSize.width
+                let height = Double(parts[1]).map { CGFloat($0) } ?? currentSize.height
+                return CGSize(width: width, height: height)
+            }
+
+            func parseColor(_ value: String) -> UIColor? {
+                let value = stripQuotes(value)
+
+                /// Asset-Farbe
+                if let asset = UIColor(named: value) { return asset }
+
+                /// Hex (#RRGGBB)
+                if let hexColor = UIColor(hexstring: value) { return hexColor }
+
+                /// Systemfarbnamen
+                switch value {
+                case "black": return .black
+                case "blue": return .blue
+                case "brown": return .brown
+                case "clear": return .clear
+                case "cyan": return .cyan
+                case "darkGray": return .darkGray
+                case "gray": return .gray
+                case "green": return .green
+                case "lightGray": return .lightGray
+                case "magenta": return .magenta
+                case "orange": return .orange
+                case "purple": return .purple
+                case "red": return .red
+                case "white": return .white
+                case "yellow": return .yellow
+                case "label": return .label
+                case "secondaryLabel": return .secondaryLabel
+                case "tertiaryLabel": return .tertiaryLabel
+                case "quaternaryLabel": return .quaternaryLabel
+                case "systemBackground": return .systemBackground
+                case "secondarySystemBackground": return .secondarySystemBackground
+                case "tertiarySystemBackground": return .tertiarySystemBackground
+                case "systemBlue": return .systemBlue
+                case "systemBrown": return .systemBrown
+                case "systemCyan": return .systemCyan
+                case "systemGray": return .systemGray
+                case "systemGray2": return .systemGray2
+                case "systemGray3": return .systemGray3
+                case "systemGray4": return .systemGray4
+                case "systemGray5": return .systemGray5
+                case "systemGray6": return .systemGray6
+                case "systemGreen": return .systemGreen
+                case "systemIndigo": return .systemIndigo
+                case "systemMint": return .systemMint
+                case "systemOrange": return .systemOrange
+                case "systemPink": return .systemPink
+                case "systemPurple": return .systemPurple
+                case "systemRed": return .systemRed
+                case "systemTeal": return .systemTeal
+                case "systemYellow": return .systemYellow
+                default: return nil
+                }
+            }
+
+            let token = (token.removingPercentEncoding ?? token)
+                .replacingOccurrences(of: "\u{00AD}", with: "")
+                .replacingOccurrences(of: "\u{2010}", with: "")
+            let parameters = splitParameterList(token)
+            guard var imageToken = parameters.first else { return nil }
+
+            var requestedSize: String?
+            var requestedColor: UIColor?
+
+            if let range = imageToken.range(of: ":") {
+                requestedSize = String(imageToken[range.upperBound...])
+                imageToken = String(imageToken[..<range.lowerBound])
+            }
+
+            for parameter in parameters.dropFirst() {
+                guard let range = parameter.range(of: ":") else { continue }
+
+                let key = parameter[..<range.lowerBound]
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .lowercased()
+                let rawValue = String(parameter[range.upperBound...])
+
+                switch key {
+                case "color", "tint":
+                    requestedColor = parseColor(rawValue)
+                case "size":
+                    requestedSize = rawValue
+                default:
+                    continue
+                }
+            }
+
+            let imagename = stripQuotes(imageToken)
+            guard !imagename.isEmpty,
+                  let originalImage = UIImage(named: imagename) ??
+                                      UIImage(systemName: imagename, withConfiguration: config)
+            else { return nil }
+
+            let image = requestedColor.map {
+                originalImage.withTintColor($0, renderingMode: .alwaysOriginal)
+            } ?? originalImage.withRenderingMode(.alwaysOriginal)
             
             ///-----------------------------------------------------------------------------------
             /// Größe des Images und das Seitenverhältnis ermitteln
-            var width  = image.size.width
-            var height = image.size.height
-            let aspect = width / height
-
-            /// Wenn es eine Breite und/oder eine Höhe gibt, diese ermitteln zum Beispiel `100x50`. Wenn es nur einen Wert
-            /// gibt, wird dieser als Höhe verwendet und die Breite berechnet.
-            if components.count > 1 {
-                let imagesize = components[1].split(separator: "x")
-                
-                width  = (imagesize.first as? NSString)?.doubleValue ?? width
-                height = (imagesize.last  as? NSString)?.doubleValue ?? height
-                
-                /// Wenn nur ein Wert eingetragen ist, dann diesen als Höhe verwenden und die Breite berechnen
-                if imagesize.count < 2 {
-                    width = height * aspect
-                }
-            }
+            let imageSize = requestedSize.map { parseSize($0, currentSize: image.size) } ?? image.size
+            let width  = imageSize.width
+            let height = imageSize.height
 
             /// Attachment und Run-Delegate
             let attachment = ImageAttachment(image: image, size: .init(width: width, height: height), font: font)
             let delegate   = makeRunDelegate(for: attachment)
 
             /// Platzhalter-String
-            let ph = NSAttributedString(string: "\u{FFFC}",
-                                        attributes: [ .runDelegate       : delegate,
-                                                      .myImageAttachment : attachment ])
-            /// Token mit Platzhalter ersetzen
-            mutable.replaceCharacters(in: nsRange, with: ph)
+            return NSAttributedString(string: "\u{FFFC}",
+                                      attributes: [ .runDelegate       : delegate,
+                                                    .myImageAttachment : attachment ])
         }
+
+        func imageURLToken(from value: Any?) -> String? {
+            if let url = value as? URL { return url.relativeString }
+            if let url = value as? NSURL { return url.relativeString }
+            if let string = value as? String { return string }
+
+            guard var token = (value as? AnyObject)?.description
+            else { return nil }
+
+            if token.hasPrefix("Optional("), token.hasSuffix(")") {
+                token.removeFirst("Optional(".count)
+                token.removeLast()
+            }
+            return token
+        }
+
+        var replacements: [(range: NSRange, placeholder: NSAttributedString)] = []
+
+        mutable.enumerateAttribute(.imageURL, in: mutable.rangeAll, options: []) { value, nsRange, _ in
+            guard let token = imageURLToken(from: value),
+                  let placeholder = makeImagePlaceholder(for: token, at: nsRange.location)
+            else { return }
+
+            replacements.append((range: nsRange, placeholder: placeholder))
+        }
+
+        let originalString = mutable.string
+        let pattern = #"!\[[^\]]*\]\(([^)]+)\)"#
+        if let regex = try? NSRegularExpression(pattern: pattern) {
+            let fullRange = NSRange(location: 0, length: (originalString as NSString).length)
+            let matches = regex.matches(in: originalString, range: fullRange)
+
+            for match in matches {
+                guard match.numberOfRanges > 1 else { continue }
+
+                let token = (originalString as NSString).substring(with: match.range(at: 1))
+                guard let placeholder = makeImagePlaceholder(for: token, at: match.range.location)
+                else { continue }
+
+                /// Nicht als Markdown geparste Images nachträglich ersetzen.
+                replacements.append((range: match.range, placeholder: placeholder))
+            }
+        }
+
+        for replacement in replacements.sorted(by: { $0.range.location > $1.range.location }) {
+            mutable.replaceCharacters(in: replacement.range, with: replacement.placeholder)
+        }
+
         return mutable
     }
 }
@@ -818,3 +996,4 @@ final class HorizontalRuleRenderer: BlockRenderer {
         context.strokePath()
     }
 }
+
