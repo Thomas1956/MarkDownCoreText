@@ -15,6 +15,7 @@
 		E92C9B142DDF1FD800750AB4 /* SettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B132DDF1FD800750AB4 /* SettingsController.swift */; };
 		E92C9B162DDF4B4C00750AB4 /* SettingViewController+PDF.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */; };
 		E93B3BAB2DE246A9007436C5 /* SettingViewController+BlockQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = E93B3BAA2DE246A9007436C5 /* SettingViewController+BlockQuote.swift */; };
+		E941926B2FD7FA7900C4C788 /* CommonCollection in Frameworks */ = {isa = PBXBuildFile; productRef = E941926A2FD7FA7900C4C788 /* CommonCollection */; };
 		E949006E2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */; };
 		E94900892DCB99F600DD7880 /* NSTextTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94900882DCB99F000DD7880 /* NSTextTab.swift */; };
 		E949008C2DCCB49B00DD7880 /* CommonSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E949008B2DCCB49B00DD7880 /* CommonSplitViewController.swift */; };
@@ -51,7 +52,6 @@
 		E9A940842DC4ECA6004501E6 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406E2DC4ECA6004501E6 /* SceneDelegate.swift */; };
 		E9A940852DC4ECA6004501E6 /* MarkdownViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9406F2DC4ECA6004501E6 /* MarkdownViewController.swift */; };
 		E9A940882DC4EE4D004501E6 /* MarkdownParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A940872DC4EE4D004501E6 /* MarkdownParser.swift */; };
-		E9BF66272FD061A000096230 /* CommonCollection in Frameworks */ = {isa = PBXBuildFile; productRef = E9BF66262FD061A000096230 /* CommonCollection */; };
 		E9BF66292FD16F7400096230 /* SettingViewController+CodeBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BF66282FD16F7400096230 /* SettingViewController+CodeBlock.swift */; };
 		E9C218EB2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C218EA2FCC6DA600184F69 /* SettingViewController+RulerSetting.swift */; };
 /* End PBXBuildFile section */
@@ -131,7 +131,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E903956D2EE04037001E660F /* UsefulExtensions in Frameworks */,
-				E9BF66272FD061A000096230 /* CommonCollection in Frameworks */,
+				E941926B2FD7FA7900C4C788 /* CommonCollection in Frameworks */,
 				E90395542EDF9826001E660F /* SwiftParser in Frameworks */,
 				E90395562EDF9826001E660F /* SwiftSyntax in Frameworks */,
 			);
@@ -287,7 +287,7 @@
 				E90395532EDF9826001E660F /* SwiftParser */,
 				E90395552EDF9826001E660F /* SwiftSyntax */,
 				E903956C2EE04037001E660F /* UsefulExtensions */,
-				E9BF66262FD061A000096230 /* CommonCollection */,
+				E941926A2FD7FA7900C4C788 /* CommonCollection */,
 			);
 			productName = CoreTextTableExample;
 			productReference = E928C3912DBA315C006D071D /* CoreTextTableExample.app */;
@@ -347,7 +347,7 @@
 			packageReferences = (
 				E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */,
 				E903955B2EDF9987001E660F /* XCRemoteSwiftPackageReference "UsefulExtensions" */,
-				E9BF66252FD0617D00096230 /* XCLocalSwiftPackageReference "../CommonCollection" */,
+				E94192692FD7FA6A00C4C788 /* XCRemoteSwiftPackageReference "CommonCollection" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E928C3922DBA315C006D071D /* Products */;
@@ -730,13 +730,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		E9BF66252FD0617D00096230 /* XCLocalSwiftPackageReference "../CommonCollection" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../CommonCollection;
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCRemoteSwiftPackageReference section */
 		E90395522EDF9826001E660F /* XCRemoteSwiftPackageReference "swift-syntax" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -749,6 +742,14 @@
 		E903955B2EDF9987001E660F /* XCRemoteSwiftPackageReference "UsefulExtensions" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Thomas1956/UsefulExtensions";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		E94192692FD7FA6A00C4C788 /* XCRemoteSwiftPackageReference "CommonCollection" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Thomas1956/CommonCollection";
 			requirement = {
 				branch = main;
 				kind = branch;
@@ -787,9 +788,9 @@
 			package = E903955B2EDF9987001E660F /* XCRemoteSwiftPackageReference "UsefulExtensions" */;
 			productName = UsefulExtensions;
 		};
-		E9BF66262FD061A000096230 /* CommonCollection */ = {
+		E941926A2FD7FA7900C4C788 /* CommonCollection */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E9BF66252FD0617D00096230 /* XCLocalSwiftPackageReference "../CommonCollection" */;
+			package = E94192692FD7FA6A00C4C788 /* XCRemoteSwiftPackageReference "CommonCollection" */;
 			productName = CommonCollection;
 		};
 /* End XCSwiftPackageProductDependency section */

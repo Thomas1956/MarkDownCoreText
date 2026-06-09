@@ -12,8 +12,11 @@ import UsefulExtensions
 
 
 extension UTType {
-    /// Eigener Markdown-Typ (fallback auf plainText, wenn’s schiefgeht)
-    static var markdown: UTType { UTType(filenameExtension: "md") ?? .plainText }
+    /// Eigener Markdown-Typ, an plainText gebunden, damit der Document-Picker
+    /// zuverlässig auf die Erweiterung .md filtert.
+    static var markdown: UTType {
+        UTType(filenameExtension: "md", conformingTo: .plainText) ?? .plainText
+    }
 }
 
 

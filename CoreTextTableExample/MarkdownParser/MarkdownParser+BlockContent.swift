@@ -519,13 +519,83 @@ struct BlockContent {
                                   range: NSRange(location: 0, length: attrText.length))
             /// Sprache zufügen
             attrText.addAttributes([.languageIdentifier: "de-DE"])
-            
+
             /// DEBUG
 //            print(AttributedString(attrText).debugStringLong)
             assert(ps.tabStops.map(\.ctTab) == tabulators.map(\.ctTab) )
-            
+
+            ///-------------------------------------------------------------------------------
+            /// D O P P E L S P A L T E   —   Syntax: `Linke Spalte:: Rechte Spalte`
+            /// Optional kann die Tab-Position als `::<wert>::` vor der rechten Spalte angegeben werden.
+            ///
+            if !block.hasCodeBlock, !block.hasTable, !block.hasThematicBreak,
+               attrText.string.contains("::") {
+                let (ranges, tabValue) = findTabRanges(in: attrText.string)
+                if !ranges.isEmpty {
+                    /// Trennzeichen rückwärts durch einen Tabulator ersetzen, damit die Indizes gültig bleiben.
+                    for nsRange in ranges.reversed() {
+                        attrText.replaceCharacters(in: nsRange, with: "\t")
+                    }
+                    /// Innerhalb des Blocks Soft-Breaks zu Absatz-Separatoren machen, damit der neue Tab
+                    /// und der angepasste Einzug pro Zeile wirken.
+                    let fullRange = NSRange(location: 0, length: attrText.length)
+                    attrText.mutableString.replaceOccurrences(of: .lineSeparator,
+                                                              with: .paragraphSeparator,
+                                                              options: [],
+                                                              range: fullRange)
+
+                    /// Tabulator-Position aus dem optionalen Wert (oder Default 100) plus aktuellem `headIndent`.
+                    var tabLocation = (tabValue ?? 100) + ps.headIndent
+                    tabLocation = typography.scaled(tabLocation)
+
+                    ps.tabStops    = [NSTextTab(textAlignment: .left, location: tabLocation)]
+                    ps.headIndent += tabLocation
+                    ps.alignment   = .left
+
+                    attrText.addAttribute(.paragraphStyle, value: ps, range: fullRange)
+                }
+            }
+
             allBlocks[index].attrText = attrText
         }
+    }
+
+    //----------------------------------------------------------------------------------------
+    // MARK: - Ermitteln der Ranges für die Doppelspalten
+
+    /// Sucht alle Trennzeichen `::` (optional `::<wert>::`) in einem String und liefert die zu ersetzenden
+    /// NSRanges sowie den ersten gefundenen Tabulatorwert zurück.
+    private static func findTabRanges(in string: String) -> (ranges: [NSRange], tabValue: CGFloat?) {
+        var ranges: [NSRange] = []
+        var tabValue: CGFloat?
+        let nsstring = string as NSString
+        var searchStart = 0
+
+        while searchStart < nsstring.length {
+            let searchRange = NSRange(location: searchStart, length: nsstring.length - searchStart)
+            let start = nsstring.range(of: "::", options: [], range: searchRange)
+            guard start.location != NSNotFound else { break }
+
+            var range = start
+            var nextStart = start.location + start.length
+
+            /// Wenn nach dem `::` ein weiteres `::` folgt, kann zwischen beiden die Zahl für den Tabulator stehen.
+            let endSearchRange = NSRange(location: nextStart, length: nsstring.length - nextStart)
+            let end = nsstring.range(of: "::", options: [], range: endSearchRange)
+            if end.location != NSNotFound {
+                let valueRange = NSRange(location: nextStart, length: end.location - nextStart)
+                let valueString = nsstring.substring(with: valueRange)
+                if let value = Double(valueString) {
+                    if tabValue == nil { tabValue = CGFloat(value) }
+                    range = NSRange(location: start.location,
+                                    length: end.location + end.length - start.location)
+                    nextStart = end.location + end.length
+                }
+            }
+            ranges.append(range)
+            searchStart = nextStart
+        }
+        return (ranges, tabValue)
     }
 }
 
