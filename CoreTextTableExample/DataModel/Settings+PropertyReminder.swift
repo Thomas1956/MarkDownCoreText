@@ -73,48 +73,33 @@ extension Settings {
         ("Purpur"    , .textPurple)
     ]
     
-    private static let barColorDefinitions: [(String, UIColor)] = [
-        ("Grau"      , .systemGray4),
-        ("Dunkelgrau", .systemGray2),
-        ("Blau"      , .systemBlue),
-        ("Indigo"    , .systemIndigo),
-        ("Mint"      , .systemMint),
-        ("Grün"      , .systemGreen),
-        ("Orange"    , .systemOrange),
-        ("Rot"       , .systemRed),
-        ("Purpur"    , .systemPurple)
-    ]
-    
-    private static let backgroundColorDefinitions: [(String, UIColor)] = [
-        ("Hellgrau"  , .systemGray6),
-        ("Grau"      , .systemGray5),
-        ("Blau"      , .systemBlue  .withAlphaComponent(0.12)),
-        ("Indigo"    , .systemIndigo.withAlphaComponent(0.12)),
-        ("Mint"      , .systemMint  .withAlphaComponent(0.14)),
-        ("Grün"      , .systemGreen .withAlphaComponent(0.12)),
-        ("Gelb"      , .systemYellow.withAlphaComponent(0.18)),
-        ("Orange"    , .systemOrange.withAlphaComponent(0.14)),
-        ("Rot"       , .systemRed   .withAlphaComponent(0.10)),
-        ("Purpur"    , .systemPurple.withAlphaComponent(0.12))
-    ]
+    private static let strokeColorDefinitions     = makeDerivedColorDefinitions(\.derivedStrokeColor)
+    private static let fillColorDefinitions       = makeDerivedColorDefinitions(\.derivedFillColor)
+    private static let headerFillColorDefinitions = makeDerivedColorDefinitions(\.derivedHeaderFillColor)
     
     static let textColorPalette                   = makeColorPalette(textColorDefinitions)
-    static let blockBarColorPalette               = makeColorPalette(barColorDefinitions)
-    static let blockBackgroundColorPalette        = makeColorPalette(backgroundColorDefinitions)
-    static let rulerColorPalette                  = makeColorPalette(barColorDefinitions)
-    static let codeBackgroundColorPalette         = makeColorPalette(backgroundColorDefinitions)
-    static let codeBorderColorPalette             = makeColorPalette(barColorDefinitions)
-    static let tableGridColorPalette              = makeColorPalette(barColorDefinitions)
-    static let tableHeaderBackgroundColorPalette  = makeColorPalette(backgroundColorDefinitions)
-    static let tableBackgroundColorPalette        = makeColorPalette(backgroundColorDefinitions)
+    static let blockBarColorPalette               = makeColorPalette(strokeColorDefinitions)
+    static let blockBackgroundColorPalette        = makeColorPalette(fillColorDefinitions)
+    static let rulerColorPalette                  = makeColorPalette(strokeColorDefinitions)
+    static let codeBackgroundColorPalette         = makeColorPalette(fillColorDefinitions)
+    static let codeBorderColorPalette             = makeColorPalette(strokeColorDefinitions)
+    static let tableGridColorPalette              = makeColorPalette(strokeColorDefinitions)
+    static let tableHeaderBackgroundColorPalette  = makeColorPalette(headerFillColorDefinitions)
+    static let tableBackgroundColorPalette        = makeColorPalette(fillColorDefinitions)
     
     private static var completeColorPalette: [UIColor] {
-        (textColorDefinitions + barColorDefinitions + backgroundColorDefinitions).map(\.1)
+        (textColorDefinitions + strokeColorDefinitions + fillColorDefinitions + headerFillColorDefinitions).map(\.1)
     }
     
     private static func makeColorPalette(_ definitions: [(String, UIColor)]) -> [KeyText] {
         definitions.map { name, color in
             KeyText(value: color, text: name, color: color)
+        }
+    }
+    
+    private static func makeDerivedColorDefinitions(_ keyPath: KeyPath<UIColor, UIColor>) -> [(String, UIColor)] {
+        textColorDefinitions.map { name, color in
+            (name, color[keyPath: keyPath])
         }
     }
     
