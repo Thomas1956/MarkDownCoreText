@@ -153,6 +153,13 @@ extension AttributeScopes.FoundationAttributes.PresentationIntentAttribute.Value
     
     /// Identität der Liste
     var listIdentity: Int { self.listParameter()?.identity ?? 0 }
+
+    /// Kette der Listen-Identities vom äußersten bis zum innersten Eintrag.
+    /// Wird genutzt, um die Bullet-Breiten pro Liste (statt global pro Hierarchiestufe) zu summieren.
+    var listIdentityChain: [Int] {
+        let lists = self.components.filter { $0.kind == .orderedList || $0.kind == .unorderedList }
+        return lists.sorted { $0.identity < $1.identity }.map { $0.identity }
+    }
     
     /// Ordinal einer sortierten Liste 1...n (bei 0 ist es keine sortierte Liste)
     var listOrdinal: Int { self.listParameter()?.ordinal ?? 0 }

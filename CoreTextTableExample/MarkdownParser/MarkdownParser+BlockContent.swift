@@ -81,11 +81,13 @@ struct BlockContent {
         /// Anführungszeichen vordefinieren
         self.listBulletPointStr = ""
         self.widthDefault       = 0
-        
+
         /// Einzüge für die Listen und die Block Quote
         self.firstLineHeadIndent = 0
         self.headIndent          = 0
-        self.blockQuoteIndent    = 5
+        /// 0 = kein zusätzlicher Versatz für den BlockQuote-Hintergrund. Wird nur dann gesetzt, wenn der
+        /// BlockQuote innerhalb einer Liste steht (siehe `prepareBlocks`).
+        self.blockQuoteIndent    = 0
         
         self.tableBlock = TableBlock()
         
@@ -175,7 +177,9 @@ struct BlockContent {
         ///-----------------------------------------------------------------------------------
         /// 1 .  D U R C H L A U F  :   Berechnen der Arrays für die Tabellen und Listen
         ///
-        var arrIndent       = [ML.leftIndent]           /// Array der Einzüge nach Hierarchie (Summe bilden)
+        /// Bullet-Breite pro Listen-Identity (NICHT global pro Hierarchiestufe), damit zwei unabhängige
+        /// Listen unterschiedliche Bullet-Breiten haben können.
+        var dictArrIndent   = [Int: CGFloat]()
         var dictHeadIndent  = [String: CGFloat]()       /// Dictionary der Einzüge in der Hierachie für gleiche Absätze
         var dictBlockIndent = [Int: CGFloat]()          /// Dictionary der Einzüge für den Block Indent
         var dictTableBlock  = [Int: BlockContent.TableBlock]()
@@ -230,20 +234,21 @@ struct BlockContent {
             ///
             if let block, let id = block.listHierarchie, prevKey != blockContent.key  {
                 prevKey = blockContent.key
-                
+
                 /// Anführungszeichen (-zahl) für die Liste
                 let listBulletPoint = block.hasOrderedList ? "\(block.listOrdinal)." :
                 ML.bulletPoint[(id-1) % ML.bulletPoint.count]
-                
+
                 /// Ermitteln der Breite der Anführungszeichen der Liste (oder Ordnungszahlen)
                 let font = UIFont.systemFont(ofSize: textSize)
                 let widthDefault = " ".width(font)
                 let width = listBulletPoint.width(font) + 3 * widthDefault
-                
-                /// Die maximale Breite entsprechend der Hierarchie in das Array einfügen (oder anhängen)
-                if arrIndent.count <= id { arrIndent.append(width) }
-                arrIndent[id] = max(arrIndent[id], width)
-                
+
+                /// Maximale Breite pro Listen-Identity merken. So bleibt die Einrückung innerhalb einer Liste
+                /// einheitlich, ohne dass eine andere Liste mit breiteren Bullets die Einrückung beeinflusst.
+                let identity = block.listIdentity
+                dictArrIndent[identity] = max(dictArrIndent[identity] ?? 0, width)
+
                 /// Die Standard-Breite für ein Leerzeichen merken, die für die Festlegung des rechten und linken Randes
                 /// des Anführungszeichen benötigt wird
                 allBlocks[index].widthDefault = widthDefault
@@ -255,10 +260,20 @@ struct BlockContent {
         ///
         for (index, blockContent) in allBlocks.enumerated() {
             guard let block = blockContent.block, let id = block.listHierarchie else { continue }
-            
-            /// Der Einzug des Listenelements ist die Summe der Indents in der Hierarchie
-            var headIndent          = arrIndent[0...id].reduce(0, +)
-            var firstLineHeadIndent = arrIndent[0..<id].reduce(0, +)
+
+            /// Einzüge aus der Kette der Listen-Identities zusammenrechnen:
+            /// - `headIndent`          = linker Rand + Bullet-Breiten aller Listen entlang der Hierarchie
+            /// - `firstLineHeadIndent` = linker Rand + Bullet-Breiten aller VORGELAGERTEN Listen (ohne die innerste)
+            let chain = block.listIdentityChain
+            var headIndent          = ML.leftIndent
+            var firstLineHeadIndent = ML.leftIndent
+            for (level, ancestorId) in chain.enumerated() {
+                let width = dictArrIndent[ancestorId] ?? 0
+                headIndent += width
+                if level < chain.count - 1 {
+                    firstLineHeadIndent += width
+                }
+            }
             var blockQuoteIndent    = blockContent.blockQuoteIndent
             
             /// Anführungszeichen (-zahl) für die Liste
@@ -282,22 +297,18 @@ struct BlockContent {
             ///-------------------------------------------------------------------------------
             /// Block Quote berücksichtigen
             ///
+            /// Nur relevant, wenn der BlockQuote selbst innerhalb einer Liste steht (`blockQuoteHierarchie > 0`).
+            /// Den Einzug der ersten Ebene (Textposition der äußersten Liste) für ALLE Blöcke desselben
+            /// BlockQuote wiederverwenden, damit der Hintergrund bei tieferen Hierarchien nicht "mitwandert".
             if let hierarchie = block.blockQuoteHierarchie, hierarchie > 0,
                let blockIdentity = block.blockQuoteIdentity
             {
-                /// Wenn ein Block Quote über eine Hierarchie geht, müssen alle Einzüge mit der gleichen Block
-                /// Identity gleich sein. Merken in einem Dictionary und wählen des kleinsten Wertes.
                 if let blockIndent = dictBlockIndent[blockIdentity] {
-                    if firstLineHeadIndent < blockIndent {
-                        blockQuoteIndent = firstLineHeadIndent
-                        dictBlockIndent[blockIdentity] = firstLineHeadIndent
-                        assert(false)
-                    }
                     blockQuoteIndent = blockIndent
                 }
                 else {
-                    dictBlockIndent[blockIdentity] = firstLineHeadIndent
-                    blockQuoteIndent = firstLineHeadIndent
+                    dictBlockIndent[blockIdentity] = headIndent
+                    blockQuoteIndent = headIndent
                 }
             }
             

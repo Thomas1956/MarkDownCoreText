@@ -417,10 +417,18 @@ extension String {
         )
     }()
 
+    /// Einmalig kompilierter Regex für HTML-Entities, bevor sie vom Markdown-Parser aufgelöst werden.
+    private static let htmlEntityRegex: NSRegularExpression = {
+        try! NSRegularExpression(
+          pattern: #"&(?:#[0-9]+|#x[0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]+);"#,
+          options: []
+        )
+    }()
+
     /// Cache für CFLocale-Objekte
     private static var cfLocaleCache = [String: CFLocale]()
 
-    /// Fügt Soft-Hyphens gemäß deutscher Trennregeln ein, ignoriert Markdown-Attribute.
+    /// Fügt Soft-Hyphens gemäß deutscher Trennregeln ein, ignoriert Markdown-Attribute und HTML-Entities.
     func stringWithHyphens(lang: String = "de-DE") -> String {
         // ---- 0) Locale holen/anfertigen ----
         let cfLoc: CFLocale
@@ -442,16 +450,15 @@ extension String {
         let ns   = self as NSString
         let fullCFRange = CFRange(location: 0, length: ns.length)
 
-        // ---- 1) Markdown-Attribute finden ----
-        let matches = Self.markdownAttrRegex.matches(
-          in: self,
-          range: NSRange(location: 0, length: ns.length)
-        )
-        let attrRanges = matches.map { $0.range }
-        // Wir wandeln in ein swift IndexSet um für O(log n)-contains:
+        // ---- 1) Bereiche finden, die vor Soft-Hyphens geschützt werden müssen ----
+        let protectedRanges = [Self.markdownAttrRegex, Self.htmlEntityRegex].flatMap { regex in
+            regex.matches(in: self,
+                          range: NSRange(location: 0, length: ns.length)).map(\.range)
+        }
+        // Wir wandeln in ein Swift IndexSet um für O(log n)-contains.
         var indexSet = IndexSet()
-        for r in attrRanges {
-            indexSet.insert(integersIn: r.location ..< (r.location + r.length))
+        for range in protectedRanges {
+            indexSet.insert(integersIn: range.location ..< (range.location + range.length))
         }
 
         // ---- 2) Hyphen-Positionen sammeln ----

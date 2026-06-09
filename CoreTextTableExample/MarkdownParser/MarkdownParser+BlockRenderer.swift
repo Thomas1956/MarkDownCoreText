@@ -55,11 +55,16 @@ extension BlockRenderer {
     }
     
     ///---------------------------------------------------------------------------------------
+    /// Typographie-Metriken, die an der eingestellten Dokument-Schriftgröße hängen.
+    var documentTypography: MarkdownTypography {
+        MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: CGFloat(Markdown.textSize)))
+    }
+    
+    ///---------------------------------------------------------------------------------------
     /// Umranden des Rechteckes für Paragraph Spacing (danach)
     var blockQouteSpacings: (paddingBefore: CGFloat, paddingAfter: CGFloat, paddingLeft: CGFloat, paddingRight: CGFloat) {
         guard let block = blockContent.block else { return (0, 0, 0, 0) }
-        let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize))
-        let blockQuote = typography.blockQuote
+        let blockQuote = documentTypography.blockQuote
         let attachment = blockQuote.rectAttachment
         let paddingBefore = blockContent.isFirstBlockQuote ? attachment.rectInsetTop : 0
         let paddingAfter = blockContent.isLastBlockQuote ? attachment.rectInsetBottom : 0
@@ -124,17 +129,24 @@ extension BlockRenderer {
     /// Zeichnen des Hintergrundes von BlockQuote. Das Rechteck ist der gesamte Frame des Renderers.
     ///
     func drawBlockQuote(in context: CGContext, rect: CGRect) {
-        
+
         let (before, after) = blockContent.attrText.paragraphSpacings
 
         /// Hintergrund füllen
-        let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize))
-        let blockQuote = typography.blockQuote
+        let blockQuote = documentTypography.blockQuote
         let attachment = blockQuote.rectAttachment
+
+        /// Steht der BlockQuote innerhalb einer Liste, muss der Hintergrund dem Einzug der Liste folgen.
+        /// `blockContent.blockQuoteIndent` enthält in diesem Fall die in `prepareBlocks` gemerkte Textposition
+        /// der ersten Ebene des BlockQuote. Für alle anderen Fälle (kein BlockQuote in einer Liste — z.B.
+        /// Listen-Items, die innerhalb eines top-level BlockQuote stehen) ist der Wert 0 und der Hintergrund
+        /// wandert NICHT mit der inneren Hierarchie mit.
+        let listOffset: CGFloat = blockContent.blockQuoteIndent
+
         var rect = rect
-        rect.origin.x    += attachment.rectInsetLeft
+        rect.origin.x    += attachment.rectInsetLeft + listOffset
         rect.origin.y    += blockContent.isLastBlockQuote ? after : 0
-        rect.size.width  -= attachment.rectInsetLeft + attachment.rectInsetRight
+        rect.size.width  -= attachment.rectInsetLeft + attachment.rectInsetRight + listOffset
         rect.size.height -= (blockContent.isLastBlockQuote ? after : 0) + (blockContent.isFirstBlockQuote ? before : 0)
         
         let textColor = blockContent.attrText.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor ?? M.textColor
@@ -709,8 +721,7 @@ final class TableRenderer: BlockRenderer {
         let firstBlock = blockContents.first ?? BlockContent(attrText: NSAttributedString(), block: nil, range: AttributedString().startIndex..<AttributedString().endIndex)
         self.blockContent = firstBlock
         self.tableBlock = firstBlock.tableBlock
-        let font = firstBlock.attrText.attribute(.font, at: 0, effectiveRange: nil) as? UIFont ?? UIFont.systemFont(ofSize: CGFloat(Markdown.textSize))
-        let typography = MarkdownTypography(bodyFont: font)
+        let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: CGFloat(Markdown.textSize)))
         let inset = max(4, typography.scaled(Markdown.Block.contentIndent * 0.5))
         self.padding = UIEdgeInsets(top: inset * 0.75, left: inset, bottom: inset * 0.75, right: inset)
         self.gridLineWidth = max(0.5, typography.thematicBreak.lineHeight * 0.5)
@@ -747,8 +758,7 @@ final class TableRenderer: BlockRenderer {
     
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         let hasBlockQuote = blockContent.block?.hasBlockQuote ?? false
-        let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize))
-        let leftIndent = hasBlockQuote ? typography.blockQuote.blockQuoteContentIndent : CGFloat(M.marginLeft)
+        let leftIndent = hasBlockQuote ? documentTypography.blockQuote.blockQuoteContentIndent : CGFloat(M.marginLeft)
         let availableWidth = max(0, width - leftIndent - CGFloat(M.marginRight))
         columnWidths = Self.fittedColumnWidths(from: tableBlock.columns,
                                                availableWidth: availableWidth,
@@ -757,7 +767,7 @@ final class TableRenderer: BlockRenderer {
         rowHeights = measureRowHeights(columnWidths: columnWidths)
         
         let tableHeight = rowHeights.reduce(0, +)
-        let bottomSpacing = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).paragraph.paragraphSpacing
+        let bottomSpacing = documentTypography.paragraph.paragraphSpacing
         tableRect = CGRect(x: leftIndent, y: bottomSpacing, width: columnWidths.reduce(0, +), height: tableHeight)
         let totalHeight = tableHeight + bottomSpacing
         frame = CGRect(x: 0, y: y, width: width, height: totalHeight)
@@ -949,7 +959,7 @@ final class HorizontalRuleRenderer: BlockRenderer {
         self.text = blockContent.attrText
     }
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
-        let metrics = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize)).thematicBreak
+        let metrics = documentTypography.thematicBreak
         let h = metrics.height
         self.frame = CGRect(x: 0, y: y, width: width, height: h)
         return h
@@ -958,8 +968,7 @@ final class HorizontalRuleRenderer: BlockRenderer {
     func draw(in context: CGContext) {
         guard let block = blockContent.block else { return }
 
-        let typography = MarkdownTypography(bodyFont: UIFont.systemFont(ofSize: fontSize))
-        let metrics = typography.thematicBreak
+        let metrics = documentTypography.thematicBreak
 
         /// Linker und rechter Rand des Absatztextes ermitteln. Innerhalb eines BlockQuote
         /// gelten die Block-internen Ränder, sonst die globalen Dokument-Ränder.
@@ -969,9 +978,9 @@ final class HorizontalRuleRenderer: BlockRenderer {
             let rect = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             drawBlockQuote(in: context, rect: rect)
 
-            let bq = typography.blockQuote
-            textLeft  = bq.blockQuoteContentIndent
-            textRight = frame.width - bq.blockQuoteRightIndent
+            let blockQuote = documentTypography.blockQuote
+            textLeft  = blockQuote.blockQuoteContentIndent
+            textRight = frame.width - blockQuote.blockQuoteRightIndent
         } else {
             textLeft  = CGFloat(M.marginLeft)
             textRight = frame.width - CGFloat(M.marginRight)
