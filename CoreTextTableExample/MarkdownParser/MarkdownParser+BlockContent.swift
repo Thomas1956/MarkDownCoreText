@@ -27,6 +27,7 @@ struct BlockContent {
     var firstLineHeadIndent : CGFloat
     var blockQuoteIndent    : CGFloat
     var tableIndent         : CGFloat
+    var codeBlockIndent     : CGFloat
     var tableBlock          : TableBlock
     
     var isFirstBlockQuote   : Bool
@@ -92,6 +93,9 @@ struct BlockContent {
         /// 0 = kein zusätzlicher Versatz für die Tabelle. Wird nur dann gesetzt, wenn die Tabelle
         /// innerhalb einer Liste steht (siehe `prepareBlocks`).
         self.tableIndent         = 0
+        /// 0 = kein zusätzlicher Versatz für den CodeBlock. Wird nur dann gesetzt, wenn der CodeBlock
+        /// innerhalb einer Liste steht (siehe `prepareBlocks`).
+        self.codeBlockIndent     = 0
         
         self.tableBlock = TableBlock()
         
@@ -323,6 +327,15 @@ struct BlockContent {
             /// damit die ganze Tabelle einheitlich mit der Liste mitwandert.
             if let tableId = block.tableIdentity, dictTableIndent[tableId] == nil {
                 dictTableIndent[tableId] = headIndent
+            }
+
+            ///-------------------------------------------------------------------------------
+            /// CodeBlock innerhalb einer Liste-Hierarchie berücksichtigen.
+            /// Der CodeBlock ist ein einzelner Block, daher kann der Wert direkt gesetzt werden.
+            /// Wird im CodeBlockRenderer additiv zum globalen linken Rand bzw. zum
+            /// `blockQuoteContentIndent` (bei CodeBlock im BlockQuote) angewendet.
+            if block.hasCodeBlock {
+                allBlocks[index].codeBlockIndent = headIndent
             }
             
             ///-------------------------------------------------------------------------------

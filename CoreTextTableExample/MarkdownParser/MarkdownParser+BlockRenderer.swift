@@ -637,10 +637,31 @@ final class CodeBlockRenderer: BlockRenderer {
         self.text = NSAttributedString(attrString)
     }
     
+    ///---------------------------------------------------------------------------------------
+    /// Linker und rechter Außenabstand des CodeBlock-Hintergrundes (vom Frame-Ursprung gemessen).
+    /// - Innerhalb eines BlockQuote sitzt der CodeBlock im BlockQuote-Content-Bereich,
+    ///   ggf. zusätzlich um den Listen-Hierarchie-Einzug verschoben.
+    /// - Außerhalb wirkt der globale linke Dokument-Rand zzgl. `Markdown.CodeBlock.indentLeft`
+    ///   (in `metrics.outerLeftIndent` enthalten) plus der Listen-Hierarchie-Einzug.
+    private func boxOuterIndents() -> (left: CGFloat, right: CGFloat) {
+        let typography = documentTypography
+        guard blockContent.block?.hasBlockQuote ?? false else {
+            return (metrics.outerLeftIndent + blockContent.codeBlockIndent,
+                    metrics.outerRightIndent)
+        }
+        let bq = typography.blockQuote
+        let extraLeft  = typography.scaled(CGFloat(MC.indentLeft))
+        let extraRight = typography.scaled(CGFloat(MC.indentRight))
+        return (bq.blockQuoteContentIndent + extraLeft + blockContent.codeBlockIndent,
+                bq.blockQuoteRightIndent  + extraRight)
+    }
+
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
 
-        let availableWidth = width - metrics.outerLeftIndent - metrics.outerRightIndent
-        let innerWidth = availableWidth - padding.left - padding.right
+        let hasBlockQuote = blockContent.block?.hasBlockQuote ?? false
+        let (leftIndent, rightIndent) = boxOuterIndents()
+        let availableWidth = max(0, width - leftIndent - rightIndent)
+        let innerWidth = max(1, availableWidth - padding.left - padding.right)
 
         let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
         let constraint = CGSize(width: innerWidth, height: .greatestFiniteMagnitude)
@@ -656,17 +677,54 @@ final class CodeBlockRenderer: BlockRenderer {
         let boxHeight = textHeight + padding.top + padding.bottom
         let totalHeight = metrics.paragraphSpacingBefore + boxHeight + metrics.paragraphSpacing
 
-        self.frame = CGRect(x: metrics.outerLeftIndent,
-                            y: y,
-                            width: availableWidth,
-                            height: totalHeight)
+        /// Innerhalb eines BlockQuote umfasst der Frame die volle Breite, damit der BlockQuote-BG
+        /// (Balken + Hintergrund) auch hinter dem CodeBlock gezeichnet werden kann.
+        let frameX = hasBlockQuote ? 0 : leftIndent
+        let frameWidth = hasBlockQuote ? width : availableWidth
+        self.frame = CGRect(x: frameX, y: y, width: frameWidth, height: totalHeight)
 
         return totalHeight
     }
 
     func draw(in context: CGContext) {
 
-        // Hintergrund
+        let hasBlockQuote = blockContent.block?.hasBlockQuote ?? false
+
+        /// CodeBlock-Hintergrund (relativ zum Frame). Bei BlockQuote wandert die linke Kante an die
+        /// Content-Position des BlockQuote – sonst sitzt der Frame schon dort.
+        let inset = max(metrics.rectAttachment.borderWidth / 2, 0)
+        let boxLeft: CGFloat = hasBlockQuote ? boxOuterIndents().left : 0
+        let boxWidth: CGFloat = hasBlockQuote ? frame.width - boxOuterIndents().left - boxOuterIndents().right
+                                              : frame.width
+        let rectBackground = CGRect(x: boxLeft,
+                                    y: metrics.paragraphSpacing,
+                                    width: boxWidth,
+                                    height: frame.height - metrics.paragraphSpacingBefore - metrics.paragraphSpacing)
+
+        /// BlockQuote-Hintergrund (Balken + BG) durchgängig hinter dem CodeBlock zeichnen,
+        /// damit er optisch nicht unterbrochen wirkt. Die Breite ist die volle Frame-Breite –
+        /// `drawBlockQuote` rechnet die BlockQuote-Insets (linker/rechter Rand inkl. Balken)
+        /// intern auf den übergebenen Rechteck-Bereich an.
+        ///
+        /// Höhe: Im Inneren des BlockQuote läuft der BG über den vollen Frame (inkl. CodeBlock-
+        /// `paragraphSpacingBefore`/`paragraphSpacing`), damit zwischen Nachbarn keine Lücke
+        /// entsteht. An den Rändern des BlockQuote (`isFirstBlockQuote`/`isLastBlockQuote`)
+        /// wird die CodeBlock-Spacing visuell oben bzw. unten ausgespart. Achtung: Der Context
+        /// ist für Core Text geflippt – y wächst nach oben, also liegt das visuell obere
+        /// Spacing am oberen Frame-Ende (= hohe y-Werte) und das visuell untere Spacing am
+        /// unteren Frame-Ende (= y=0). Die in `drawBlockQuote` enthaltene zusätzliche
+        /// Trimmung über `attrText.paragraphSpacings` wirkt hier nicht, weil diese beim
+        /// CodeBlock auf 0 gesetzt sind – wir trimmen daher direkt mit den CodeBlock-Metriken.
+        if hasBlockQuote {
+            let topTrim    = blockContent.isFirstBlockQuote ? metrics.paragraphSpacingBefore : 0
+            let bottomTrim = blockContent.isLastBlockQuote  ? metrics.paragraphSpacing       : 0
+            let blockQuoteRect = CGRect(x: 0,
+                                        y: bottomTrim,
+                                        width: frame.width,
+                                        height: frame.height - topTrim - bottomTrim)
+            drawBlockQuote(in: context, rect: blockQuoteRect)
+        }
+
         let textColor = M.textColor
         let backgroundColor = MC.useDefaultBackgroundColor ? textColor.derivedFillColor : MC.backgroundColor
         let borderColor = MC.useDefaultBorderColor ? textColor.derivedStrokeColor : MC.borderColor
@@ -675,12 +733,6 @@ final class CodeBlockRenderer: BlockRenderer {
         context.setStrokeColor(borderColor.cgColor)
         context.setLineWidth(borderWidth)
 
-        /// Den Rahmen um die halbe Linienbreite nach innen ziehen, damit er vollständig im Frame liegt.
-        let inset = max(borderWidth / 2, 0)
-        let rectBackground = CGRect(x: 0,
-                                    y: metrics.paragraphSpacing,
-                                    width: frame.width,
-                                    height: frame.height - metrics.paragraphSpacingBefore - metrics.paragraphSpacing)
         context.addPath(
             UIBezierPath(
                 roundedRect: rectBackground.insetBy(dx: inset, dy: inset),
