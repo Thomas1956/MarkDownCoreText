@@ -460,7 +460,7 @@ struct BlockContent {
             /// NSParagraphStyle.tailIndent erwartet einen negativen Wert (Abstand vom rechten Rand).
             var firstLineHeadIndent    : CGFloat  =  block.hasBlockQuote ? 0 :  CGFloat(M.marginLeft)
             var headIndent             : CGFloat  =  block.hasBlockQuote ? 0 :  CGFloat(M.marginLeft)
-            var tailIndent             : CGFloat  =  block.hasBlockQuote ? 0 : -CGFloat(M.marginRight)
+            let tailIndent             : CGFloat  =  block.hasBlockQuote ? 0 : -CGFloat(M.marginRight)
             var paragraphSpacing       : CGFloat  =  paragraphMetrics.paragraphSpacing
             var paragraphSpacingBefore : CGFloat  =  paragraphMetrics.paragraphSpacingBefore
             var lineHeightMultiple     : CGFloat  =  paragraphMetrics.lineHeightMultiple
@@ -471,32 +471,35 @@ struct BlockContent {
             ///-------------------------------------------------------------------------------
             /// Blockerkennung, um Abstände nach Bedarf einzustellen
             ///
-            let prevBlockQuote = index > 0                   && allBlocks[index-1].hasBlockQuote
-            let nextBlockQuote = index < allBlocks.count - 1 && allBlocks[index+1].hasBlockQuote
+            /// Wichtig: Zwei aufeinanderfolgende, durch eine Leerzeile getrennte BlockQuotes
+            /// haben in Foundations PresentationIntent unterschiedliche `blockQuoteIdentity`.
+            /// Erst wenn die Identity übereinstimmt, gehört der Nachbar zum selben BlockQuote –
+            /// nur dann darf der BG/Balken durchgängig laufen. Sonst wird der jeweilige Block
+            /// als `isFirstBlockQuote` bzw. `isLastBlockQuote` markiert und am Übergang
+            /// werden `paragraphSpacingBefore` / `paragraphSpacing` ausgespart, was die
+            /// BlockQuotes visuell voneinander trennt.
             let currBlockQuote = block.hasBlockQuote
+            let currIdentity   = block.blockQuoteIdentity
+            let prevSameQuote  = index > 0
+                && allBlocks[index-1].hasBlockQuote
+                && allBlocks[index-1].block?.blockQuoteIdentity == currIdentity
+            let nextSameQuote  = index < allBlocks.count - 1
+                && allBlocks[index+1].hasBlockQuote
+                && allBlocks[index+1].block?.blockQuoteIdentity == currIdentity
             
             /// Start eines BlockQuote
-            if  currBlockQuote && !prevBlockQuote {
+            if  currBlockQuote && !prevSameQuote {
                 allBlocks[index].isFirstBlockQuote = true
 //                attrText.addAttributes([.foregroundColor: UIColor.systemPurple], range: NSRange(location: 0, length: 1))
             }
             
             /// Ende eines BlockQuote
-            if currBlockQuote && !nextBlockQuote {
+            if currBlockQuote && !nextSameQuote {
                 allBlocks[index].isLastBlockQuote = true
+//                paragraphSpacing = paragraphSpacing * 2
 //                attrText.addAttributes([.foregroundColor: UIColor.systemTeal], range: NSRange(location: 1, length: 1))
             }
-            
-            /// Absatz nach einer BlockQuote
-            if !currBlockQuote && prevBlockQuote {
-                
-            }
-            
-            /// Absatz vor einer BlockQuote
-            if !currBlockQuote && nextBlockQuote {
-                
-            }
-            
+                        
             ///-------------------------------------------------------------------------------
             /// Header erkennen und den Font des Headers ergänzen
             if block.hasHeader {

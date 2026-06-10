@@ -774,6 +774,7 @@ final class TableRenderer: BlockRenderer {
     private var columnWidths: [CGFloat]
     private var rowHeights: [CGFloat] = []
     private var tableRect: CGRect = .zero
+    private var bottomSpacing: CGFloat = 0
     
     init(blockContents: [BlockContent]) {
         let firstBlock = blockContents.first ?? BlockContent(attrText: NSAttributedString(), block: nil, range: AttributedString().startIndex..<AttributedString().endIndex)
@@ -831,7 +832,7 @@ final class TableRenderer: BlockRenderer {
         rowHeights = measureRowHeights(columnWidths: columnWidths)
         
         let tableHeight = rowHeights.reduce(0, +)
-        let bottomSpacing = documentTypography.paragraph.paragraphSpacing
+        bottomSpacing = documentTypography.paragraph.paragraphSpacing
         tableRect = CGRect(x: leftIndent, y: bottomSpacing, width: columnWidths.reduce(0, +), height: tableHeight)
         let totalHeight = tableHeight + bottomSpacing
         frame = CGRect(x: 0, y: y, width: width, height: totalHeight)
@@ -840,7 +841,21 @@ final class TableRenderer: BlockRenderer {
     
     func draw(in context: CGContext) {
         guard !columnWidths.isEmpty, !rowHeights.isEmpty else { return }
-        
+
+        /// BlockQuote-Hintergrund (Balken + BG) durchgängig hinter der Tabelle zeichnen,
+        /// damit er optisch nicht unterbrochen wirkt – analog zum CodeBlock.
+        /// Im Frame liegt der `tableRect` ganz oben (kein paragraphSpacingBefore), darunter
+        /// ein freier `bottomSpacing`-Bereich. Bei `isLastBlockQuote` wird dieser Bereich
+        /// ausgespart, damit zum nächsten Block ein Abstand bleibt.
+        if blockContent.block?.hasBlockQuote ?? false {
+            let bottomTrim = blockContent.isLastBlockQuote ? bottomSpacing : 0
+            let blockQuoteRect = CGRect(x: 0,
+                                        y: bottomTrim,
+                                        width: frame.width,
+                                        height: frame.height - bottomTrim)
+            drawBlockQuote(in: context, rect: blockQuoteRect)
+        }
+
         drawBackgrounds(in: context)
         drawCellTexts(in: context)
         drawGrid(in: context)
