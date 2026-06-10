@@ -225,6 +225,15 @@ extension SettingsController {
                  getMarkdown: { Markdown.Ruler.paddingRight },
                  setMarkdown: { Markdown.Ruler.paddingRight = $0 }),
 
+        // ── Markdown.Table ─────────────────────────────────────
+        FieldMap(settingsKey: \Settings.tableIndentLeft,
+                 getMarkdown: { Markdown.Table.indentLeft },
+                 setMarkdown: { Markdown.Table.indentLeft = $0 }),
+
+        FieldMap(settingsKey: \Settings.tableIndentRight,
+                 getMarkdown: { Markdown.Table.indentRight },
+                 setMarkdown: { Markdown.Table.indentRight = $0 }),
+
         // ── Markdown.PDF ───────────────────────────────────────
         FieldMap(settingsKey: \Settings.pdfTextSize,
                  getMarkdown: { Markdown.PDF.textSize },

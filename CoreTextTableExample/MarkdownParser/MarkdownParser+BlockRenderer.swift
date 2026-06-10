@@ -627,6 +627,8 @@ final class CodeBlockRenderer: BlockRenderer {
             paragraphStyle.headIndent          = 0
             paragraphStyle.tailIndent          = 0
             paragraphStyle.lineHeightMultiple  = metrics.lineHeightMultiple
+            paragraphStyle.paragraphSpacing    = 0
+            paragraphStyle.paragraphSpacingBefore = 0
             paragraphStyle.minimumLineHeight   = 0
             
             /// Den Text übernehmen und die Attribute des Absatzes zufügen.
@@ -651,14 +653,15 @@ final class CodeBlockRenderer: BlockRenderer {
         )
 
         let textHeight = ceil(size.height)
-        let totalHeight = textHeight + padding.top + padding.bottom
+        let boxHeight = textHeight + padding.top + padding.bottom
+        let totalHeight = metrics.paragraphSpacingBefore + boxHeight + metrics.paragraphSpacing
 
         self.frame = CGRect(x: metrics.outerLeftIndent,
                             y: y,
                             width: availableWidth,
                             height: totalHeight)
 
-        return totalHeight + metrics.paragraphSpacing
+        return totalHeight
     }
 
     func draw(in context: CGContext) {
@@ -674,7 +677,10 @@ final class CodeBlockRenderer: BlockRenderer {
 
         /// Den Rahmen um die halbe Linienbreite nach innen ziehen, damit er vollständig im Frame liegt.
         let inset = max(borderWidth / 2, 0)
-        let rectBackground = CGRect(origin: .zero, size: frame.size)
+        let rectBackground = CGRect(x: 0,
+                                    y: metrics.paragraphSpacing,
+                                    width: frame.width,
+                                    height: frame.height - metrics.paragraphSpacingBefore - metrics.paragraphSpacing)
         context.addPath(
             UIBezierPath(
                 roundedRect: rectBackground.insetBy(dx: inset, dy: inset),
@@ -758,8 +764,14 @@ final class TableRenderer: BlockRenderer {
     
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         let hasBlockQuote = blockContent.block?.hasBlockQuote ?? false
-        let leftIndent = hasBlockQuote ? documentTypography.blockQuote.blockQuoteContentIndent : CGFloat(M.marginLeft)
-        let availableWidth = max(0, width - leftIndent - CGFloat(M.marginRight))
+        /// Basis-Einzug links: innerhalb eines BlockQuote der bereits berechnete Content-Einzug,
+        /// sonst der globale linke Dokument-Rand. Steht die Tabelle innerhalb einer Liste,
+        /// wandert sie über `tableIndent` mit der Hierarchie mit. `Markdown.Table.indentLeft`
+        /// und `indentRight` werden additiv darauf angewendet.
+        let baseLeft = hasBlockQuote ? documentTypography.blockQuote.blockQuoteContentIndent : CGFloat(M.marginLeft)
+        let leftIndent = baseLeft + blockContent.tableIndent + CGFloat(MT.indentLeft)
+        let rightIndent = CGFloat(M.marginRight) + CGFloat(MT.indentRight)
+        let availableWidth = max(0, width - leftIndent - rightIndent)
         columnWidths = Self.fittedColumnWidths(from: tableBlock.columns,
                                                availableWidth: availableWidth,
                                                padding: padding,

@@ -20,25 +20,31 @@ extension SettingViewController  {
 
     enum TableSetting: String, @MainActor BasicDetail, CaseIterable {
 
-        case tableUseDefaultGridColor,            tableGridColor,
+        case tableIndentLeft, tableIndentRight,
+             tableUseDefaultGridColor,            tableGridColor,
              tableUseDefaultHeaderBackgroundColor, tableHeaderBackgroundColor,
              tableUseDefaultBackgroundColor,       tableBackgroundColor
 
         /// Titel des Items
         var title: TextSourceConvertible? {
             switch self {
-            case .tableUseDefaultGridColor:             "Standardfarbe".markdown(size: 15)
-            case .tableGridColor:                       "Eigene Farbe" .markdown(size: 15)
-            case .tableUseDefaultHeaderBackgroundColor: "Standardfarbe".markdown(size: 15)
-            case .tableHeaderBackgroundColor:           "Eigene Farbe" .markdown(size: 15)
-            case .tableUseDefaultBackgroundColor:       "Standardfarbe".markdown(size: 15)
-            case .tableBackgroundColor:                 "Eigene Farbe" .markdown(size: 15)
+            case .tableIndentLeft:                      "Linker Einzug" .markdown(size: 15)
+            case .tableIndentRight:                     "Rechter Einzug".markdown(size: 15)
+            case .tableUseDefaultGridColor:             "Standardfarbe" .markdown(size: 15)
+            case .tableGridColor:                       "Eigene Farbe"  .markdown(size: 15)
+            case .tableUseDefaultHeaderBackgroundColor: "Standardfarbe" .markdown(size: 15)
+            case .tableHeaderBackgroundColor:           "Eigene Farbe"  .markdown(size: 15)
+            case .tableUseDefaultBackgroundColor:       "Standardfarbe" .markdown(size: 15)
+            case .tableBackgroundColor:                 "Eigene Farbe"  .markdown(size: 15)
             }
         }
 
         /// Zusätzliche Parameter, die im Wesentlichen für Images, Selektion, ... benötigt werden.
         var parameter: [KeyText]? {
             switch self {
+            case .tableIndentLeft, .tableIndentRight:
+                    .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(80).stepValue(1)
+
             case .tableUseDefaultGridColor,
                  .tableUseDefaultHeaderBackgroundColor,
                  .tableUseDefaultBackgroundColor:
@@ -56,6 +62,7 @@ extension SettingViewController  {
         /// Konfiguration entsprechend des Datentyps
         var contentViewType: ContentViewType {
             switch self {
+            case .tableIndentLeft, .tableIndentRight: .stepper
             case .tableUseDefaultGridColor,
                  .tableUseDefaultHeaderBackgroundColor,
                  .tableUseDefaultBackgroundColor: .button
@@ -80,8 +87,16 @@ extension SettingViewController  {
         /// items als BasicType anlegen
         var items = [BasicType]()
 
+        var info1 = "Einzüge".markdown(size: 17, weight: .semibold, textcolor: .textGray).asContentDataLayout()
+        info1.layoutMargins = .init(top: 8, leading: 0, bottom: 8, trailing: 0)
+        items.append(.basic(info1))
+
+        items.append(.basic(Content.tableIndentLeft  .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+        items.append(.basic(Content.tableIndentRight .line(setting, .rw, labelWidth: w).leadingMargin(10)))
+
         let textGitter = "Gitterlinien".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkGitter = BasicType.stdItem(textGitter, presentation: .outlineDisclosure)
+        items.append(.vDivider(6, color: .systemGray5, layoutMargins: layoutMargins))
         items.append(linkGitter)
 
         let itemsGitter: [BasicType] = [

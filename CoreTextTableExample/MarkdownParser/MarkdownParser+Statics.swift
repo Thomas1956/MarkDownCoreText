@@ -84,11 +84,16 @@ public struct Markdown {
         static var footerTextScale: Double = 0.8                /// Schriftgröße der Fußzeile relativ zum Text
     }
     
-    /// Konstanten für die Tabelle
+    /// Konstanten für die Tabelle.
+    /// `indentLeft` / `indentRight` werden additiv zum globalen `marginLeft` / `marginRight`
+    /// (bzw. zum Hierarchie-Einzug innerhalb einer Liste) auf die Tabelle angewendet.
     struct Table {
         static var weightText                       : UIFont.Weight = .regular      /// Stil des Textes
         static var weightHeader                     : UIFont.Weight = .bold         /// Stil der Überschrift
         static var weightBox                        : UIFont.Weight = .ultraLight   /// Stil der Balken
+
+        static var indentLeft                       : Double  = 0                   /// Zusätzlicher Einzug links
+        static var indentRight                      : Double  = 0                   /// Zusätzlicher Einzug rechts
 
         static var useDefaultGridColor              : Bool    = true                /// Gitterfarbe aus Textfarbe ableiten
         static var gridColor                        : UIColor = .systemGray4        /// Eigene Farbe für das Gitter
@@ -140,8 +145,8 @@ public struct Markdown {
     /// auf die Hintergrundbox angewendet. `paddingLeft` / `paddingRight` sind die
     /// Innenabstände vom BG-Rand zum Text.
     struct CodeBlock {
-        static var textSizeFactor            : Double  = 80.0           /// Prozentuale Größe des Textfonts
-        static var lineHeightMultiple        : Double  = 1.0            /// Zeilenabstand im Code Block
+        static var textSizeFactor            : Double  = 95.0           /// Prozentuale Größe des Textfonts
+        static var lineHeightMultiple        : Double  = 1.1            /// Zeilenabstand im Code Block
         static var spacing                   : Double  = 6.0            /// Abstand nach dem Code Block
         static var spacingBefore             : Double  = 6.0            /// Abstand vor dem Code Block
 

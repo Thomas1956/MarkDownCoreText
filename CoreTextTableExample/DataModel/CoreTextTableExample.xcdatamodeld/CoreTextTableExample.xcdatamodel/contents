@@ -39,6 +39,8 @@
         <attribute name="rulerPaddingRight" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="rulerRawColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="rulerUseHighlightColor" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="tableIndentLeft" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="tableIndentRight" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="tableRawBackgroundColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="tableRawGridColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="tableRawHeaderBackgroundColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>

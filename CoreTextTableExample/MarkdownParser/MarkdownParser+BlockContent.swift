@@ -26,6 +26,7 @@ struct BlockContent {
     var headIndent          : CGFloat
     var firstLineHeadIndent : CGFloat
     var blockQuoteIndent    : CGFloat
+    var tableIndent         : CGFloat
     var tableBlock          : TableBlock
     
     var isFirstBlockQuote   : Bool
@@ -88,6 +89,9 @@ struct BlockContent {
         /// 0 = kein zusätzlicher Versatz für den BlockQuote-Hintergrund. Wird nur dann gesetzt, wenn der
         /// BlockQuote innerhalb einer Liste steht (siehe `prepareBlocks`).
         self.blockQuoteIndent    = 0
+        /// 0 = kein zusätzlicher Versatz für die Tabelle. Wird nur dann gesetzt, wenn die Tabelle
+        /// innerhalb einer Liste steht (siehe `prepareBlocks`).
+        self.tableIndent         = 0
         
         self.tableBlock = TableBlock()
         
@@ -182,6 +186,7 @@ struct BlockContent {
         var dictArrIndent   = [Int: CGFloat]()
         var dictHeadIndent  = [String: CGFloat]()       /// Dictionary der Einzüge in der Hierachie für gleiche Absätze
         var dictBlockIndent = [Int: CGFloat]()          /// Dictionary der Einzüge für den Block Indent
+        var dictTableIndent = [Int: CGFloat]()          /// Dictionary der Hierarchie-Einzüge pro Tabellen-Identity
         var dictTableBlock  = [Int: BlockContent.TableBlock]()
         var prevKey         = ""                        /// Key des vorherigen Blocks
         
@@ -311,6 +316,14 @@ struct BlockContent {
                     blockQuoteIndent = headIndent
                 }
             }
+
+            ///-------------------------------------------------------------------------------
+            /// Tabelle innerhalb einer Liste-Hierarchie berücksichtigen.
+            /// Den Listen-Einzug der ersten Zelle für ALLE Zellen derselben Tabelle wiederverwenden,
+            /// damit die ganze Tabelle einheitlich mit der Liste mitwandert.
+            if let tableId = block.tableIdentity, dictTableIndent[tableId] == nil {
+                dictTableIndent[tableId] = headIndent
+            }
             
             ///-------------------------------------------------------------------------------
             /// Speichern der berechneten Werte für die Einzüge
@@ -399,6 +412,9 @@ struct BlockContent {
             if let tableBlock = dictTableBlock[id] {
                 allBlocks[index].tableBlock = tableBlock
             }
+            if let tableIndent = dictTableIndent[id] {
+                allBlocks[index].tableIndent = tableIndent
+            }
         }
         
 //        for table in dictTableBlock {
@@ -479,13 +495,12 @@ struct BlockContent {
             
             ///-------------------------------------------------------------------------------
             /// Code Block erkennen und den Font des Code Block ergänzen.
-            /// Die horizontalen Einzüge werden vom `CodeBlockRenderer` direkt aus den Metrics
-            /// gesetzt; hier braucht es nur Font und vertikale Abstände.
+            /// Die äußeren Abstände vor/nach dem CodeBlock setzt der `CodeBlockRenderer`.
             if block.hasCodeBlock {
                 let codeMetrics = typography.codeBlock
                 attrText.addAttributes([.font: font])
-                paragraphSpacingBefore = codeMetrics.paragraphSpacingBefore
-                paragraphSpacing       = codeMetrics.paragraphSpacing
+                paragraphSpacingBefore = 0
+                paragraphSpacing       = 0
                 lineHeightMultiple     = codeMetrics.lineHeightMultiple
             }
             

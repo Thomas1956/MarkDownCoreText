@@ -78,11 +78,12 @@ extension NSAttributedString {
             let len = CTTypesetterSuggestLineBreak(ts, 0, Double(effWidth))
             guard len > 0 else { break }
 
-            /// Einen Swift-String aus dem Reststring machen
-            let lineStr = slice.string
+            /// Einen NSString aus dem Reststring machen; Core Text liefert UTF-16-Laengen.
+            let lineStr = slice.string as NSString
+            guard len <= lineStr.length else { break }
 
             /// Letztes Zeichen der Zeile als UTF‑16‑Codeunit
-            let lastUTF16 = lineStr.utf16[lineStr.utf16.index(lineStr.utf16.startIndex, offsetBy: len-1)]
+            let lastUTF16 = lineStr.character(at: len - 1)
 
             ///-------------------------------------------------------------------------------
             /// 1. P A S S :  Wenn ein  SHY steht am Ende – durch Hyphen ersetzen
@@ -107,17 +108,18 @@ extension NSAttributedString {
             /// 2. P A S S :  Wenn wir vorher einen Hyphen eingefügt hatten, der jetzt mitten in der Zeile steht, müssen wir
             /// den jetzt löschen. Wir suchen in der Zeile nach dem letzten eingesetzen HYPHEN.
   
-            /// Range ohne den letzten Code‑Unit
-            let innerRange = lineStr[..<lineStr.index(lineStr.startIndex, offsetBy: len - 1)]
+            /// Range ohne den letzten Code-Unit
+            let innerRange = NSRange(location: 0, length: max(0, len - 1))
 
             /// Suchen des ersten Auftretens eines HYPHEN
-            if let relPos = innerRange.firstIndex(of: "\u{2010}") {
+            let relRange = lineStr.range(of: "\u{2010}", options: [], range: innerRange)
+            if relRange.location != NSNotFound {
 
                 /// Auf den Index in `mutable` umrechnen
-                let deleteIdx = idx + lineStr.distance(from: lineStr.startIndex, to: relPos)
+                let deleteIdx = idx + relRange.location
                 
                 /// Löschen des HYPEN
-                mutable.deleteCharacters(in: .init(location: deleteIdx, length: 1))
+                mutable.deleteCharacters(in: .init(location: deleteIdx, length: relRange.length))
                 
                 /// Die gleiche Zeile erneut prüfen (keine Erhöhung des Index)
                 continue
