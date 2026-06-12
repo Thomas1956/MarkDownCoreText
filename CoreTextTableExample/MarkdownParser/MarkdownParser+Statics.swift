@@ -50,6 +50,7 @@ public struct Markdown {
          .phone: [24, 18, 16, 16, 16, 16]]
     }
     
+    /// Absatzabstände (vor/nach) für die Header
     static func headerSpacing(level: Int, size: CGFloat) -> (before: CGFloat, after: CGFloat) {
         switch level {
         case 1:  return (before: size * 0.90, after: size * 0.30)
@@ -58,6 +59,18 @@ public struct Markdown {
         case 4:  return (before: size * 0.55, after: size * 0.20)
         case 5:  return (before: size * 0.45, after: size * 0.18)
         default: return (before: size * 0.40, after: size * 0.16)
+        }
+    }
+
+    /// Absatzabstände (vor/nach) für die Header bei AUFEINANDER folgenden Headern
+    static func consecutiveHeaderSpacingBefore(level: Int, size: CGFloat) -> CGFloat {
+        switch level {
+        case 1:  return size * 0.25
+        case 2:  return size * 0.22
+        case 3:  return size * 0.18
+        case 4:  return size * 0.15
+        case 5:  return size * 0.12
+        default: return size * 0.10
         }
     }
 

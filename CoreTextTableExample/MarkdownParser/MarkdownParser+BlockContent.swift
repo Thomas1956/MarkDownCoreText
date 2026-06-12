@@ -504,8 +504,13 @@ struct BlockContent {
             /// Header erkennen und den Font des Headers ergänzen
             if block.hasHeader {
                 let headerMetrics = typography.header(level: block.headerLevel ?? 1)
+                let previousBlockHasHeader = index > 0 && allBlocks[index - 1].block?.hasHeader == true
                 attrText.addAttributes([.font: font])
-                paragraphSpacingBefore = index > 0 ? headerMetrics.paragraphSpacingBefore : 0
+                paragraphSpacingBefore = index == 0
+                    ? 0
+                    : (previousBlockHasHeader
+                       ? headerMetrics.consecutiveParagraphSpacingBefore
+                       : headerMetrics.paragraphSpacingBefore)
                 paragraphSpacing = headerMetrics.paragraphSpacing
             }
             
