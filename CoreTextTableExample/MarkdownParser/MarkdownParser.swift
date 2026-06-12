@@ -32,10 +32,9 @@ public class MarkdownParser {
         let parsedDocument = parseDocumentMetadata(from: string)
         pdfFooter = parsedDocument.footer
         
-        /// E-Mail-Autolinks `<x@y.tld>` werden von Foundations Markdown-Parser nicht als Link
-        /// erkannt. Wir schreiben sie vor dem Parsen in einen klassischen Markdown-Link mit
-        /// `mailto:`-Schema um – danach läuft die normale Link-Styling-/Tap-Pipeline.
-        let preProcessed = rewriteEmailAutolinks(in: parsedDocument.markdown)
+        /// Kleine Vorverarbeitung für Syntax, die Foundations Markdown-Parser nicht oder nicht
+        /// passend zur App-Pipeline interpretiert.
+        let preProcessed = rewriteHTMLFragments(in: rewriteEmailAutolinks(in: parsedDocument.markdown))
         
         /// Automatischen Silbentrennung mit dem Einfügen von Soft-Hyphen
         let string = preProcessed.stringWithHyphens()
@@ -118,6 +117,82 @@ public class MarkdownParser {
                                               options: [],
                                               range: fullRange,
                                               withTemplate: "[$1](mailto:$1)")
+    }
+
+    //----------------------------------------------------------------------------------------
+    // MARK: - Einfache HTML-Fragmente vorverarbeiten
+
+    /// Übersetzt kleine HTML-Fragmente in bestehende Markdown/User-Attribute. Das ist kein
+    /// vollständiger HTML-Parser; es deckt bewusst nur typische Inline-HTML-Beispiele ab.
+    private static func rewriteHTMLFragments(in source: String) -> String {
+        var result = source
+        result = replaceHTMLSpansWithColor(in: result)
+        result = replaceHTMLTagPair(in: result, tag: "strong", marker: "**")
+        result = replaceHTMLTagPair(in: result, tag: "b", marker: "**")
+        result = replaceHTMLTagPair(in: result, tag: "em", marker: "*")
+        result = replaceHTMLTagPair(in: result, tag: "i", marker: "*")
+        result = replaceHTMLLineBreaks(in: result)
+        result = stripHTMLTag(in: result, tag: "div")
+        result = stripHTMLTag(in: result, tag: "p")
+        return result
+    }
+
+    private static func replaceHTMLSpansWithColor(in source: String) -> String {
+        let pattern = #"(?is)<span\b(?=[^>]*\bstyle\s*=\s*[\"'][^\"']*\bcolor\s*:\s*([^;\"']+))[^>]*>(.*?)</span>"#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return source }
+        let nsSource = source as NSString
+        let matches = regex.matches(in: source, range: NSRange(location: 0, length: nsSource.length))
+        guard !matches.isEmpty else { return source }
+
+        var result = source
+        for match in matches.reversed() {
+            let color = nsSource.substring(with: match.range(at: 1))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let text = nsSource.substring(with: match.range(at: 2))
+            let replacement = "^[\(text)](color: '\(color)')"
+            if let range = Range(match.range, in: result) {
+                result.replaceSubrange(range, with: replacement)
+            }
+        }
+        return result
+    }
+
+    private static func replaceHTMLTagPair(in source: String, tag: String, marker: String) -> String {
+        let pattern = #"(?is)<\#(tag)\b[^>]*>(.*?)</\#(tag)>"#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return source }
+        let nsSource = source as NSString
+        let matches = regex.matches(in: source, range: NSRange(location: 0, length: nsSource.length))
+        guard !matches.isEmpty else { return source }
+
+        var result = source
+        for match in matches.reversed() {
+            let text = nsSource.substring(with: match.range(at: 1))
+            let replacement = marker + text + marker
+            if let range = Range(match.range, in: result) {
+                result.replaceSubrange(range, with: replacement)
+            }
+        }
+        return result
+    }
+
+    private static func replaceHTMLLineBreaks(in source: String) -> String {
+        let pattern = #"(?i)<br\s*/?>"#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return source }
+        let fullRange = NSRange(location: 0, length: (source as NSString).length)
+        return regex.stringByReplacingMatches(in: source,
+                                              options: [],
+                                              range: fullRange,
+                                              withTemplate: "  \n")
+    }
+
+    private static func stripHTMLTag(in source: String, tag: String) -> String {
+        let pattern = #"(?is)</?\#(tag)\b[^>]*>"#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return source }
+        let fullRange = NSRange(location: 0, length: (source as NSString).length)
+        return regex.stringByReplacingMatches(in: source,
+                                              options: [],
+                                              range: fullRange,
+                                              withTemplate: "")
     }
 }
 
