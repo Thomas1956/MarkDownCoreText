@@ -172,6 +172,47 @@ struct BlockContent {
     }
     
     
+    private static func normalizedDefinitionList(_ source: NSMutableAttributedString)
+    -> (attrText: NSMutableAttributedString, termRange: NSRange)?
+    {
+        let separator = String.lineSeparator
+        let lines = source.string.components(separatedBy: separator)
+        guard lines.count >= 2 else { return nil }
+
+        let term = lines[0].trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !term.isEmpty, !term.hasPrefix(":") else { return nil }
+
+        var deleteRanges: [NSRange] = []
+        var location = (lines[0] as NSString).length + (separator as NSString).length
+        for line in lines.dropFirst() {
+            let nsLine = line as NSString
+            var index = 0
+            while index < nsLine.length {
+                let scalar = UnicodeScalar(nsLine.character(at: index))
+                guard let scalar, CharacterSet.whitespaces.contains(scalar) else { break }
+                index += 1
+            }
+
+            guard index < nsLine.length, nsLine.character(at: index) == 58 else { return nil }
+
+            var deleteLength = index + 1
+            while deleteLength < nsLine.length {
+                let scalar = UnicodeScalar(nsLine.character(at: deleteLength))
+                guard let scalar, CharacterSet.whitespaces.contains(scalar) else { break }
+                deleteLength += 1
+            }
+            deleteRanges.append(NSRange(location: location, length: deleteLength))
+            location += nsLine.length + (separator as NSString).length
+        }
+
+        let mutable = NSMutableAttributedString(attributedString: source)
+        for range in deleteRanges.reversed() {
+            mutable.deleteCharacters(in: range)
+        }
+
+        return (mutable, NSRange(location: 0, length: (lines[0] as NSString).length))
+    }
+
     private static func prepareBlocks(allBlocks: inout [BlockContent],
                                       attrText: AttributedString, typography: MarkdownTypography)
     {
@@ -181,6 +222,7 @@ struct BlockContent {
         typealias ML = Markdown.List
         typealias MT = Markdown.Table
         typealias MC = Markdown.CodeBlock
+        typealias MD = Markdown.DefinitionList
         
         ///-----------------------------------------------------------------------------------
         /// 1 .  D U R C H L A U F  :   Berechnen der Arrays für die Tabellen und Listen
@@ -509,7 +551,8 @@ struct BlockContent {
                 paragraphSpacingBefore = index == 0
                     ? 0
                     : (previousBlockHasHeader
-                       ? headerMetrics.consecutiveParagraphSpacingBefore
+                       ? Markdown.consecutiveHeaderSpacingBefore(level: headerMetrics.level,
+                                                                 size: headerMetrics.font.pointSize)
                        : headerMetrics.paragraphSpacingBefore)
                 paragraphSpacing = headerMetrics.paragraphSpacing
             }
@@ -525,6 +568,23 @@ struct BlockContent {
                 lineHeightMultiple     = codeMetrics.lineHeightMultiple
             }
             
+            ///-------------------------------------------------------------------------------
+            /// Definition List erkennen: erster Eintrag ist der Begriff, folgende Zeilen
+            /// beginnen mit `:` und werden als eingerückte Definitionen dargestellt.
+            if block.hasParagraph,
+               !block.hasList,
+               !block.hasTable,
+               !block.hasHeader,
+               !block.hasCodeBlock,
+               let definitionList = normalizedDefinitionList(attrText) {
+                attrText = definitionList.attrText
+                attrText.addAttributes([.font: UIFont.systemFont(ofSize: font.pointSize,
+                                                                 weight: MD.termWeight)],
+                                       range: definitionList.termRange)
+                firstLineHeadIndent = CGFloat(M.marginLeft)
+                headIndent = CGFloat(M.marginLeft) + typography.scaled(CGFloat(MD.indentLeft))
+            }
+
             ///-------------------------------------------------------------------------------
             /// List erkennen und die Bullets voranstellen
             if block.hasList {

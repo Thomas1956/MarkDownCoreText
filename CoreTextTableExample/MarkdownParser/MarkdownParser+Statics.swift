@@ -121,6 +121,12 @@ public struct Markdown {
         static var bulletPoint      : [String] = [.listBullet_1, .listBullet_2, .listBullet_3]
         static var leftIndent       : Double = 10               /// Linker Rand der untersten Hierarchie
     }
+
+    /// Konstanten für Definition Lists (`Begriff` gefolgt von `: Definition`).
+    struct DefinitionList {
+        static var indentLeft       : Double = 20               /// Einzug der Definitionszeilen
+        static var termWeight       : UIFont.Weight = .semibold /// Stil des Begriffs
+    }
     
     /// Konstanten für den vertikalen Trennstrich (Ruler).
     /// `paddingLeft` / `paddingRight` werden vom linken/rechten Rand des Absatztextes gemessen.

@@ -28,7 +28,6 @@ struct MarkdownTypography {
         let level: Int
         let font: UIFont
         let paragraphSpacingBefore: CGFloat
-        let consecutiveParagraphSpacingBefore: CGFloat
         let paragraphSpacing: CGFloat
         let firstLineHeadIndent: CGFloat
         let headIndent: CGFloat
@@ -148,7 +147,6 @@ struct MarkdownTypography {
             level: safeLevel,
             font: font,
             paragraphSpacingBefore: spacing.before,
-            consecutiveParagraphSpacingBefore: Markdown.consecutiveHeaderSpacingBefore(level: safeLevel, size: size),
             paragraphSpacing: spacing.after,
             firstLineHeadIndent: 0,
             headIndent: 0
