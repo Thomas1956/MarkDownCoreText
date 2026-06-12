@@ -264,6 +264,10 @@ extension EditViewController: UIDocumentPickerDelegate {
                 try Data(contentsOf: url)
             }
             MarkdownDocumentLocation.shared.updateLoadedFileURL(url)
+            /// Direkt nach dem Auswählen versuchen, das Eltern-Verzeichnis als Folder-
+            /// Bookmark zu sichern. Falls das System es zulässt, sind Bilder neben der
+            /// `.md`-Datei ohne extra Folder-Picker zugänglich.
+            MarkdownImageLocation.shared.captureFolder(forDocumentAt: url)
             /// Versuche UTF-8, fallback auf String(decoding:)
             if let str = String(data: data, encoding: .utf8) {
                 textView.text = str

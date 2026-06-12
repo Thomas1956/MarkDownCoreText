@@ -16,6 +16,7 @@
 		E92C9B162DDF4B4C00750AB4 /* SettingViewController+PDF.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */; };
 		E93B3BAB2DE246A9007436C5 /* SettingViewController+BlockQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = E93B3BAA2DE246A9007436C5 /* SettingViewController+BlockQuote.swift */; };
 		E941926B2FD7FA7900C4C788 /* CommonCollection in Frameworks */ = {isa = PBXBuildFile; productRef = E941926A2FD7FA7900C4C788 /* CommonCollection */; };
+		E941926D2FD9BE3100C4C788 /* MarkdownImageLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E941926C2FD9BE3000C4C788 /* MarkdownImageLocation.swift */; };
 		E949006E2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */; };
 		E94900892DCB99F600DD7880 /* NSTextTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94900882DCB99F000DD7880 /* NSTextTab.swift */; };
 		E949008C2DCCB49B00DD7880 /* CommonSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E949008B2DCCB49B00DD7880 /* CommonSplitViewController.swift */; };
@@ -73,6 +74,7 @@
 		E92C9B132DDF1FD800750AB4 /* SettingsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsController.swift; sourceTree = "<group>"; };
 		E92C9B152DDF4B4C00750AB4 /* SettingViewController+PDF.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+PDF.swift"; sourceTree = "<group>"; };
 		E93B3BAA2DE246A9007436C5 /* SettingViewController+BlockQuote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingViewController+BlockQuote.swift"; sourceTree = "<group>"; };
+		E941926C2FD9BE3000C4C788 /* MarkdownImageLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownImageLocation.swift; sourceTree = "<group>"; };
 		E949006D2DCA0ABE00DD7880 /* Markdown+Hyphenation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Markdown+Hyphenation.swift"; sourceTree = "<group>"; };
 		E94900792DCB7ECA00DD7880 /* HyphenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HyphenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E94900882DCB99F000DD7880 /* NSTextTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSTextTab.swift; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 				E9A9406B2DC4ECA6004501E6 /* MarkdownScrollView.swift */,
 				E9A940632DC4ECA6004501E6 /* MarkdownContentView.swift */,
 				E95C52FA2FC9CDD90089054B /* MarkdownDocumentLocation.swift */,
+				E941926C2FD9BE3000C4C788 /* MarkdownImageLocation.swift */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -407,6 +410,7 @@
 				E9A9407F2DC4ECA6004501E6 /* MarkdownParser+PresentationIntent.swift in Sources */,
 				E94900A82DCE5C0E00DD7880 /* SettingViewController+Action.swift in Sources */,
 				E90395462EDDE3B9001E660F /* MarkdownParser+Highlight.swift in Sources */,
+				E941926D2FD9BE3100C4C788 /* MarkdownImageLocation.swift in Sources */,
 				E94900B42DCE62BB00DD7880 /* CoreTextTableExample.xcdatamodeld in Sources */,
 				E93B3BAB2DE246A9007436C5 /* SettingViewController+BlockQuote.swift in Sources */,
 				E94900A92DCE5C0E00DD7880 /* SettingViewController+DataSource.swift in Sources */,

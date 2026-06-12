@@ -35,6 +35,20 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "MarkdownImageLocation.resolveLocalImageURL(named:):MarkdownImageLocation.swift">
+      </ContextState>
+      <ContextState
+         contextName = "MarkdownImageLocation.loadImage(named:):MarkdownImageLocation.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "folderURL">
+            </PersistentString>
+            <PersistentString
+               value = "url.path">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in MarkdownScrollView.markdown(string:size:weight:textColor:):MarkdownScrollView.swift">
       </ContextState>
       <ContextState

@@ -32,8 +32,13 @@ public class MarkdownParser {
         let parsedDocument = parseDocumentMetadata(from: string)
         pdfFooter = parsedDocument.footer
         
+        /// E-Mail-Autolinks `<x@y.tld>` werden von Foundations Markdown-Parser nicht als Link
+        /// erkannt. Wir schreiben sie vor dem Parsen in einen klassischen Markdown-Link mit
+        /// `mailto:`-Schema um – danach läuft die normale Link-Styling-/Tap-Pipeline.
+        let preProcessed = rewriteEmailAutolinks(in: parsedDocument.markdown)
+        
         /// Automatischen Silbentrennung mit dem Einfügen von Soft-Hyphen
-        let string = parsedDocument.markdown.stringWithHyphens()
+        let string = preProcessed.stringWithHyphens()
 
         let rawAttr: AttributedString
         do {
@@ -95,6 +100,24 @@ public class MarkdownParser {
 //        attr.debugInfo(.presentationIntent, "Nach Inline Presentation")
 
         return CoreTextBlockFactory.renderers(from: attr, typography: typo)
+    }
+
+    //----------------------------------------------------------------------------------------
+    // MARK: - E-Mail-Autolinks vorverarbeiten
+
+    /// Ersetzt CommonMark-konforme E-Mail-Autolinks `<x@y.tld>` durch einen klassischen
+    /// Markdown-Link `[x@y.tld](mailto:x@y.tld)`. Foundations Markdown-Parser erkennt die
+    /// `<…>`-Form nicht als Link – nach dieser Umschreibung wird der E-Mail-Autolink wie
+    /// jeder andere Link gestylet und tap-bar.
+    private static func rewriteEmailAutolinks(in source: String) -> String {
+        let pattern = #"<([A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,})>"#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return source }
+        let ns = source as NSString
+        let fullRange = NSRange(location: 0, length: ns.length)
+        return regex.stringByReplacingMatches(in: source,
+                                              options: [],
+                                              range: fullRange,
+                                              withTemplate: "[$1](mailto:$1)")
     }
 }
 
@@ -280,6 +303,19 @@ extension MarkdownParser {
             let source = AttributeContainer([.inlinePresentationIntent: block.rawValue])
             attrText[range].replaceAttributes(source, with: destination)
         }
+
+        ///-----------------------------------------------------------------------------------
+        /// Link-Attribute visuell hervorheben (blaue Farbe + Unterstreichung). Das `.link`-Attribut
+        /// selbst bleibt erhalten, sodass der Tap-Handler im View über die String-Position die URL
+        /// auslesen und öffnen kann.
+        for (linkValue, range) in attrText.runs[\.link] {
+            guard linkValue != nil else { continue }
+            var linkAttributes = AttributeContainer()
+            linkAttributes.uiKit.foregroundColor = .systemBlue
+            linkAttributes.uiKit.underlineStyle  = .single
+            attrText[range].mergeAttributes(linkAttributes)
+        }
+
         return attrText
     }
     

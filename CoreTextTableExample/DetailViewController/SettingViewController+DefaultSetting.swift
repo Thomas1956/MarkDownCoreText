@@ -25,12 +25,18 @@ extension SettingViewController  {
    
         /// Die Strings sollen den Namen der Properties entsprechen
         case textDefaults
+        case textImageFolder
         
         var title: TextSourceConvertible? {
             switch self {
             case .textDefaults:
               """
               Die **Standardeinstellungen** wiederherstellen. Alle Einstellungen werden überschrieben.
+              """.markdown()
+            case .textImageFolder:
+              """
+              **Bilder-Ordner** für eingebettete Bilder. Bilder werden zuerst neben der Markdown-Datei \
+              gesucht, dann in diesem Ordner.
               """.markdown()
             }
         }
@@ -78,6 +84,25 @@ extension SettingViewController  {
         let linkPrint = BasicType.stdItem("Drucken oder Teilen", image: "square.and.arrow.up")
         items.append(linkPrint)
         self.linkPrint = linkPrint
+
+        ///-----------------------------------------------------------------------------------
+        /// Bilder-Ordner auswählen / zurücksetzen
+        items.append(.info(Content.textImageFolder.title))
+
+        let folderPath = MarkdownImageLocation.shared.folderURL?.path ?? "Kein Ordner ausgewählt"
+        items.append(.info(folderPath.markdown(size: 13, textcolor: .textGray)))
+
+        let linkImageFolder = BasicType.stdItem("Bilder-Ordner auswählen", image: "folder.badge.plus")
+        items.append(linkImageFolder)
+        self.linkImageFolder = linkImageFolder
+
+        if MarkdownImageLocation.shared.folderURL != nil {
+            let linkImageFolderClear = BasicType.stdItem("Bilder-Ordner entfernen", image: "folder.badge.minus")
+            items.append(linkImageFolderClear)
+            self.linkImageFolderClear = linkImageFolderClear
+        } else {
+            self.linkImageFolderClear = nil
+        }
 
         dataSource.makeSection(SectionContent.DefaultSetting, items: items.itemType)
     }

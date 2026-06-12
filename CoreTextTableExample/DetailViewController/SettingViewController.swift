@@ -40,6 +40,12 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     /// Liste der Links, die für Aktionen benötigt werden.
     var linkPrint: BasicType?
     var linkDefaults: BasicType?
+    var linkImageFolder: BasicType?
+    var linkImageFolderClear: BasicType?
+
+    /// Hält den Delegate-Proxy für den Bilder-Ordner-Picker am Leben,
+    /// solange der UIDocumentPickerViewController sichtbar ist.
+    var imageFolderPickerProxy: ImageFolderPickerProxy?
 
     ///---------------------------------------------------------------------------------------
 
@@ -268,8 +274,10 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
 
         /// Beispiel für Aufruf des Druckens
-        if item == linkPrint?    .itemType { actionShare(linkPrint) }
-        if item == linkDefaults? .itemType { actionSetDefaults() }
+        if item == linkPrint?           .itemType { actionShare(linkPrint) }
+        if item == linkDefaults?        .itemType { actionSetDefaults() }
+        if item == linkImageFolder?     .itemType { actionSelectImageFolder() }
+        if item == linkImageFolderClear?.itemType { actionClearImageFolder() }
     }
     
     /// Abfrage, ob eine Zelle ausgewählt werden kann
@@ -277,8 +285,10 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return false }
 
         /// Beispiel für Aufruf des Druckens
-        if item == linkPrint?    .itemType { return true }
-        if item == linkDefaults? .itemType { return true }
+        if item == linkPrint?           .itemType { return true }
+        if item == linkDefaults?        .itemType { return true }
+        if item == linkImageFolder?     .itemType { return true }
+        if item == linkImageFolderClear?.itemType { return true }
 
         collectionView.deselectItem(at: indexPath, animated: false)
         return false

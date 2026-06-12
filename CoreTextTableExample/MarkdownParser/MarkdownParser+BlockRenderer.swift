@@ -165,6 +165,69 @@ extension BlockRenderer {
     
     
     //----------------------------------------------------------------------------------------
+    // MARK: - Link-Treffer bestimmen
+
+    /// Liefert die URL des an `point` getroffenen Links zurück, falls vorhanden. `point` wird in
+    /// UIKit-Koordinaten relativ zum Renderer-Frame erwartet (Ursprung oben-links, y nach unten).
+    /// Default-Implementierung nutzt die gleiche Geometrie wie `drawContent` (CoreText-Frame über
+    /// `contentRect`). Renderer mit abweichendem Layout (z. B. Tabelle, CodeBlock) können das überschreiben.
+    func linkURL(at point: CGPoint) -> URL? {
+        let text = blockContent.attrText.insertingLineEndHyphens(width: contentRect.width)
+        guard text.length > 0 else { return nil }
+
+        /// Tap-Point in CoreText-Koordinaten (y nach oben, (0,0) unten-links im Frame).
+        let ctPoint = CGPoint(x: point.x, y: frame.height - point.y)
+        guard contentRect.contains(ctPoint) else { return nil }
+
+        /// Tap-Point lokal zum contentRect.origin.
+        let localPoint = CGPoint(x: ctPoint.x - contentRect.minX,
+                                 y: ctPoint.y - contentRect.minY)
+
+        let path = CGMutablePath()
+        path.addRect(CGRect(origin: .zero, size: contentRect.size))
+        let fs = CTFramesetterCreateWithAttributedString(text as CFAttributedString)
+        let ctFrame = CTFramesetterCreateFrame(fs,
+                                               CFRange(location: 0, length: text.length),
+                                               path, nil)
+
+        let lines = CTFrameGetLines(ctFrame) as! [CTLine]
+        var origins = [CGPoint](repeating: .zero, count: lines.count)
+        CTFrameGetLineOrigins(ctFrame, .init(location: 0, length: 0), &origins)
+
+        for (i, line) in lines.enumerated() {
+            var ascent: CGFloat = 0, descent: CGFloat = 0, leading: CGFloat = 0
+            let width = CGFloat(CTLineGetTypographicBounds(line, &ascent, &descent, &leading))
+            let origin = origins[i]
+            let lineRect = CGRect(x: origin.x,
+                                  y: origin.y - descent,
+                                  width: width,
+                                  height: ascent + descent + leading)
+            guard lineRect.contains(localPoint) else { continue }
+
+            let relative = CGPoint(x: localPoint.x - origin.x, y: 0)
+            let index = CTLineGetStringIndexForPosition(line, relative)
+            guard index >= 0, index < text.length else { return nil }
+
+            let value = text.attribute(.link, at: index, effectiveRange: nil)
+            if let url = value as? URL { return normalizeLinkURL(url) }
+            if let url = value as? NSURL { return normalizeLinkURL(url as URL) }
+            if let str = value as? String, let url = URL(string: str) { return normalizeLinkURL(url) }
+            return nil
+        }
+        return nil
+    }
+
+    /// E-Mail-Autolinks (`<thomas@example.com>`) liefert Foundation teils ohne `mailto:`-Schema –
+    /// `UIApplication.shared.open(...)` kann eine schemalose Adresse nicht öffnen. Wenn die URL
+    /// wie eine E-Mail aussieht und kein Schema hat, `mailto:` ergänzen.
+    private func normalizeLinkURL(_ url: URL) -> URL {
+        guard url.scheme == nil || url.scheme?.isEmpty == true else { return url }
+        let raw = url.absoluteString
+        guard raw.contains("@"), let mailto = URL(string: "mailto:\(raw)") else { return url }
+        return mailto
+    }
+
+    //----------------------------------------------------------------------------------------
     // MARK: - Zeichnen des Inhaltes (Text und Bilder)
     
     func drawContent(in context: CGContext) {
@@ -179,8 +242,60 @@ extension BlockRenderer {
         let ctFrame = CTFramesetterCreateFrame(fs, CFRange(location: 0, length: text.length), path, nil)
         CTFrameDraw(ctFrame, context)
 
+        /// PDF-Link-Annotationen für alle `.link`-Runs registrieren (no-op im Live-Drawing).
+        addPDFLinkAnnotations(in: context, text: text, ctFrame: ctFrame)
+
         /// Zeichnen der Images
         drawImages(in: context, ctFrame: ctFrame)
+    }
+
+    ///---------------------------------------------------------------------------------------
+    /// PDF-Link-Annotationen registrieren. Bei `[Text](url)`-Links zeigt das PDF sonst nur den
+    /// Anzeigetext – ohne klickbare URL. `CGPDFContextSetURLForRect` ist ein No-Op, wenn der
+    /// Context kein PDF-Context ist; im Live-Drawing entsteht also kein Overhead. Der Rechteck
+    /// wird in CoreText-Koordinaten des aktuellen Frame-Ursprungs übergeben und durch den
+    /// CTM des PDF-Contextes korrekt in Page-Default-User-Space transformiert.
+    func addPDFLinkAnnotations(in context: CGContext, text: NSAttributedString, ctFrame: CTFrame) {
+        guard text.length > 0 else { return }
+
+        let lines = CTFrameGetLines(ctFrame) as! [CTLine]
+        var origins = [CGPoint](repeating: .zero, count: lines.count)
+        CTFrameGetLineOrigins(ctFrame, .init(location: 0, length: 0), &origins)
+
+        for (i, line) in lines.enumerated() {
+            let lineRange = CTLineGetStringRange(line)
+            let nsRange = NSRange(location: lineRange.location, length: lineRange.length)
+            guard nsRange.length > 0,
+                  nsRange.location + nsRange.length <= text.length else { continue }
+
+            var ascent: CGFloat = 0, descent: CGFloat = 0, leading: CGFloat = 0
+            _ = CTLineGetTypographicBounds(line, &ascent, &descent, &leading)
+            let origin = origins[i]
+
+            text.enumerateAttribute(.link, in: nsRange, options: []) { value, runRange, _ in
+                guard let value else { return }
+                let url: URL
+                if let u = value as? URL { url = u }
+                else if let u = value as? NSURL { url = u as URL }
+                else if let s = value as? String, let u = URL(string: s) { url = u }
+                else { return }
+
+                let startX = CTLineGetOffsetForStringIndex(line, runRange.location, nil)
+                let endX   = CTLineGetOffsetForStringIndex(line, runRange.location + runRange.length, nil)
+
+                let rect = CGRect(x: contentRect.origin.x + origin.x + startX,
+                                  y: contentRect.origin.y + origin.y - descent,
+                                  width: max(1, endX - startX),
+                                  height: ascent + descent)
+                /// `CGContext.setURL(_:for:)` erwartet den Rechteck im PDF-Default-User-Space
+                /// (unten-links, y nach oben) und ignoriert den aktuellen CTM. Beim Zeichnen
+                /// sind die Renderer aber schon mehrfach transformiert (Seiten-Flip → Margin
+                /// → Block-Origin → lokaler CoreText-Flip). Daher den rect manuell durch den
+                /// aktuellen CTM jagen, damit die Annotation an der richtigen Stelle landet.
+                let pdfRect = rect.applying(context.ctm)
+                context.setURL(normalizeLinkURL(url) as CFURL, for: pdfRect)
+            }
+        }
     }
     
     ///---------------------------------------------------------------------------------------
@@ -378,6 +493,14 @@ extension BlockRenderer {
             let token = (token.removingPercentEncoding ?? token)
                 .replacingOccurrences(of: "\u{00AD}", with: "")
                 .replacingOccurrences(of: "\u{2010}", with: "")
+
+            /// Remote-URLs früh überspringen – bevor die `:`-Größenlogik den Token zerschneidet.
+            /// Sonst würde aus `https://example.com/foo.png` der Bildname `"https"`.
+            let tokenLower = token.lowercased()
+            if tokenLower.hasPrefix("http://") || tokenLower.hasPrefix("https://") {
+                return nil
+            }
+
             let parameters = splitParameterList(token)
             guard var imageToken = parameters.first else { return nil }
 
@@ -408,10 +531,26 @@ extension BlockRenderer {
             }
 
             let imagename = stripQuotes(imageToken)
-            guard !imagename.isEmpty,
-                  let originalImage = UIImage(named: imagename) ??
-                                      UIImage(systemName: imagename, withConfiguration: config)
-            else { return nil }
+            guard !imagename.isEmpty else { return nil }
+
+            /// Remote-URLs werden aktuell nicht heruntergeladen – Bilder müssen entweder im
+            /// Asset-Catalog liegen, ein SF-Symbol-Name sein, neben der Markdown-Datei oder im
+            /// in den Einstellungen konfigurierten Bilder-Ordner.
+            let lowercased = imagename.lowercased()
+            if lowercased.hasPrefix("http://") || lowercased.hasPrefix("https://") {
+                return nil
+            }
+
+            let originalImage: UIImage
+            if let asset = UIImage(named: imagename) {
+                originalImage = asset
+            } else if let local = MarkdownImageLocation.shared.loadImage(named: imagename) {
+                originalImage = local
+            } else if let symbol = UIImage(systemName: imagename, withConfiguration: config) {
+                originalImage = symbol
+            } else {
+                return nil
+            }
 
             let image = requestedColor.map {
                 originalImage.withTintColor($0, renderingMode: .alwaysOriginal)
@@ -434,11 +573,19 @@ extension BlockRenderer {
         }
 
         func imageURLToken(from value: Any?) -> String? {
+            /// Foundation enumeriert `.imageURL` auch für Bereiche ohne gesetztes Attribut.
+            /// Die Werte sind dann `nil` oder `NSNull`. `(NSNull() as AnyObject).description`
+            /// liefert "<null>" – das hat hier nichts zu suchen.
+            if value == nil || value is NSNull { return nil }
             if let url = value as? URL { return url.relativeString }
             if let url = value as? NSURL { return url.relativeString }
-            if let string = value as? String { return string }
+            if let string = value as? String {
+                return string.isEmpty ? nil : string
+            }
 
-            guard var token = (value as? AnyObject)?.description
+            guard var token = (value as? AnyObject)?.description,
+                  !token.isEmpty,
+                  token != "<null>"
             else { return nil }
 
             if token.hasPrefix("Optional("), token.hasSuffix(")") {

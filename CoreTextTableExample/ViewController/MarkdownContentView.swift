@@ -15,10 +15,47 @@ class MarkdownContentView: UIView {
     
     private var renderers: [BlockRenderer] = []
 
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addLinkTapRecognizer()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        addLinkTapRecognizer()
+    }
+
+    private func addLinkTapRecognizer() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleLinkTap(_:)))
+        tap.cancelsTouchesInView = false
+        addGestureRecognizer(tap)
+    }
+
     func apply(_ renderers: [BlockRenderer]) {
         self.renderers = renderers
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    ///---------------------------------------------------------------------------------------
+    /// Tap auswerten: getroffenen Renderer ermitteln und über dessen `linkURL(at:)` prüfen,
+    /// ob am Tap-Punkt ein Link liegt. Falls ja, die URL über `UIApplication.shared.open`
+    /// öffnen.
+    @objc private func handleLinkTap(_ recognizer: UITapGestureRecognizer) {
+        guard recognizer.state == .ended else { return }
+        let raw = recognizer.location(in: self)
+        let liveLeftInset = Markdown.LiveView.extraMarginLeft
+        let viewPoint = CGPoint(x: raw.x - liveLeftInset, y: raw.y)
+
+        for renderer in renderers {
+            guard renderer.frame.contains(viewPoint) else { continue }
+            let localPoint = CGPoint(x: viewPoint.x - renderer.frame.minX,
+                                     y: viewPoint.y - renderer.frame.minY)
+            if let url = renderer.linkURL(at: localPoint) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
+            return
+        }
     }
 
     ///---------------------------------------------------------------------------------------
