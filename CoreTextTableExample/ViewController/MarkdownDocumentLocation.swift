@@ -82,7 +82,15 @@ final class MarkdownDocumentLocation {
 
     private func storeBookmark(for url: URL) {
         do {
-            let data = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
+            #if targetEnvironment(macCatalyst)
+            let data = try url.bookmarkData(options: [.withSecurityScope],
+                                            includingResourceValuesForKeys: nil,
+                                            relativeTo: nil)
+            #else
+            let data = try url.bookmarkData(options: [],
+                                            includingResourceValuesForKeys: nil,
+                                            relativeTo: nil)
+            #endif
             UserDefaults.standard.set(data, forKey: bookmarkKey)
         } catch {
             UserDefaults.standard.removeObject(forKey: bookmarkKey)
@@ -94,10 +102,17 @@ final class MarkdownDocumentLocation {
 
         do {
             var isStale = false
+            #if targetEnvironment(macCatalyst)
+            let url = try URL(resolvingBookmarkData: data,
+                              options: [.withSecurityScope],
+                              relativeTo: nil,
+                              bookmarkDataIsStale: &isStale)
+            #else
             let url = try URL(resolvingBookmarkData: data,
                               options: [],
                               relativeTo: nil,
                               bookmarkDataIsStale: &isStale)
+            #endif
             if isStale {
                 storeBookmark(for: url)
             }

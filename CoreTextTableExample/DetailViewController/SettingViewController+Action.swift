@@ -86,7 +86,12 @@ extension SettingViewController  {
 /// in einem schlanken Proxy, der nur diesen einen Use-Case bedient.
 final class ImageFolderPickerProxy: NSObject, UIDocumentPickerDelegate {
     private let onPick: (URL) -> Void
-    init(onPick: @escaping (URL) -> Void) { self.onPick = onPick }
+    private let onCancel: () -> Void
+
+    init(onPick: @escaping (URL) -> Void, onCancel: @escaping () -> Void = {}) {
+        self.onPick = onPick
+        self.onCancel = onCancel
+    }
 
     func documentPicker(_ controller: UIDocumentPickerViewController,
                         didPickDocumentsAt urls: [URL]) {
@@ -94,5 +99,7 @@ final class ImageFolderPickerProxy: NSObject, UIDocumentPickerDelegate {
         onPick(url)
     }
 
-    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {}
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        onCancel()
+    }
 }

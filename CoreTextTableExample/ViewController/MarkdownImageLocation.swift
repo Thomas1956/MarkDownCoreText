@@ -16,8 +16,9 @@ import UIKit
 ///
 /// Such-Reihenfolge in `resolveLocalImageURL`:
 ///   1. Diagnose-Override (`debugOverrideFolder`)
-///   2. Automatisch erfasstes Eltern-Verzeichnis (`documentFolderURL`)
-///   3. Vom User explizit gewählter Bilder-Ordner (`folderURL`)
+///   2. Vom User explizit gewählter Bilder-Ordner (`folderURL`)
+///   3. Automatisch erfasstes Eltern-Verzeichnis (`documentFolderURL`)
+///   4. Aktuelles Eltern-Verzeichnis des Markdown-Dokuments
 final class MarkdownImageLocation {
     static let shared = MarkdownImageLocation()
 
@@ -51,11 +52,38 @@ final class MarkdownImageLocation {
         UserDefaults.standard.removeObject(forKey: bookmarkKey)
     }
 
+    func canReadCurrentDocumentFolder() -> Bool {
+        if folderURL != nil { return true }
+
+        let documentURL = MarkdownDocumentLocation.shared.markdownURL
+        let documentFolder = documentURL.deletingLastPathComponent()
+        var candidates: [(folder: URL, scope: URL?)] = [(documentFolder, documentURL)]
+        if let documentFolderURL {
+            candidates.insert((documentFolderURL, documentFolderURL), at: 0)
+        }
+
+        for candidate in candidates {
+            let started = candidate.scope?.startAccessingSecurityScopedResource() ?? false
+            defer {
+                if started, let scope = candidate.scope {
+                    scope.stopAccessingSecurityScopedResource()
+                }
+            }
+
+            if (try? FileManager.default.contentsOfDirectory(at: candidate.folder,
+                                                             includingPropertiesForKeys: nil,
+                                                             options: [.skipsHiddenFiles])) != nil {
+                return true
+            }
+        }
+        return false
+    }
+
     ///---------------------------------------------------------------------------------------
     /// Versucht, das Eltern-Verzeichnis der angegebenen `.md`-Datei als Folder-Bookmark
     /// zu speichern. Auf macOS Catalyst mit `withSecurityScope`. Falls das System keinen
-    /// Folder-Bookmark erlaubt (typisch bei iCloud-Drive ohne Folder-Picker), bleibt der
-    /// alte Wert erhalten und der User muss manuell einen Bilder-Ordner setzen.
+    /// Folder-Bookmark erlaubt, bleibt der alte Wert erhalten; der Resolver versucht danach
+    /// weiterhin den aktuellen Dokumentordner direkt über `MarkdownDocumentLocation`.
     func captureFolder(forDocumentAt url: URL) {
         let folder = url.deletingLastPathComponent()
         let started = url.startAccessingSecurityScopedResource()
@@ -80,26 +108,12 @@ final class MarkdownImageLocation {
     ///---------------------------------------------------------------------------------------
     /// Sucht eine Datei mit dem angegebenen Bild-Namen in der Reihenfolge:
     ///   1. `debugOverrideFolder` (ohne Scope, zum Testen)
-    ///   2. `documentFolderURL` (automatisch erfasstes Eltern-Verzeichnis der `.md`-Datei)
-    ///   3. `folderURL` (vom User explizit gewählter Bilder-Ordner)
+    ///   2. `folderURL` (vom User explizit gewählter Bilder-Ordner)
+    ///   3. `documentFolderURL` (automatisch erfasstes Eltern-Verzeichnis der `.md`-Datei)
+    ///   4. aktueller Eltern-Folder des Markdown-Dokuments
     /// Falls die Datei keine Endung hat, werden die üblichen Bild-Endungen probiert.
     func resolveLocalImageURL(named name: String) -> URL? {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-
-        if let override = debugOverrideFolder,
-           let url = firstExistingFile(in: override, name: trimmed, scopeURL: nil) {
-            return url
-        }
-        if let docFolder = documentFolderURL,
-           let url = firstExistingFile(in: docFolder, name: trimmed, scopeURL: docFolder) {
-            return url
-        }
-        if let folder = folderURL,
-           let url = firstExistingFile(in: folder, name: trimmed, scopeURL: folder) {
-            return url
-        }
-        return nil
+        resolvedLocalImage(named: name)?.url
     }
 
     ///---------------------------------------------------------------------------------------
@@ -107,28 +121,51 @@ final class MarkdownImageLocation {
     func loadImage(named name: String) -> UIImage? {
         guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               name != "<null>",
-              let url = resolveLocalImageURL(named: name) else { return nil }
+              let resolvedImage = resolvedLocalImage(named: name) else { return nil }
 
-        if let override = debugOverrideFolder, url.path.hasPrefix(override.path) {
-            return UIImage(contentsOfFile: url.path)
+        let started = resolvedImage.scopeURL?.startAccessingSecurityScopedResource() ?? false
+        defer {
+            if started, let scopeURL = resolvedImage.scopeURL {
+                scopeURL.stopAccessingSecurityScopedResource()
+            }
         }
-        if let docFolder = documentFolderURL, url.path.hasPrefix(docFolder.path) {
-            let started = docFolder.startAccessingSecurityScopedResource()
-            defer { if started { docFolder.stopAccessingSecurityScopedResource() } }
-            return UIImage(contentsOfFile: url.path)
-        }
-        if let folder = folderURL, url.path.hasPrefix(folder.path) {
-            let started = folder.startAccessingSecurityScopedResource()
-            defer { if started { folder.stopAccessingSecurityScopedResource() } }
-            return UIImage(contentsOfFile: url.path)
-        }
-        return UIImage(contentsOfFile: url.path)
+        return UIImage(contentsOfFile: resolvedImage.url.path)
     }
 
     //----------------------------------------------------------------------------------------
     // MARK: - Private
 
+    private struct ResolvedImage {
+        let url: URL
+        let scopeURL: URL?
+    }
+
     private static let extensionFallbacks: [String] = ["png", "jpg", "jpeg", "heic", "gif", "tiff", "bmp"]
+
+    private func resolvedLocalImage(named name: String) -> ResolvedImage? {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        if let override = debugOverrideFolder,
+           let url = firstExistingFile(in: override, name: trimmed, scopeURL: nil) {
+            return ResolvedImage(url: url, scopeURL: nil)
+        }
+        if let folder = folderURL,
+           let url = firstExistingFile(in: folder, name: trimmed, scopeURL: folder) {
+            return ResolvedImage(url: url, scopeURL: folder)
+        }
+        if let docFolder = documentFolderURL,
+           let url = firstExistingFile(in: docFolder, name: trimmed, scopeURL: docFolder) {
+            return ResolvedImage(url: url, scopeURL: docFolder)
+        }
+
+        let documentURL = MarkdownDocumentLocation.shared.markdownURL
+        let documentFolder = documentURL.deletingLastPathComponent()
+        if let url = firstExistingFile(in: documentFolder, name: trimmed, scopeURL: documentURL) {
+            return ResolvedImage(url: url, scopeURL: documentURL)
+        }
+        return nil
+    }
 
     private func firstExistingFile(in base: URL, name: String, scopeURL: URL?) -> URL? {
         let started = scopeURL?.startAccessingSecurityScopedResource() ?? false

@@ -31,6 +31,8 @@ class EditViewController: UIViewController {
 
     var start : DispatchTime?
     private var temporaryMarkdownExportURL: URL?
+    private var imageFolderPickerProxy: ImageFolderPickerProxy?
+    private var isRequestingImageFolderAccess = false
 
     /// Zugehöriger Detail View Contoller
     public lazy var detailViewController: MarkdownViewController? = {
@@ -217,6 +219,99 @@ private extension EditViewController {
         }
     }
     
+    func requestImageFolderAccessIfNeeded(for markdown: String) {
+        guard !isRequestingImageFolderAccess,
+              !MarkdownImageLocation.shared.canReadCurrentDocumentFolder(),
+              localImageTokens(in: markdown).contains(where: shouldRequestFolderAccess)
+        else { return }
+
+        isRequestingImageFolderAccess = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            let alert = UIAlertController(
+                title: "Bilderordner freigeben",
+                message: "Die Markdown-Datei verweist auf Bilder im selben Ordner. macOS erlaubt den Zugriff darauf erst, wenn dieser Ordner freigegeben wurde.",
+                preferredStyle: .alert
+            )
+            alert.addAction(.init(title: "Abbrechen", style: .cancel) { [weak self] _ in
+                self?.isRequestingImageFolderAccess = false
+            })
+            alert.addAction(.init(title: "Ordner wählen", style: .default) { [weak self] _ in
+                self?.presentDocumentImageFolderPicker()
+            })
+            self.present(alert, animated: true)
+        }
+    }
+
+    func presentDocumentImageFolderPicker() {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
+        picker.allowsMultipleSelection = false
+        picker.shouldShowFileExtensions = true
+        picker.directoryURL = MarkdownDocumentLocation.shared.directoryURL
+        imageFolderPickerProxy = ImageFolderPickerProxy { [weak self] url in
+            guard let self else { return }
+            let started = url.startAccessingSecurityScopedResource()
+            defer {
+                if started {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+            MarkdownImageLocation.shared.updateFolderURL(url)
+            self.isRequestingImageFolderAccess = false
+            self.detailViewController?.markdown(text: self.textView.text)
+        } onCancel: { [weak self] in
+            self?.isRequestingImageFolderAccess = false
+        }
+        picker.delegate = imageFolderPickerProxy
+        present(picker, animated: true)
+    }
+
+    func shouldRequestFolderAccess(for token: String) -> Bool {
+        if UIImage(named: token) != nil || UIImage(systemName: token) != nil {
+            return false
+        }
+        if token.contains("/") || !URL(fileURLWithPath: token).pathExtension.isEmpty {
+            return true
+        }
+        return MarkdownImageLocation.shared.resolveLocalImageURL(named: token) != nil
+    }
+
+    func localImageTokens(in markdown: String) -> [String] {
+        let pattern = #"!\[[^\]]*\]\(([^)]+)\)"#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
+
+        let nsMarkdown = markdown as NSString
+        let range = NSRange(location: 0, length: nsMarkdown.length)
+        return regex.matches(in: markdown, range: range).compactMap { match in
+            guard match.numberOfRanges > 1 else { return nil }
+            let rawToken = nsMarkdown.substring(with: match.range(at: 1))
+            let token = imageName(from: rawToken)
+            let lowercased = token.lowercased()
+            if token.isEmpty || lowercased.hasPrefix("http://") || lowercased.hasPrefix("https://") {
+                return nil
+            }
+            return token
+        }
+    }
+
+    func imageName(from rawToken: String) -> String {
+        let decoded = rawToken.removingPercentEncoding ?? rawToken
+        let firstParameter = decoded
+            .split(separator: ",", maxSplits: 1, omittingEmptySubsequences: false)
+            .first
+            .map(String.init) ?? ""
+        let sizedName = firstParameter
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "'\""))
+
+        if let range = sizedName.range(of: ":") {
+            return String(sizedName[..<range.lowerBound])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .trimmingCharacters(in: CharacterSet(charactersIn: "'\""))
+        }
+        return sizedName
+    }
+
     func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(.init(title: "OK", style: .default))
@@ -228,6 +323,7 @@ private extension EditViewController {
         if let savedText = UserDefaults.standard.string(forKey: keySavedText) {
             textView.text = savedText
             detailViewController?.markdown(text: textView.text)
+            requestImageFolderAccessIfNeeded(for: savedText)
         }
         if let columnWidth = UserDefaults.standard.object(forKey: keyColumnWidth) as? CGFloat {
             splitViewController?.preferredPrimaryColumnWidth = columnWidth
@@ -261,13 +357,13 @@ extension EditViewController: UIDocumentPickerDelegate {
         
         do {
             let data = try MarkdownDocumentLocation.shared.access(url: url) { url in
-                try Data(contentsOf: url)
+                MarkdownDocumentLocation.shared.updateLoadedFileURL(url)
+                /// Direkt nach dem Auswählen versuchen, das Eltern-Verzeichnis als Folder-
+                /// Bookmark zu sichern. Falls das System es zulässt, sind Bilder neben der
+                /// `.md`-Datei ohne extra Folder-Picker zugänglich.
+                MarkdownImageLocation.shared.captureFolder(forDocumentAt: url)
+                return try Data(contentsOf: url)
             }
-            MarkdownDocumentLocation.shared.updateLoadedFileURL(url)
-            /// Direkt nach dem Auswählen versuchen, das Eltern-Verzeichnis als Folder-
-            /// Bookmark zu sichern. Falls das System es zulässt, sind Bilder neben der
-            /// `.md`-Datei ohne extra Folder-Picker zugänglich.
-            MarkdownImageLocation.shared.captureFolder(forDocumentAt: url)
             /// Versuche UTF-8, fallback auf String(decoding:)
             if let str = String(data: data, encoding: .utf8) {
                 textView.text = str
@@ -275,6 +371,7 @@ extension EditViewController: UIDocumentPickerDelegate {
                 textView.text = String(decoding: data, as: UTF8.self)
             }
             detailViewController?.markdown(text: textView.text)
+            requestImageFolderAccessIfNeeded(for: textView.text)
             
         } catch {
             showAlert(title: "Import-Fehler",
