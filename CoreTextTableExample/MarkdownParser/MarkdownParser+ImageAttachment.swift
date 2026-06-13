@@ -28,16 +28,17 @@ public extension NSAttributedString.Key {
 
 public final class ImageAttachment {
     let image: UIImage
-    let size : CGSize
-    let font : CTFont
+    let size: CGSize
+    let font: CTFont
+    let baselineOffset: CGFloat
 
-    init(image: UIImage, size: CGSize, font: CTFont) {
+    init(image: UIImage, size: CGSize, font: CTFont, baselineOffset: CGFloat = 0) {
         self.image = image
-        self.size  = size
-        self.font  = font
+        self.size = size
+        self.font = font
+        self.baselineOffset = baselineOffset
     }
 }
-
 
 //--------------------------------------------------------------------------------------------
 // MARK: - Erzeugen der Delegate für die Image Attachments
@@ -62,22 +63,26 @@ private var runDelegateCallbacks: CTRunDelegateCallbacks = {
         /// Berechnung der Oberlänge
         getAscent: { ptr in
             let attach = Unmanaged<ImageAttachment>
-                            .fromOpaque(ptr)
-                            .takeUnretainedValue()
-            /// x-Height des Fonts
-            let xh = CTFontGetXHeight(attach.font)
-            /// Bildoberkante aus der Mitte des Strings heraus berechnen. Vertiikale Lage von `-`
-            return attach.size.height/2 + xh * 0.55 - 0.2
+                .fromOpaque(ptr)
+                .takeUnretainedValue()
+
+            let xh = CTFontGetXHeight(attach.font)            
+            let baseAscent = attach.size.height / 2 + xh * 0.55 + 0.2
+            return baseAscent + attach.baselineOffset // min(max(baseAscent + attach.baselineOffset, 0), attach.size.height)
         },
+        
         /// Berechnung der Unterlänge
         getDescent: { ptr in
             let attach = Unmanaged<ImageAttachment>
-                         .fromOpaque(ptr)
-                         .takeUnretainedValue()
+                .fromOpaque(ptr)
+                .takeUnretainedValue()
+
             let xh = CTFontGetXHeight(attach.font)
-            let ascent = attach.size.height/2 + xh * 0.55 - 0.2
+            let baseAscent = attach.size.height / 2 + xh * 0.55 + 0.2
+            let ascent = baseAscent + attach.baselineOffset //min(max(baseAscent + attach.baselineOffset, 0), attach.size.height)
             return attach.size.height - ascent
         },
+
         /// Berechnung der Breite
         getWidth: { ptr in
             let attach = Unmanaged<ImageAttachment>
@@ -85,6 +90,7 @@ private var runDelegateCallbacks: CTRunDelegateCallbacks = {
                          .takeUnretainedValue()
             return attach.size.width
         }
+
     )
     return cb
 }()
