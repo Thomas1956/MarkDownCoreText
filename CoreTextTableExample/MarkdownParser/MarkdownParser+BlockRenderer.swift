@@ -74,7 +74,10 @@ extension BlockRenderer {
     }
     
     ///---------------------------------------------------------------------------------------
-    /// Berechnen der Höhe des Inhaltes
+    /// Berechnet die reine Texthöhe für die angegebene Breite.
+    ///
+    /// Die Silbentrennungs-Hyphens werden erst hier eingefügt, weil sie von der tatsächlichen
+    /// Zeilenbreite abhängen und nicht dauerhaft im Dokumenttext landen sollen.
     func contentHeight(_ width: CGFloat) -> CGFloat {
         let text = blockContent.attrText.insertingLineEndHyphens(width: width)
         let constraint = CGSize(width: width, height: .greatestFiniteMagnitude)
@@ -84,8 +87,11 @@ extension BlockRenderer {
     }
     
     ///---------------------------------------------------------------------------------------
-    /// Rechteck für den Inhalt des Absatzes (korrigiert um Abstände oben/unten)
+    /// Rechteck für den tatsächlich zu zeichnenden Inhalt.
     ///
+    /// `frame` beschreibt den kompletten Block inklusive Absatzabständen und BlockQuote-Fläche.
+    /// `contentRect` zieht diese Ränder ab und ist deshalb die Geometrie, die CoreText für Text,
+    /// Links und Inline-Bilder verwendet.
     var contentRect: CGRect {
         /// Wenn `paragraphSpacingBefore` und `paragraphSpacing` definiert sind, muss der zu zeichnende Inhalt
         /// in Y-Richtung verschoben und in der Höhe verkleinert werden.
@@ -104,8 +110,10 @@ extension BlockRenderer {
     }
         
     ///---------------------------------------------------------------------------------------
-    /// Größe des Inhaltes berechnen und den Frame setzen
+    /// Misst den Block und setzt `frame` für den späteren Draw-Schritt.
     ///
+    /// Alle Renderer folgen diesem Vertrag: `measure` darf Layoutzustand cachen, `draw` verwendet
+    /// danach genau diesen Zustand. Deshalb wird bei unveränderter Breite nur die y-Position aktualisiert.
     func measure(y: CGFloat, width: CGFloat) -> CGFloat {
         /// Wenn keine Änderung erfolgt ist, dann die alte Höhe zurückgeben und den Y-Wert setzen
         if width == self.frame.width {
@@ -299,8 +307,10 @@ extension BlockRenderer {
     }
     
     ///---------------------------------------------------------------------------------------
-    /// Zeichnen der Bilder - Erkennen der Einträge vom Preprocessing im `myImageAttachment`
+    /// Zeichnet Inline-Bilder, die beim Preprocessing als `myImageAttachment` markiert wurden.
     ///
+    /// CoreText reserviert durch den RunDelegate nur die typografische Fläche. Das eigentliche
+    /// `UIImage` muss anschließend über die Run-Geometrie des fertigen CTFrames gezeichnet werden.
     func drawImages(in context: CGContext, ctFrame: CTFrame)
     {
         /// Images  – Attribute & Geometrie aus CTFrame ablesen
@@ -356,8 +366,11 @@ extension BlockRenderer {
     }
     
     ///---------------------------------------------------------------------------------------
-    /// Preprocessing der Bilder - Das Image Attachment erzeugen und in den Attributen ablegen
+    /// Ersetzt Markdown-Bildverweise durch einen Objekt-Platzhalter mit RunDelegate und ImageAttachment.
     ///
+    /// Foundation liefert Bilder teils bereits als `.imageURL`, teils bleibt bei unseren Erweiterungen
+    /// noch die originale `![...](...)`-Syntax im Text. Beide Wege werden hier auf denselben
+    /// Platzhalter normalisiert.
     func preprocessImages(_ src: NSAttributedString) -> NSMutableAttributedString {
 
         /// Attribute bleiben erhalten
@@ -374,6 +387,7 @@ extension BlockRenderer {
             let config = UIImage.SymbolConfiguration(font: font)
                                 .applying(UIImage.SymbolConfiguration.preferringMulticolor())
 
+            /// Trennt Parameter wie `image.png:24, color: 'systemRed'`, ohne Kommata in Quotes zu zerlegen.
             func splitParameterList(_ string: String) -> [String] {
                 var result: [String] = []
                 var current = ""
@@ -414,6 +428,7 @@ extension BlockRenderer {
                 return string
             }
 
+            /// Akzeptiert `Höhe` oder `Breite x Höhe`; bei nur einer Zahl bleibt das Seitenverhältnis erhalten.
             func parseSize(_ value: String, currentSize: CGSize) -> CGSize {
                 let parts = stripQuotes(value)
                     .lowercased()
@@ -653,6 +668,8 @@ func makeSetting<T>(_ spec: CTParagraphStyleSpecifier,
 // TODO: CTParagraphStyleSetting muss noch verallgemeinert werden.
 
 // -------- Paragraph ---------------------------------------------------
+/// Standardrenderer für normale Absätze, Header und BlockQuote-Absätze.
+/// Die eigentliche Text-/Bildausgabe liegt in den gemeinsamen `BlockRenderer`-Hilfen.
 final class ParagraphRenderer: BlockRenderer {
     var blockContent: BlockContent
     var frame: CGRect = .zero
@@ -725,6 +742,9 @@ final class ParagraphRenderer: BlockRenderer {
 
 // -------- CodeBlock ---------------------------------------------------
 
+/// Renderer für fenced/indented Code-Blöcke.
+/// CodeBlöcke besitzen eigene Insets, Tabulatorbreiten und Syntax-Highlighting und verwenden
+/// deshalb nicht den normalen Paragraph-Renderer.
 final class CodeBlockRenderer: BlockRenderer {
     var blockContent: BlockContent
     var frame: CGRect = .zero
@@ -905,6 +925,9 @@ final class CodeBlockRenderer: BlockRenderer {
 
 
 // -------- Table -------------------------------------------------------
+/// Renderer für komplette Markdown-Tabellen.
+/// Mehrere `BlockContent`-Zellen werden beim Initialisieren in eine Matrix übertragen; Messung und
+/// Zeichnung arbeiten danach mit berechneten Spaltenbreiten, Zeilenhöhen und `tableRect`.
 final class TableRenderer: BlockRenderer {
     var blockContent: BlockContent
     var frame: CGRect = .zero
