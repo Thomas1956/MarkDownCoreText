@@ -21,8 +21,14 @@ public class MarkdownParser {
     static var pdfFooter = PDFDocumentFooter()
 
     ///---------------------------------------------------------------------------------------
-    /// Main entry: parse Markdown string, build renderers, trigger layout
+    /// Zentraler Einstieg der Render-Pipeline.
     ///
+    /// Ablauf:
+    /// 1. YAML/PDF-Metadaten abtrennen.
+    /// 2. Kleine Markdown-Erweiterungen vor Foundation normalisieren.
+    /// 3. Foundation erzeugt den semantischen `AttributedString` mit PresentationIntents.
+    /// 4. App-spezifische Inline-Attribute und Blockaufbereitung werden angewendet.
+    /// 5. Aus den Blöcken entstehen CoreText-Renderer.
     static func markdown(string: String, size: CGFloat = 17, weight: UIFont.Weight = .regular,
                          textColor: UIColor = .gray) -> [BlockRenderer]
     {
@@ -33,16 +39,23 @@ public class MarkdownParser {
         pdfFooter = parsedDocument.footer
         
         /// Kleine Vorverarbeitung für Syntax, die Foundations Markdown-Parser nicht oder nicht
-        /// passend zur App-Pipeline interpretiert.
+        /// passend zur App-Pipeline interpretiert. Diese Schritte laufen VOR der Silbentrennung,
+        /// damit durch Umschreibungen keine bereits eingefügten Soft-Hyphens verschoben werden.
         let preProcessed = rewriteHTMLFragments(in: rewriteEmailAutolinks(in: parsedDocument.markdown))
         
-        /// Automatischen Silbentrennung mit dem Einfügen von Soft-Hyphen
+        /// Automatische Silbentrennung mit Soft-Hyphen. Danach darf der Text semantisch nicht
+        /// mehr umsortiert werden, weil die eingefügten Zeichen Teil der String-Indizes sind.
         let string = preProcessed.stringWithHyphens()
 
+        /// Foundation übernimmt hier die CommonMark-nahe Grundanalyse und versieht den
+        /// Text mit `presentationIntent` und `inlinePresentationIntent`. Tabellen,
+        /// Listen, Code-Blöcke usw. werden danach in `BlockContent` weiter ausgewertet.
         let rawAttr: AttributedString
         do {
             rawAttr = try AttributedString(markdown: string, including: \.commonAttr)
         } catch {
+            /// Parserfehler werden als normaler Absatz gerendert, damit die View nicht
+            /// leer bleibt und der Fehler direkt im Dokumentbereich sichtbar ist.
             var fallback = AttributedString("Markdown‑Konvertierung fehlgeschlagen: \(error.localizedDescription)")
             fallback.foregroundColor = .systemRed
             fallback.font = .systemFont(ofSize: 20, weight: .bold)
@@ -55,12 +68,14 @@ public class MarkdownParser {
         }
         
         ///-----------------------------------------------------------------------------------
-        /// Setzen der Defaultwerte für den Font und die Textfarbe (`.uikit` beachten!)
+        /// Defaultwerte werden nach dem Foundation-Parsing gesetzt, damit sie alle Runs
+        /// erreichen, ohne die von Foundation erzeugten semantischen Attribute zu ersetzen.
+        /// Für UIKit-Farbe muss der `.uiKit`-Scope benutzt werden.
         var attr = rawAttr
         attr.font = .systemFont(ofSize: size, weight: weight)
         attr.uiKit.foregroundColor = textColor
          
-        /// Die User-Atribute in die Formatierungsinformation ändern.
+        /// App-eigene Inline-Syntax (`^[...](...)`) in echte Textattribute übersetzen.
         attr.userAttributes(size: size, weight: weight)
         
         /// Am Ende des gesamten Textes einen Absatz ergänzen. Dadurch wird beispielsweise ein Block Quote mit einem
@@ -70,20 +85,22 @@ public class MarkdownParser {
         //------------------------------------------------------------------------------------
         // MARK: - \n durch Line Separator ersetzen und Tabulatoren entfernen (außer Code Block)
         
-        /// Einmaliges Aufsetzen eines mutable Strings
+        /// Foundation behält Zeilenumbrüche in einigen Blöcken als `\n`. Für unsere
+        /// Paragraph-Renderer ist ein Unicode-LineSeparator klarer: Er bleibt im selben
+        /// Absatz, erzeugt aber eine harte neue Zeile. CodeBlöcke bleiben unverändert,
+        /// weil dort Tabs und Newlines Inhalt sind.
         let mutable = NSMutableAttributedString(attr)
 
-        /// Nur die relevanten Runs (in umgekehrter Reihenfolge) durchgehen
+        /// Runs rückwärts bearbeiten, damit Ersetzungen keine noch offenen Ranges verschieben.
         for block in attr.runs.reversed() {
-            /// Nur Non-Code-Blocks bearbeiten
             if block.presentationIntent?.hasCodeBlock == true { continue }
          
             let nsRange = NSRange(block.range, in: attr)
-            /// In allen Blöcken außer dem Code Block die TABs löschen und  \n duch .lineSeparator ersetzen.
+            /// Tabs werden entfernt, weil Listen, Tabellen und Doppelspalten ihre Tabulatoren später selbst setzen.
             mutable.mutableString.replaceOccurrences(of: "\n", with: .lineSeparator, range: nsRange)
             mutable.mutableString.replaceOccurrences(of: "\t", with: "", range: nsRange)
         }
-        /// Am Ende wieder in AttributedString zurückwandeln
+        /// Am Ende wieder in AttributedString zurückwandeln.
         attr = AttributedString(mutable)
         
         //------------------------------------------------------------------------------------
@@ -98,6 +115,8 @@ public class MarkdownParser {
         /// Debugging nach dem Inline-Presentation
 //        attr.debugInfo(.presentationIntent, "Nach Inline Presentation")
 
+        /// Ab hier verlassen wir Foundation-Markdown: `BlockContent` normalisiert die
+        /// Blöcke, danach übernehmen die CoreText-Renderer Messung und Zeichnung.
         return CoreTextBlockFactory.renderers(from: attr, typography: typo)
     }
 
@@ -122,8 +141,12 @@ public class MarkdownParser {
     //----------------------------------------------------------------------------------------
     // MARK: - Einfache HTML-Fragmente vorverarbeiten
 
-    /// Übersetzt kleine HTML-Fragmente in bestehende Markdown/User-Attribute. Das ist kein
-    /// vollständiger HTML-Parser; es deckt bewusst nur typische Inline-HTML-Beispiele ab.
+    /// Übersetzt kleine HTML-Fragmente in bestehende Markdown/User-Attribute.
+    ///
+    /// Das ist bewusst kein vollständiger HTML-Parser. Es ist eine Vorstufe für
+    /// Test-/Dokumentationsbeispiele: einfache Container werden entfernt, starke/kursive
+    /// Auszeichnung wird zu Markdown, farbige Spans werden in die vorhandene `^[...](color:)`
+    /// Syntax übertragen.
     private static func rewriteHTMLFragments(in source: String) -> String {
         var result = source
         result = replaceHTMLSpansWithColor(in: result)
@@ -137,6 +160,7 @@ public class MarkdownParser {
         return result
     }
 
+    /// `<span style="color: red;">Text</span>` wird zu `^[Text](color: 'red')`.
     private static func replaceHTMLSpansWithColor(in source: String) -> String {
         let pattern = #"(?is)<span\b(?=[^>]*\bstyle\s*=\s*[\"'][^\"']*\bcolor\s*:\s*([^;\"']+))[^>]*>(.*?)</span>"#
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return source }
@@ -220,6 +244,8 @@ extension MarkdownParser {
         let footer: PDFDocumentFooter
     }
     
+    /// Trennt optionales YAML Front Matter vom eigentlichen Markdown.
+    /// Front Matter wird nur akzeptiert, wenn das Dokument direkt mit `---` beginnt.
     private static func parseDocumentMetadata(from source: String) -> ParsedMarkdownDocument {
         guard source.hasPrefix("---") else {
             return ParsedMarkdownDocument(markdown: source, footer: PDFDocumentFooter())
@@ -243,6 +269,7 @@ extension MarkdownParser {
         return ParsedMarkdownDocument(markdown: markdownLines.joined(separator: "\n"), footer: footer)
     }
     
+    /// Liest PDF-Footer-Metadaten aus flachen Keys oder aus einem `pdfFooter:`/`footer:` Abschnitt.
     private static func parseFooterMetadata(from lines: [String]) -> PDFDocumentFooter {
         var footer = PDFDocumentFooter()
         var inFooterSection = false
@@ -281,6 +308,7 @@ extension MarkdownParser {
         return footer
     }
     
+    /// YAML-ähnliche Leerwerte und einfache Anführungszeichen normalisieren.
     private static func cleanMetadataValue(_ value: String) -> String? {
         var result = value.trimmingCharacters(in: .whitespacesAndNewlines)
         if result == "null" || result == "nil" || result == "~" { return nil }
@@ -298,6 +326,10 @@ extension MarkdownParser {
     //----------------------------------------------------------------------------------------
     // MARK: - Inline-Presentation bearbeiten
     
+    /// Wandelt Foundations InlinePresentationIntent in UIKit/CoreText-kompatible Attribute um.
+    ///
+    /// Foundation markiert z.B. Betonung, Code, SoftBreak und LineBreak semantisch.
+    /// Die Renderer arbeiten später aber mit konkreten Fonts, Absatzseparatoren und Linkattributen.
     static func inlinePresentation(text: AttributedString, size: CGFloat, weight: UIFont.Weight) -> AttributedString {
         var attrText = text
         
@@ -324,7 +356,8 @@ extension MarkdownParser {
             /// Ersetzungen für die Inline-Presentation ermitteln
             var destination = AttributeContainer()
             
-            /// Für Italic, Bold und Code die entsprechenden Traits setzen
+            /// Foundation liefert die Inline-Intents als Bitmaske. Aus den relevanten Bits
+            /// entstehen hier konkrete Font-Traits für UIKit/CoreText.
             var traits = [UIFontDescriptor.SymbolicTraits]()
             if block.rawValue & 1 == 1 { traits.append(.traitItalic)    }
             if block.rawValue & 2 == 2 { traits.append(.traitBold)      }
@@ -400,10 +433,12 @@ extension MarkdownParser {
 
     fileprivate enum CoreTextBlockFactory {
 
-        /// Haupt‑Einstieg: komplette AttributedString in BlockRenderer aufspalten
+        /// Zerlegt den finalen AttributedString in `BlockContent` und wählt pro Block den passenden Renderer.
+        /// Tabellen sind ein Sonderfall: Foundation liefert Zellen/Zeilen als mehrere Blöcke; sie werden
+        /// anhand der `tableIdentity` zu einem `TableRenderer` gesammelt.
         static func renderers(from attr: AttributedString, typography: MarkdownTypography) -> [BlockRenderer] {
             
-            ///  Alle BlockContent‑Elemente ermitteln
+            /// Alle BlockContent‑Elemente ermitteln.
             let blocks = BlockContent.allBlockContents(attrText: attr, typography: typography)
             
 //            blocks.forEach { block in
@@ -452,6 +487,9 @@ extension MarkdownParser {
             var currentTableBlocks: [BlockContent] = []
             var currentTableIdentity: Int?
             
+            /// Schreibt eine gerade gesammelte Tabellen-Gruppe als einen Renderer aus.
+            /// Falls die Tabelle in Wirklichkeit nur ein einfacher Absatz ist, fallen die Blöcke
+            /// zurück in die normale Renderer-Auswahl.
             func flushTableRenderer() {
                 guard let first = currentTableBlocks.first else { return }
                 let table = first.tableBlock
@@ -500,7 +538,8 @@ extension MarkdownParser {
     typealias M = Markdown
     
     ///---------------------------------------------------------------------------------------
-    /// Liefert die Gesamt-Seitenzahl
+    /// Misst alle Renderer für den PDF-Export, verteilt sie auf Seiten und setzt `frame`/`pageIndex`.
+    /// Rückgabe ist die Gesamtseitenzahl.
     ///
     static func layoutForPDF(renderers:    [BlockRenderer],
                              pageWidth:    CGFloat,
@@ -517,12 +556,14 @@ extension MarkdownParser {
             let r = renderers[index]
             var h = r.measure(y: y, width: pageWidth)
 
+            /// Passt der Block nicht mehr auf die aktuelle Seite, wird er auf der nächsten Seite neu gemessen.
             if y + h > printableHeight {  // Grenze ist Printable‑Höhe
                 currentPage += 1
                 y = 0                     // nächstes Blatt, oben anfangen
                 h = r.measure(y: y, width: pageWidth)
             }
             
+            /// Header sollen nicht alleine am Seitenende stehen, wenn der folgende Inhalt noch mit umziehen kann.
             if shouldKeepWithNext(renderer: r,
                                   index: index,
                                   renderers: renderers,
@@ -543,6 +584,7 @@ extension MarkdownParser {
         return currentPage + 1
     }
     
+    /// Prüft, ob ein Header zusammen mit dem folgenden Nicht-Header auf die nächste Seite verschoben werden sollte.
     private static func shouldKeepWithNext(renderer: BlockRenderer,
                                            index: Int,
                                            renderers: [BlockRenderer],
@@ -568,6 +610,7 @@ extension MarkdownParser {
     //----------------------------------------------------------------------------------------
     // MARK: - PDF-Fußzeile
     
+    /// Ersetzt Platzhalter im Footertext, bevor die Fußzeile gezeichnet wird.
     private static func resolvedFooterText(_ text: String?, page: Int, pages: Int) -> String? {
         guard var result = text, !result.isEmpty else { return nil }
         result = result.replacingOccurrences(of: "{page}", with: "\(page)")
@@ -576,6 +619,7 @@ extension MarkdownParser {
         return result
     }
     
+    /// Zeichnet den PDF-Footer direkt mit CoreText, unabhängig von den normalen Markdown-Renderern.
     private static func drawFooter(in ctx: CGContext,
                                    pageRect: CGRect,
                                    page: Int,
