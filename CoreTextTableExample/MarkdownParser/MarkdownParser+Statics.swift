@@ -30,9 +30,6 @@ public struct Markdown {
     static var lineHeightMultiple     : Double = 1.1            /// Zeilenabstand Multiplikator
     static var paragraphSpacing       : Double = 0.5            /// Absatzabstand
     static var paragraphSpacingBefore : Double = 1.2            /// Absatzabstand vor einem Header
-//    static var paddingHorz            : Double = 0.5          /// blockQouteSpacings
-//    static var paddingBefore          : Double = 0.3
-//    static var paddingAfter           : Double = 0.3
     
     /// Allgemeine Block-Metriken für CodeBlock, BlockQuote und Tabellen.
     struct Block {
@@ -119,6 +116,10 @@ public struct Markdown {
     /// Konstanten für die Liste (Anführungszeichen der Liste in der Hierarchie)
     struct List {
         static var bulletPoint      : [String] = [.listBullet_1, .listBullet_2, .listBullet_3]
+        static var taskChecked      : String = "☑"              /// Fallback-Checkbox für erledigte Task-List-Einträge
+        static var taskUnchecked    : String = "☐"              /// Fallback-Checkbox für offene Task-List-Einträge
+        static var taskCheckedSymbolName   : String = "checkmark.square"
+        static var taskUncheckedSymbolName : String = "square"
         static var leftIndent       : Double = 10               /// Linker Rand der untersten Hierarchie
     }
 
