@@ -22,6 +22,7 @@ struct BlockContent {
     var identity : Int = 0
     
     var listBulletPointStr  : String
+    var listBulletSymbolName: String?
     var widthDefault        : CGFloat
     var headIndent          : CGFloat
     var firstLineHeadIndent : CGFloat
@@ -81,8 +82,9 @@ struct BlockContent {
         }
         
         /// Anführungszeichen vordefinieren
-        self.listBulletPointStr = ""
-        self.widthDefault       = 0
+        self.listBulletPointStr   = ""
+        self.listBulletSymbolName = nil
+        self.widthDefault         = 0
 
         /// Einzüge für die Listen und die Block Quote
         self.firstLineHeadIndent = 0
@@ -172,6 +174,67 @@ struct BlockContent {
     }
     
     
+    private static func taskListMarker(in text: String) -> (checked: Bool, range: NSRange)? {
+        let nsText = text as NSString
+        guard nsText.length >= 3 else { return nil }
+
+        var index = 0
+        while index < nsText.length {
+            let scalar = UnicodeScalar(nsText.character(at: index))
+            guard let scalar, CharacterSet.whitespaces.contains(scalar) else { break }
+            index += 1
+        }
+
+        guard index + 2 < nsText.length,
+              nsText.character(at: index) == 91,
+              nsText.character(at: index + 2) == 93
+        else { return nil }
+
+        let marker = nsText.character(at: index + 1)
+        let checked: Bool
+        switch marker {
+        case 32:
+            checked = false
+        case 88, 120:
+            checked = true
+        default:
+            return nil
+        }
+
+        var length = index + 3
+        while length < nsText.length {
+            let scalar = UnicodeScalar(nsText.character(at: length))
+            guard let scalar, CharacterSet.whitespaces.contains(scalar) else { break }
+            length += 1
+        }
+        return (checked, NSRange(location: 0, length: length))
+    }
+
+    private static func taskBulletAttributedString(symbolName: String,
+                                                   font: UIFont,
+                                                   attributes: [NSAttributedString.Key: Any]) -> NSAttributedString? {
+
+        let symbolSize = font.pointSize * 1.0
+        let configuration = UIImage.SymbolConfiguration(pointSize: symbolSize, weight: .regular)
+       
+        guard let sourceImage = UIImage(systemName: symbolName, withConfiguration: configuration) else { return nil }
+
+        let tintColor = attributes[.foregroundColor] as? UIColor ?? Markdown.textColor
+        let image     = sourceImage.withTintColor(tintColor, renderingMode: .alwaysOriginal)
+        let ctFont    = CTFontCreateWithName(font.fontName as CFString, font.pointSize, nil)
+                                          
+        let attachment = ImageAttachment(image: image, size: image.size, font: ctFont, baselineOffset: 2)
+        
+        let delegate = makeRunDelegate(for: attachment)
+        let mutable = NSMutableAttributedString(string: "\t")
+        mutable.append(NSAttributedString(string: "\u{FFFC}",
+                                          attributes: [.runDelegate: delegate,
+                                                       .myImageAttachment: attachment,
+                                                       .font: font]))
+        mutable.append(NSAttributedString(string: "\t"))
+        return mutable
+    }
+
     private static func normalizedDefinitionList(_ source: NSMutableAttributedString)
     -> (attrText: NSMutableAttributedString, termRange: NSRange)?
     {
@@ -287,8 +350,9 @@ struct BlockContent {
                 prevKey = blockContent.key
 
                 /// Anführungszeichen (-zahl) für die Liste
-                let listBulletPoint = block.hasOrderedList ? "\(block.listOrdinal)." :
-                ML.bulletPoint[(id-1) % ML.bulletPoint.count]
+                let taskMarker = taskListMarker(in: blockContent.attrText.string)
+                let listBulletPoint = taskMarker.map { $0.checked ? ML.taskChecked : ML.taskUnchecked }
+                    ?? (block.hasOrderedList ? "\(block.listOrdinal)." : ML.bulletPoint[(id-1) % ML.bulletPoint.count])
 
                 /// Ermitteln der Breite der Anführungszeichen der Liste (oder Ordnungszahlen)
                 let font = UIFont.systemFont(ofSize: textSize)
@@ -328,8 +392,10 @@ struct BlockContent {
             var blockQuoteIndent    = blockContent.blockQuoteIndent
             
             /// Anführungszeichen (-zahl) für die Liste
-            var listBulletPoint = block.hasOrderedList ? "\(block.listOrdinal)." :
-            ML.bulletPoint[(id-1) % ML.bulletPoint.count]
+            let taskMarker = taskListMarker(in: blockContent.attrText.string)
+            let taskSymbolName = taskMarker.map { $0.checked ? ML.taskCheckedSymbolName : ML.taskUncheckedSymbolName }
+            var listBulletPoint = taskMarker.map { $0.checked ? ML.taskChecked : ML.taskUnchecked }
+                ?? (block.hasOrderedList ? "\(block.listOrdinal)." : ML.bulletPoint[(id-1) % ML.bulletPoint.count])
             
             /// Es muss geprüft werden, ob im Dictionary schon ein Eintrag mit dem gleichen Key existiert.
             /// Der Key wird aus `identity`, `hierarchie`und `ordinal`gebildet.
@@ -338,10 +404,12 @@ struct BlockContent {
             if let dictIndent = dictHeadIndent[blockContent.key]
             {
                 listBulletPoint = ""                            /// Aufzählungszeichen löschen
+                allBlocks[index].listBulletSymbolName = nil
                 firstLineHeadIndent = dictIndent                /// Einzüge aus dem vorigen Absatz holen
                 headIndent = dictIndent
             } else {
                 listBulletPoint = "\t" + listBulletPoint + "\t" /// Aufzählungszeichen mit TAB ergänzen
+                allBlocks[index].listBulletSymbolName = taskSymbolName
                 dictHeadIndent[blockContent.key] = headIndent   /// Einzug dieses Absatzes merken
             }
             
@@ -588,13 +656,25 @@ struct BlockContent {
             ///-------------------------------------------------------------------------------
             /// List erkennen und die Bullets voranstellen
             if block.hasList {
-                let attrList = NSMutableAttributedString(       /// Bullet-Point dem Attributed String voranstellen
-                    string:     blockContent.listBulletPointStr,
-                    attributes: blockContent.attrText.attributes(at: 0, effectiveRange: nil))
-                
-                                                                /// Bullet muss auf den Standard-Font gesetzt werden
-                attrList.addAttributes([.font: UIFont.systemFont(ofSize: textSize, weight: .regular) ])
-                attrList.append(blockContent.attrText)          /// Original-Text anhängen
+                if let taskMarker = taskListMarker(in: attrText.string) {
+                    attrText.deleteCharacters(in: taskMarker.range)
+                }
+
+                let bulletAttributes = blockContent.attrText.attributes(at: 0, effectiveRange: nil)
+                let bulletFont = UIFont.systemFont(ofSize: textSize, weight: .regular)
+                let attrList = NSMutableAttributedString()
+                if let symbolName = blockContent.listBulletSymbolName,
+                   let symbol = taskBulletAttributedString(symbolName: symbolName,
+                                                           font: bulletFont,
+                                                           attributes: bulletAttributes) {
+                    attrList.append(symbol)
+                } else {
+                    attrList.append(NSAttributedString(string: blockContent.listBulletPointStr,
+                                                       attributes: bulletAttributes))
+                    /// Bullet muss auf den Standard-Font gesetzt werden
+                    attrList.addAttributes([.font: bulletFont])
+                }
+                attrList.append(attrText)                       /// Bereinigten Text anhängen
                 attrText = attrList
 
                 /// Die Defaultbreite eines SPACE x 3
