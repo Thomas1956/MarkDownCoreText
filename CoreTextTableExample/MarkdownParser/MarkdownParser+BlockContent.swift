@@ -21,14 +21,25 @@ struct BlockContent {
     var kind     : PresentationIntent.Kind = .paragraph
     var identity : Int = 0
     
+    /// Textuelles Listenzeichen inklusive Tabulatoren. Bei Task-Listen dient es nur als
+    /// Fallback und zur Breitenberechnung; gerendert wird dort bevorzugt ein SF Symbol.
     var listBulletPointStr  : String
+    /// Optionaler SF-Symbol-Name für Task-Listen (`square` / `checkmark.square`).
+    /// Ist der Wert gesetzt, ersetzt das Symbol das normale Listenzeichen.
     var listBulletSymbolName: String?
+    /// Breite eines Leerzeichens in der aktuellen Textgröße. Wird für Tab-Positionen genutzt.
     var widthDefault        : CGFloat
+    /// Einzug ab der zweiten Zeile eines Absatzes.
     var headIndent          : CGFloat
+    /// Einzug der ersten Zeile; bei Listen steht hier das Bullet vor dem Text.
     var firstLineHeadIndent : CGFloat
+    /// Zusätzlicher linker Versatz für BlockQuote-Hintergründe innerhalb von Listen.
     var blockQuoteIndent    : CGFloat
+    /// Listen-Hierarchie-Einzug, der an den TableRenderer weitergereicht wird.
     var tableIndent         : CGFloat
+    /// Listen-Hierarchie-Einzug, der an den CodeBlockRenderer weitergereicht wird.
     var codeBlockIndent     : CGFloat
+    /// Sammelstruktur für Tabellenlinien, Tabulatoren und Spaltenbreiten.
     var tableBlock          : TableBlock
     
     var isFirstBlockQuote   : Bool
@@ -174,6 +185,12 @@ struct BlockContent {
     }
     
     
+    /// Erkennt GitHub-kompatible Task-List-Marker am Anfang eines Listeneintrags.
+    ///
+    /// Foundation liefert `- [x] Text` als normalen Listenabsatz. Deshalb wird der Marker
+    /// hier manuell erkannt und später aus dem sichtbaren Text gelöscht. Die zurückgegebene
+    /// Range umfasst auch nachfolgende Leerzeichen, damit der Text sauber direkt nach dem
+    /// Checkbox-Symbol beginnt.
     private static func taskListMarker(in text: String) -> (checked: Bool, range: NSRange)? {
         let nsText = text as NSString
         guard nsText.length >= 3 else { return nil }
@@ -210,6 +227,12 @@ struct BlockContent {
         return (checked, NSRange(location: 0, length: length))
     }
 
+    /// Erzeugt das Bullet einer Task-Liste als CoreText-kompatibles ImageAttachment.
+    ///
+    /// Normale Text-Bullets funktionieren über Tabulatoren. SF Symbols müssen dagegen als
+    /// Replacement-Run mit CTRunDelegate eingefügt werden, damit CoreText Breite, Ascent und
+    /// Descent korrekt in das Zeilenlayout einrechnet. Das AttributedString-Ergebnis enthält
+    /// deshalb bewusst `Tab + Attachment + Tab`.
     private static func taskBulletAttributedString(symbolName: String,
                                                    font: UIFont,
                                                    attributes: [NSAttributedString.Key: Any]) -> NSAttributedString? {
@@ -222,7 +245,9 @@ struct BlockContent {
         let tintColor = attributes[.foregroundColor] as? UIColor ?? Markdown.textColor
         let image     = sourceImage.withTintColor(tintColor, renderingMode: .alwaysOriginal)
         let ctFont    = CTFontCreateWithName(font.fontName as CFString, font.pointSize, nil)
-                                          
+
+        /// Das Attachment verwendet die tatsächliche Symbolgröße. So bleibt das Seitenverhältnis
+        /// erhalten, falls später ein nicht-quadratisches Symbol verwendet wird.
         let attachment = ImageAttachment(image: image, size: image.size, font: ctFont, baselineOffset: 2)
         
         let delegate = makeRunDelegate(for: attachment)
@@ -235,6 +260,12 @@ struct BlockContent {
         return mutable
     }
 
+    /// Normalisiert Definition Lists in einem normalen Paragraph-Block.
+    ///
+    /// Foundation kennt diese Erweiterung nicht als eigene Blockart. Ein Block mit
+    /// `Begriff` + `: Definition` kommt daher als normaler Absatz mit Softbreaks an.
+    /// Diese Funktion prüft das Muster, entfernt die führenden Doppelpunkte der
+    /// Definitionszeilen und liefert den Range des Begriffs für dessen Fettdruck zurück.
     private static func normalizedDefinitionList(_ source: NSMutableAttributedString)
     -> (attrText: NSMutableAttributedString, termRange: NSRange)?
     {
@@ -288,7 +319,11 @@ struct BlockContent {
         typealias MD = Markdown.DefinitionList
         
         ///-----------------------------------------------------------------------------------
-        /// 1 .  D U R C H L A U F  :   Berechnen der Arrays für die Tabellen und Listen
+        /// 1 .  D U R C H L A U F  :   Messwerte für Tabellen und Listen sammeln
+        ///
+        /// In diesem Durchlauf wird noch nichts am Text verändert. Wir sammeln nur Breiten und
+        /// Tabelleninformationen, weil Listen-Einzüge und Tabellenrahmen erst korrekt berechnet
+        /// werden können, wenn alle Zellen bzw. alle Einträge einer Listen-Identity bekannt sind.
         ///
         /// Bullet-Breite pro Listen-Identity (NICHT global pro Hierarchiestufe), damit zwei unabhängige
         /// Listen unterschiedliche Bullet-Breiten haben können.
@@ -349,7 +384,8 @@ struct BlockContent {
             if let block, let id = block.listHierarchie, prevKey != blockContent.key  {
                 prevKey = blockContent.key
 
-                /// Anführungszeichen (-zahl) für die Liste
+                /// Für die Einzugsbreite reicht der textuelle Fallback der Task-Checkbox.
+                /// Das echte SF Symbol wird erst im dritten Durchlauf eingefügt.
                 let taskMarker = taskListMarker(in: blockContent.attrText.string)
                 let listBulletPoint = taskMarker.map { $0.checked ? ML.taskChecked : ML.taskUnchecked }
                     ?? (block.hasOrderedList ? "\(block.listOrdinal)." : ML.bulletPoint[(id-1) % ML.bulletPoint.count])
@@ -371,8 +407,12 @@ struct BlockContent {
         }
         
         ///-----------------------------------------------------------------------------------
-        /// 2  .  D U R C H L A U F   D E R    L I S T E  :   Berechnen der Werte für den Block Content
+        /// 2  .  D U R C H L A U F   D E R    L I S T E  :   Einzüge und Bullet-Daten speichern
         ///
+        /// Jetzt sind die maximalen Bullet-Breiten bekannt. Daraus werden die tatsächlichen
+        /// Paragraph-Indents berechnet und in `BlockContent` gespeichert. Bei Task-Listen wird
+        /// zusätzlich der SF-Symbol-Name gemerkt; der sichtbare Text wird weiterhin erst im
+        /// dritten Durchlauf verändert.
         for (index, blockContent) in allBlocks.enumerated() {
             guard let block = blockContent.block, let id = block.listHierarchie else { continue }
 
@@ -398,8 +438,10 @@ struct BlockContent {
                 ?? (block.hasOrderedList ? "\(block.listOrdinal)." : ML.bulletPoint[(id-1) % ML.bulletPoint.count])
             
             /// Es muss geprüft werden, ob im Dictionary schon ein Eintrag mit dem gleichen Key existiert.
-            /// Der Key wird aus `identity`, `hierarchie`und `ordinal`gebildet.
-            /// Bei Absätzen, die zur gleichen Aufzählung gehören, das Aufzählungszeichen löschen und den Einzug korrigieren
+            /// Der Key wird aus `identity`, `hierarchie` und `ordinal` gebildet.
+            /// Mehrere Absatz-Blöcke können zum selben Listeneintrag gehören. Nur der erste Block
+            /// bekommt ein Bullet bzw. Task-Symbol; Folgeblöcke übernehmen den Texteinzug ohne
+            /// erneutes Listenzeichen.
             ///
             if let dictIndent = dictHeadIndent[blockContent.key]
             {
@@ -549,8 +591,11 @@ struct BlockContent {
         //        return allBlocks
         
         ///-----------------------------------------------------------------------------------
-        /// 3  .  D U R C H L A U F   D E R    L I S T E
+        /// 3  .  D U R C H L A U F   :   Text und ParagraphStyle finalisieren
         ///
+        /// Erst hier wird der sichtbare `attrText` verändert: Header-Fonts, CodeBlock-Fonts,
+        /// Definition-List-Normalisierung, Listen-Bullets, Task-Checkbox-Symbole und der finale
+        /// ParagraphStyle werden zusammengeführt. So bleiben die Mess-Durchläufe davor stabil.
         for (index, blockContent) in allBlocks.enumerated() {
             guard let block = blockContent.block else { continue }
             
@@ -656,6 +701,9 @@ struct BlockContent {
             ///-------------------------------------------------------------------------------
             /// List erkennen und die Bullets voranstellen
             if block.hasList {
+                /// Task-List-Marker (`[x]` / `[ ]`) gehören zur Markdown-Syntax, nicht zum
+                /// sichtbaren Inhalt. Das Löschen passiert vor dem Anhängen des Bullets, damit
+                /// der Marker nicht wieder aus dem Originaltext übernommen wird.
                 if let taskMarker = taskListMarker(in: attrText.string) {
                     attrText.deleteCharacters(in: taskMarker.range)
                 }
@@ -663,6 +711,8 @@ struct BlockContent {
                 let bulletAttributes = blockContent.attrText.attributes(at: 0, effectiveRange: nil)
                 let bulletFont = UIFont.systemFont(ofSize: textSize, weight: .regular)
                 let attrList = NSMutableAttributedString()
+                /// Task-Listen verwenden ein SF Symbol als Bullet. Wenn das Symbol nicht
+                /// erzeugt werden kann, fällt der Code automatisch auf das Text-Bullet zurück.
                 if let symbolName = blockContent.listBulletSymbolName,
                    let symbol = taskBulletAttributedString(symbolName: symbolName,
                                                            font: bulletFont,
