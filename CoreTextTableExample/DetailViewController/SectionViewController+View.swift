@@ -28,7 +28,7 @@ extension SettingViewController  {
              viewTextColor, viewUseSoftBreaks, viewUseHyphenation, viewUseJustification,
              viewLineHeightMultiple, viewParagraphSpacing, viewParagraphSpacingBefore,
              viewMarginLeft, viewMarginRight,
-             message
+             message, folderName, addFolder, clearFolder
 
         /// Titel des Items
         var title: TextSourceConvertible? {
@@ -45,6 +45,9 @@ extension SettingViewController  {
 
             case .viewMarginLeft:             "Linker Rand" .markdown(size: 15)
             case .viewMarginRight:            "Rechter Rand".markdown(size: 15)
+            
+            case .addFolder:                  "Zufügen"
+            case .clearFolder:                "Entfernen"
             default: nil
             }
         }
@@ -64,6 +67,21 @@ extension SettingViewController  {
             case .viewMarginLeft, .viewMarginRight, .viewParagraphSpacing, .viewParagraphSpacingBefore:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(1)
 
+            case .addFolder:
+                    .start.symbol("folder.badge.plus")
+                            
+            case .clearFolder:
+                    .start.symbol("folder.badge.minus")
+                
+            case .folderName:
+                    .start
+                        .placeholder("Kein Ordner festgelegt.")
+                        .textInsets(ContentParam.Insets(top: 4, left: 8, bottom: 4, right: 8))
+                        .backgroundColor(.secondarySystemBackground)
+                        .borderColor(.separator)
+                        .borderWidth(1)
+                        .cornerRadius(12)
+
             default: .einsNachkomma
             }
         }
@@ -75,6 +93,8 @@ extension SettingViewController  {
                  .viewParagraphSpacing, .viewParagraphSpacingBefore, .viewTextSize: .stepper
             case .viewUseSoftBreaks, .viewUseHyphenation, .viewUseJustification: .button
             case .viewTextColor:     .colorpalettewell
+            case .addFolder, .clearFolder: .imageButton
+            case .folderName: .label
             default: .number
             }
         }
@@ -104,6 +124,23 @@ extension SettingViewController  {
         items.append(.basic( Content.viewUseHyphenation .line(setting, .rw, labelWidth: w).leadingMargin(10)))
         items.append(.basic( Content.viewUseJustification.line(setting, .rw, labelWidth: w).leadingMargin(10)))
         
+        ///------------------------------------------------------------------
+        /// Bilder Ordner auswählen und rücksetzen
+        ///
+        let textOrdner = "Ordner für Bilder".markdown(size: 17, weight: .semibold, textcolor: .textGray)
+        let linkOrdner = BasicType.stdItem(textOrdner, presentation: .outlineDisclosure)
+        items.append(.vDivider(6, color: .systemGray5, layoutMargins: layoutMargins))
+        items.append(linkOrdner)
+                
+        /// Name des Ordners wird in `onUpdateData` gesetzt.
+        var itemsOrdner = [BasicType]()
+        itemsOrdner.append(.basic([
+            Content.addFolder  .plain(nil, .rw).width(0),
+            Content.clearFolder.plain(provider: MarkdownImageLocation.shared.folderURL, .rw).width(0),
+            Content.folderName .plain().height(50).trailingMargin(100)]))
+  
+        ///------------------------------------------------------------------
+
         let textAbstand = "Abstände".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkAbstand = BasicType.stdItem(textAbstand, presentation: .outlineDisclosure)
         items.append(.vDivider(6, color: .systemGray5, layoutMargins: layoutMargins))
@@ -130,6 +167,7 @@ extension SettingViewController  {
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen
         ///
         dataSource.makeSection(SectionContent.ViewSetting, items: items.itemType) { snapshot in
+            snapshot.append(itemsOrdner.itemType,  to: linkOrdner.itemType)
             snapshot.append(itemsAbstand.itemType, to: linkAbstand.itemType)
             snapshot.append(itemsEinzug .itemType, to: linkEinzug .itemType)
         }

@@ -221,7 +221,7 @@ private extension EditViewController {
     
     func requestImageFolderAccessIfNeeded(for markdown: String) {
         guard !isRequestingImageFolderAccess,
-              !MarkdownImageLocation.shared.canReadCurrentDocumentFolder(),
+              MarkdownImageLocation.shared.folderURL == nil,
               localImageTokens(in: markdown).contains(where: shouldRequestFolderAccess)
         else { return }
 
@@ -267,13 +267,12 @@ private extension EditViewController {
     }
 
     func shouldRequestFolderAccess(for token: String) -> Bool {
+        /// Asset-Bilder und SF Symbols brauchen keinen Ordnerzugriff.
         if UIImage(named: token) != nil || UIImage(systemName: token) != nil {
             return false
         }
-        if token.contains("/") || !URL(fileURLWithPath: token).pathExtension.isEmpty {
-            return true
-        }
-        return MarkdownImageLocation.shared.resolveLocalImageURL(named: token) != nil
+        /// Alles andere ist ein lokaler Bild-Token – egal ob mit oder ohne Endung.
+        return true
     }
 
     func localImageTokens(in markdown: String) -> [String] {
@@ -358,10 +357,6 @@ extension EditViewController: UIDocumentPickerDelegate {
         do {
             let data = try MarkdownDocumentLocation.shared.access(url: url) { url in
                 MarkdownDocumentLocation.shared.updateLoadedFileURL(url)
-                /// Direkt nach dem Auswählen versuchen, das Eltern-Verzeichnis als Folder-
-                /// Bookmark zu sichern. Falls das System es zulässt, sind Bilder neben der
-                /// `.md`-Datei ohne extra Folder-Picker zugänglich.
-                MarkdownImageLocation.shared.captureFolder(forDocumentAt: url)
                 return try Data(contentsOf: url)
             }
             /// Versuche UTF-8, fallback auf String(decoding:)

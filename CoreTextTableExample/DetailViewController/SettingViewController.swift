@@ -40,8 +40,6 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
     /// Liste der Links, die für Aktionen benötigt werden.
     var linkPrint: BasicType?
     var linkDefaults: BasicType?
-    var linkImageFolder: BasicType?
-    var linkImageFolderClear: BasicType?
 
     /// Hält den Delegate-Proxy für den Bilder-Ordner-Picker am Leben,
     /// solange der UIDocumentPickerViewController sichtbar ist.
@@ -196,6 +194,15 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             setting.pushProperty(value: color, key: key)
             print("Color", setting.isChanged, key, value)
         }
+        
+        /// Aktionen zur Auswahl und Entfernen des Image Folders
+        else if key == ViewSetting.addFolder.key {
+            actionSelectImageFolder()
+        }
+        else if key == ViewSetting.clearFolder.key {
+            actionClearImageFolder()
+        }
+        
         else {
             /// Die Attribute werden als ihre ursprünglichen Datentypen gespeichert
             setting.pushProperty(value: value, key: key)
@@ -252,6 +259,14 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
             }
             return ktxt
         }
+        
+        /// Setzen des Pfades für den Ordner der Bilder
+        if key == C.folderName.key {
+            let folderPath = MarkdownImageLocation.shared.folderURL?.path.attributedPath()
+            let ktxt = KeyText(value: folderPath)
+            return ktxt
+        }
+        
         return nil
     }
     
@@ -276,8 +291,6 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         /// Beispiel für Aufruf des Druckens
         if item == linkPrint?           .itemType { actionShare(linkPrint) }
         if item == linkDefaults?        .itemType { actionSetDefaults() }
-        if item == linkImageFolder?     .itemType { actionSelectImageFolder() }
-        if item == linkImageFolderClear?.itemType { actionClearImageFolder() }
     }
     
     /// Abfrage, ob eine Zelle ausgewählt werden kann
@@ -287,8 +300,6 @@ class SettingViewController: CommonDetailViewController<Settings, ItemType> {
         /// Beispiel für Aufruf des Druckens
         if item == linkPrint?           .itemType { return true }
         if item == linkDefaults?        .itemType { return true }
-        if item == linkImageFolder?     .itemType { return true }
-        if item == linkImageFolderClear?.itemType { return true }
 
         collectionView.deselectItem(at: indexPath, animated: false)
         return false

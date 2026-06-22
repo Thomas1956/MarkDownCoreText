@@ -85,25 +85,6 @@ extension SettingViewController  {
         items.append(linkPrint)
         self.linkPrint = linkPrint
 
-        ///-----------------------------------------------------------------------------------
-        /// Bilder-Ordner auswählen / zurücksetzen
-        items.append(.info(Content.textImageFolder.title))
-
-        let folderPath = MarkdownImageLocation.shared.folderURL?.path ?? "Kein Ordner ausgewählt"
-        items.append(.info(folderPath.markdown(size: 13, textcolor: .textGray)))
-
-        let linkImageFolder = BasicType.stdItem("Bilder-Ordner auswählen", image: "folder.badge.plus")
-        items.append(linkImageFolder)
-        self.linkImageFolder = linkImageFolder
-
-        if MarkdownImageLocation.shared.folderURL != nil {
-            let linkImageFolderClear = BasicType.stdItem("Bilder-Ordner entfernen", image: "folder.badge.minus")
-            items.append(linkImageFolderClear)
-            self.linkImageFolderClear = linkImageFolderClear
-        } else {
-            self.linkImageFolderClear = nil
-        }
-
         dataSource.makeSection(SectionContent.DefaultSetting, items: items.itemType)
     }
 }

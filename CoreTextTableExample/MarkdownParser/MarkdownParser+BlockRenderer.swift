@@ -563,6 +563,12 @@ extension BlockRenderer {
                 originalImage = local
             } else if let symbol = UIImage(systemName: imagename, withConfiguration: config) {
                 originalImage = symbol
+            } else if let placeholder = UIImage(systemName: "photo.badge.exclamationmark", withConfiguration: config)
+                                     ?? UIImage(systemName: "photo", withConfiguration: config) {
+                /// Nicht auflösbare Bild-Referenz: Signalfarbe, damit der Fehler weder in der
+                /// LiveView noch im PDF übersehen wird.
+                originalImage = placeholder
+                if requestedColor == nil { requestedColor = .systemRed }
             } else {
                 return nil
             }

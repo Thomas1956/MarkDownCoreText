@@ -1,5 +1,5 @@
 {
-  "originHash" : "d81cc94195ac991fb140224d2d2b915afdcd277d8a1d6ea8b64ccd78b54b7daa",
+  "originHash" : "9c039cfa9b44db2e41e8d4bc2265ead0379f847736786f3180652f3e4c2bf732",
   "pins" : [
     {
       "identity" : "commoncollection",
@@ -7,7 +7,7 @@
       "location" : "https://github.com/Thomas1956/CommonCollection",
       "state" : {
         "branch" : "main",
-        "revision" : "c2acd46fa4f582b429f0ea710c0282fe74db775d"
+        "revision" : "3035edca07ff8cf16f61860bad482003fdd1203d"
       }
     },
     {
@@ -16,7 +16,7 @@
       "location" : "https://github.com/swiftlang/swift-syntax.git",
       "state" : {
         "branch" : "main",
-        "revision" : "996efe58bff528645fb8273d641d3d1e5e2a693b"
+        "revision" : "bd09469ce4da40f942c049fbe027ef445338a8f9"
       }
     },
     {
@@ -25,7 +25,7 @@
       "location" : "https://github.com/Thomas1956/UsefulExtensions",
       "state" : {
         "branch" : "main",
-        "revision" : "105248a3bcdc50d88b30508a9f4e0c1a3beaccb1"
+        "revision" : "665d65cb3cc91a9d1a6ca4124f800cde4c352eb6"
       }
     }
   ],

@@ -48,6 +48,7 @@ extension SettingViewController  {
         let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
         picker.allowsMultipleSelection = false
         picker.shouldShowFileExtensions = true
+        picker.directoryURL = MarkdownDocumentLocation.shared.directoryURL
         imageFolderPickerProxy = ImageFolderPickerProxy { [weak self] url in
             guard let self else { return }
             _ = url.startAccessingSecurityScopedResource()
@@ -68,10 +69,12 @@ extension SettingViewController  {
     }
 
     ///---------------------------------------------------------------------------------------
-    /// Hilfsmethode: die `DefaultSetting`-Section neu aufbauen, damit der angezeigte Pfad
-    /// und die Sichtbarkeit des "Entfernen"-Buttons aktuell sind.
+    /// Hilfsmethode:  Die Sichtbarkeit des "Entfernen"-Buttons aktuell sind.
+    ///
     private func refreshDefaultSettingSection() {
-        sectionDefaultSetting()
+        
+        dataSource.reconfigureIfNeeded([ViewSetting.folderName.key])
+        
         if let setting = self.entity {
             onLiveChange?(setting)
         }
