@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 620" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif">
+
+  <defs>
+    <marker id="arrowEnd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2563EB"/>
+    </marker>
+    <marker id="arrowStart" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M10,0 L0,5 L10,10 z" fill="#2563EB"/>
+    </marker>
+    <style>
+      .doc-edge      { stroke: #94A3B8; stroke-width: 1; stroke-dasharray: 4 3; }
+      .doc-edge-label{ fill: #64748B; font-size: 11px; }
+      .margin-guide  { stroke: #CBD5E1; stroke-width: 1; stroke-dasharray: 2 3; }
+      .textline      { fill: #94A3B8; }
+      .bullet        { fill: #475569; }
+      .dim-line      { stroke: #2563EB; stroke-width: 1; }
+      .dim-tick      { stroke: #2563EB; stroke-width: 1; }
+      .dim-label     { fill: #1E3A8A; font-size: 12px; font-weight: 500; }
+      .title         { fill: #0F172A; font-size: 14px; font-weight: 600; }
+      .caption       { fill: #475569; font-size: 11px; font-style: italic; }
+    </style>
+  </defs>
+
+  <!-- Titel -->
+  <text x="20" y="28" class="title">Absatz / Listenpunkt – horizontale Einzüge</text>
+
+  <!-- Dokument-Ränder (gestrichelt) -->
+  <line x1="60"  y1="60"  x2="60"  y2="560" class="doc-edge"/>
+  <line x1="820" y1="60"  x2="820" y2="560" class="doc-edge"/>
+  <text x="60"  y="580" text-anchor="middle" class="doc-edge-label">linker Dokumentrand</text>
+  <text x="820" y="580" text-anchor="middle" class="doc-edge-label">rechter Dokumentrand</text>
+
+  <!-- Margin-Linien (heller gestrichelt) -->
+  <line x1="160" y1="200" x2="160" y2="430" class="margin-guide"/>
+  <line x1="720" y1="200" x2="720" y2="430" class="margin-guide"/>
+
+  <!-- Bullet + Text-Zeilen (Listen-Item) -->
+  <circle cx="183" cy="217" r="3.2" class="bullet"/>
+  <rect x="218" y="213" width="380" height="6" class="textline"/>
+  <rect x="218" y="231" width="470" height="6" class="textline"/>
+  <rect x="218" y="249" width="455" height="6" class="textline"/>
+  <rect x="218" y="267" width="478" height="6" class="textline"/>
+  <rect x="218" y="285" width="460" height="6" class="textline"/>
+  <rect x="218" y="303" width="295" height="6" class="textline"/>
+
+  <!-- Zweiter Absatz, normaler Text (zum Vergleich) -->
+  <rect x="160" y="333" width="528" height="6" class="textline"/>
+  <rect x="160" y="351" width="510" height="6" class="textline"/>
+  <rect x="160" y="369" width="535" height="6" class="textline"/>
+  <rect x="160" y="387" width="320" height="6" class="textline"/>
+
+  <!-- =========== Maßlinien =========== -->
+
+  <!-- viewMarginLeft -->
+  <line x1="60"  y1="90" x2="160" y2="90" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <line x1="60"  y1="80" x2="60"  y2="200" class="dim-tick"/>
+  <line x1="160" y1="80" x2="160" y2="200" class="dim-tick"/>
+  <text x="110" y="78" text-anchor="middle" class="dim-label">viewMarginLeft</text>
+
+  <!-- viewMarginRight -->
+  <line x1="720" y1="90" x2="820" y2="90" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <line x1="720" y1="80" x2="720" y2="200" class="dim-tick"/>
+  <line x1="820" y1="80" x2="820" y2="200" class="dim-tick"/>
+  <text x="770" y="78" text-anchor="middle" class="dim-label">viewMarginRight</text>
+
+  <!-- firstLineHeadIndent : linker Rand → Bullet-Position -->
+  <line x1="160" y1="130" x2="183" y2="130" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <line x1="183" y1="120" x2="183" y2="220" class="dim-tick"/>
+  <text x="188" y="128" text-anchor="start" class="dim-label">firstLineHeadIndent</text>
+
+  <!-- headIndent : linker Rand → Folgezeilen-Position -->
+  <line x1="160" y1="165" x2="218" y2="165" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <line x1="218" y1="155" x2="218" y2="320" class="dim-tick"/>
+  <text x="223" y="163" text-anchor="start" class="dim-label">headIndent</text>
+
+  <!-- tailIndent : Text-Ende → rechter Rand (negativ) -->
+  <line x1="700" y1="130" x2="720" y2="130" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <line x1="700" y1="120" x2="700" y2="320" class="dim-tick"/>
+  <text x="695" y="128" text-anchor="end" class="dim-label">tailIndent (negativer Wert)</text>
+
+  <!-- Beschriftungen für die Absätze -->
+  <text x="60"  y="430" class="caption">↑ Listenpunkt: erste Zeile beginnt mit Bullet an firstLineHeadIndent,
+  Folgezeilen wickeln an headIndent.</text>
+  <text x="60"  y="450" class="caption">↑ Normaler Absatz ohne Listen-Einzug: beide Einzüge gleich dem linken Rand,
+  Text beginnt am margin.</text>
+
+  <!-- Legende -->
+  <g transform="translate(60, 530)">
+    <circle cx="9" cy="5" r="3.2" class="bullet"/>
+    <text x="24"  y="9" class="caption">Bullet</text>
+    <rect x="100" y="2" width="60" height="4" class="textline"/>
+    <text x="170" y="9" class="caption">Textzeile</text>
+    <line x1="290" y1="5" x2="320" y2="5" class="margin-guide"/>
+    <text x="328" y="9" class="caption">Text-Margin (viewMarginLeft / viewMarginRight)</text>
+  </g>
+
+</svg>

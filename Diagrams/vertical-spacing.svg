@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 620" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif">
+
+  <defs>
+    <marker id="arrowEnd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2563EB"/>
+    </marker>
+    <marker id="arrowStart" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M10,0 L0,5 L10,10 z" fill="#2563EB"/>
+    </marker>
+    <style>
+      .doc-edge      { stroke: #94A3B8; stroke-width: 1; stroke-dasharray: 4 3; }
+      .doc-edge-label{ fill: #64748B; font-size: 11px; }
+      .textline      { fill: #94A3B8; }
+      .heading-line  { fill: #475569; }
+      .dim-line      { stroke: #2563EB; stroke-width: 1; }
+      .dim-tick      { stroke: #2563EB; stroke-width: 1; }
+      .dim-label     { fill: #1E3A8A; font-size: 12px; font-weight: 500; }
+      .title         { fill: #0F172A; font-size: 14px; font-weight: 600; }
+      .caption       { fill: #475569; font-size: 11px; font-style: italic; }
+    </style>
+  </defs>
+
+  <!-- Titel -->
+  <text x="20" y="28" class="title">Vertikale Abstände – paragraphSpacing, paragraphSpacingBefore, lineSpacing</text>
+
+  <!-- Dokument-Ränder -->
+  <line x1="60"  y1="60"  x2="60"  y2="500" class="doc-edge"/>
+  <line x1="820" y1="60"  x2="820" y2="500" class="doc-edge"/>
+  <text x="60"  y="518" text-anchor="middle" class="doc-edge-label">linker Dokumentrand</text>
+  <text x="820" y="518" text-anchor="middle" class="doc-edge-label">rechter Dokumentrand</text>
+
+  <!-- =========== Absatz A (3 Zeilen) =========== -->
+  <rect x="160" y="84"  width="540" height="6" class="textline"/>
+  <rect x="160" y="104" width="525" height="6" class="textline"/>
+  <rect x="160" y="124" width="490" height="6" class="textline"/>
+
+  <!-- lineSpacing zwischen Zeile 1 und Zeile 2 -->
+  <line x1="740" y1="90"  x2="740" y2="104" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <line x1="730" y1="90"  x2="750" y2="90"  class="dim-tick"/>
+  <line x1="730" y1="104" x2="750" y2="104" class="dim-tick"/>
+  <text x="756" y="100" text-anchor="start" class="dim-label">lineSpacing</text>
+
+  <!-- =========== paragraphSpacing-Lücke (Absatz A → B) =========== -->
+  <line x1="100" y1="130" x2="100" y2="175" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <line x1="90"  y1="130" x2="110" y2="130" class="dim-tick"/>
+  <line x1="90"  y1="175" x2="110" y2="175" class="dim-tick"/>
+  <text x="115" y="156" text-anchor="start" class="dim-label">paragraphSpacing</text>
+
+  <!-- =========== Absatz B (3 Zeilen) =========== -->
+  <rect x="160" y="179" width="535" height="6" class="textline"/>
+  <rect x="160" y="199" width="520" height="6" class="textline"/>
+  <rect x="160" y="219" width="395" height="6" class="textline"/>
+
+  <!-- =========== paragraphSpacingBefore-Lücke (vor Header) =========== -->
+  <line x1="100" y1="225" x2="100" y2="285" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <line x1="90"  y1="225" x2="110" y2="225" class="dim-tick"/>
+  <line x1="90"  y1="285" x2="110" y2="285" class="dim-tick"/>
+  <text x="115" y="259" text-anchor="start" class="dim-label">paragraphSpacingBefore</text>
+
+  <!-- =========== Header H1 =========== -->
+  <rect x="160" y="290" width="280" height="14" class="heading-line"/>
+
+  <!-- paragraphSpacing nach Header -->
+  <line x1="100" y1="304" x2="100" y2="334" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <line x1="90"  y1="304" x2="110" y2="304" class="dim-tick"/>
+  <line x1="90"  y1="334" x2="110" y2="334" class="dim-tick"/>
+  <text x="115" y="322" text-anchor="start" class="dim-label">paragraphSpacing</text>
+
+  <!-- =========== Absatz C (2 Zeilen) =========== -->
+  <rect x="160" y="338" width="535" height="6" class="textline"/>
+  <rect x="160" y="358" width="445" height="6" class="textline"/>
+
+  <!-- Hinweise -->
+  <text x="20" y="410" class="caption">Zwischen zwei Blöcken zählt jeweils der größere der beiden Werte —</text>
+  <text x="20" y="426" class="caption">max(paragraphSpacing des vorherigen Blocks, paragraphSpacingBefore des folgenden Blocks).</text>
+  <text x="20" y="444" class="caption">paragraphSpacing und paragraphSpacingBefore sind als em-Faktor gespeichert</text>
+  <text x="20" y="460" class="caption">und werden zur Laufzeit mit der aktuellen Body-Schriftgröße multipliziert.</text>
+  <text x="20" y="478" class="caption">lineHeightMultiple wirkt zusätzlich als Multiplikator auf die berechnete Zeilenhöhe innerhalb eines Absatzes.</text>
+
+  <!-- Legende -->
+  <g transform="translate(60, 555)">
+    <rect x="0"   y="2" width="60" height="4" class="textline"/>
+    <text x="68"  y="9" class="caption">Textzeile</text>
+    <rect x="180" y="0" width="60" height="8" class="heading-line"/>
+    <text x="248" y="9" class="caption">Überschrift</text>
+  </g>
+</svg>

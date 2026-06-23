@@ -767,7 +767,7 @@ struct BlockContent {
             ///
             if !block.hasCodeBlock, !block.hasTable, !block.hasThematicBreak,
                attrText.string.contains("::") {
-                let (ranges, tabValue) = findTabRanges(in: attrText.string)
+                let (ranges, tabValue) = findTabRanges(in: attrText)
                 if !ranges.isEmpty {
                     /// Trennzeichen rückwärts durch einen Tabulator ersetzen, damit die Indizes gültig bleiben.
                     for nsRange in ranges.reversed() {
@@ -800,12 +800,13 @@ struct BlockContent {
     //----------------------------------------------------------------------------------------
     // MARK: - Ermitteln der Ranges für die Doppelspalten
 
-    /// Sucht alle Trennzeichen `::` (optional `::<wert>::`) in einem String und liefert die zu ersetzenden
-    /// NSRanges sowie den ersten gefundenen Tabulatorwert zurück.
-    private static func findTabRanges(in string: String) -> (ranges: [NSRange], tabValue: CGFloat?) {
+    /// Sucht alle Trennzeichen `::` (optional `::<wert>::`) in einem AttributedString und liefert die
+    /// zu ersetzenden NSRanges sowie den ersten gefundenen Tabulatorwert zurück. Treffer, die innerhalb
+    /// von Inline-Code (Monospace-Font) liegen, werden übersprungen.
+    private static func findTabRanges(in attrText: NSAttributedString) -> (ranges: [NSRange], tabValue: CGFloat?) {
         var ranges: [NSRange] = []
         var tabValue: CGFloat?
-        let nsstring = string as NSString
+        let nsstring = attrText.string as NSString
         var searchStart = 0
 
         while searchStart < nsstring.length {
@@ -813,13 +814,21 @@ struct BlockContent {
             let start = nsstring.range(of: "::", options: [], range: searchRange)
             guard start.location != NSNotFound else { break }
 
-            var range = start
             var nextStart = start.location + start.length
+
+            /// Inline-Code überspringen: `::` innerhalb eines Monospace-Bereichs ist Bestandteil
+            /// eines Code-Spans und darf nicht zur Doppelspalte werden.
+            if isInlineCode(attrText, at: start.location) {
+                searchStart = nextStart
+                continue
+            }
+
+            var range = start
 
             /// Wenn nach dem `::` ein weiteres `::` folgt, kann zwischen beiden die Zahl für den Tabulator stehen.
             let endSearchRange = NSRange(location: nextStart, length: nsstring.length - nextStart)
             let end = nsstring.range(of: "::", options: [], range: endSearchRange)
-            if end.location != NSNotFound {
+            if end.location != NSNotFound, !isInlineCode(attrText, at: end.location) {
                 let valueRange = NSRange(location: nextStart, length: end.location - nextStart)
                 let valueString = nsstring.substring(with: valueRange)
                 if let value = Double(valueString) {
@@ -833,6 +842,27 @@ struct BlockContent {
             searchStart = nextStart
         }
         return (ranges, tabValue)
+    }
+
+    /// Prüft, ob an der gegebenen String-Position Inline-Code vorliegt. Primärer Indikator ist der
+    /// in `MarkdownParser.inlinePresentation` gesetzte `.inlinePresentationIntent`-Marker (überlebt
+    /// auch Font-Überschreibungen durch Header). Als Fallback wird der Monospace-Trait des Fonts
+    /// geprüft.
+    private static func isInlineCode(_ attrText: NSAttributedString, at location: Int) -> Bool {
+        guard location < attrText.length else { return false }
+
+        if let intent = attrText.attribute(.inlinePresentationIntent, at: location, effectiveRange: nil) {
+            let raw: UInt? = (intent as? NSNumber)?.uintValue ?? (intent as? UInt)
+            if let raw, raw & InlinePresentationIntent.code.rawValue != 0 {
+                return true
+            }
+        }
+
+        if let font = attrText.attribute(.font, at: location, effectiveRange: nil) as? UIFont,
+           font.fontDescriptor.symbolicTraits.contains(.traitMonoSpace) {
+            return true
+        }
+        return false
     }
 }
 

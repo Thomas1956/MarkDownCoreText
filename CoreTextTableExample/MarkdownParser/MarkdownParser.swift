@@ -406,7 +406,14 @@ extension MarkdownParser {
                 font = UIFont(descriptor: descriptor!, size: pointSize)
                 destination.font = font
             }
-            
+
+            /// Inline-Code-Marker beibehalten, damit spätere Verarbeitungsschritte (z. B. die
+            /// `::`-Ersetzung) Inline-Code zuverlässig erkennen — auch wenn der Font durch einen
+            /// Header- oder Block-Font überschrieben wird.
+            if block.contains(.code) {
+                destination.inlinePresentationIntent = .code
+            }
+
             /// Ersetzungen ausführen
             let source = AttributeContainer([.inlinePresentationIntent: block.rawValue])
             attrText[range].replaceAttributes(source, with: destination)
