@@ -148,6 +148,8 @@ public struct Markdown {
         static var indentLeft          : Double = 0              /// Abstand der BG-Box vom linken Textrand
         static var indentRight         : Double = 0              /// Abstand der BG-Box vom rechten Textrand
         static var verticalOffset      : Double = 5              /// Verschiebung des Hintergrunds nach unten
+        static var useDefaultTextColor : Bool = true             /// Textfarbe aus globaler Textfarbe übernehmen
+        static var textColor           : UIColor = .black        /// Eigene Textfarbe für den BlockQuote
         static var useDefaultBackgroundColor: Bool = true        /// Hintergrundfarbe aus Textfarbe ableiten
         static var backgroundColor     : UIColor = .systemGray6  /// Eigene Farbe für den Hintergrund
 

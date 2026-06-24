@@ -9,8 +9,10 @@
         <attribute name="blockPaddingRight" optional="YES" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
         <attribute name="blockRawBackgroundColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="blockRawBarColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
+        <attribute name="blockRawTextColor" optional="YES" attributeType="Transformable" valueTransformerName="ColorToDataTransformer"/>
         <attribute name="blockUseDefaultBackgroundColor" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
         <attribute name="blockUseDefaultBarColor" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="blockUseDefaultTextColor" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
         <attribute name="blockVerticalOffset" optional="YES" attributeType="Double" defaultValueString="5.0" usesScalarValueType="YES"/>
         <attribute name="codeBorderWidth" optional="YES" attributeType="Double" defaultValueString="1.0" usesScalarValueType="YES"/>
         <attribute name="codeIndentLeft" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>

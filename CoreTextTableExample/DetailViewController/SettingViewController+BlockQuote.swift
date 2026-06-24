@@ -27,6 +27,7 @@ extension SettingViewController  {
              blockBarIndent, blockBarWidth,
              blockPaddingLeft, blockPaddingRight,
              blockVerticalOffset,
+             blockUseDefaultTextColor, blockTextColor,
              blockUseDefaultBarColor, blockBarColor,
              blockUseDefaultBackgroundColor, blockBackgroundColor
 
@@ -40,6 +41,8 @@ extension SettingViewController  {
             case .blockPaddingLeft:               "Linker Innenabstand"    .markdown(size: 15)
             case .blockPaddingRight:              "Rechter Innenabstand"   .markdown(size: 15)
             case .blockVerticalOffset:            "Vertikaler Offset"      .markdown(size: 15)
+            case .blockUseDefaultTextColor:       "Standardfarbe"          .markdown(size: 15)
+            case .blockTextColor:                 "Eigene Farbe"           .markdown(size: 15)
             case .blockUseDefaultBarColor:        "Standardfarbe"          .markdown(size: 15)
             case .blockBarColor:                  "Eigene Farbe"           .markdown(size: 15)
             case .blockUseDefaultBackgroundColor: "Standardfarbe"          .markdown(size: 15)
@@ -58,8 +61,11 @@ extension SettingViewController  {
             case .blockBarWidth:
                     .start.fraction(1).symbol("Pt").minimumValue(0).maximumValue(30).stepValue(0.5)
 
-            case .blockUseDefaultBarColor, .blockUseDefaultBackgroundColor:
+            case .blockUseDefaultTextColor, .blockUseDefaultBarColor, .blockUseDefaultBackgroundColor:
                     .alignLeading
+            case .blockTextColor:
+                    .start
+                    .list(Settings.blockTextColorPalette)
             case .blockBarColor, .blockBackgroundColor:
                     .start
                     .list(self == .blockBarColor ? Settings.blockBarColorPalette : Settings.blockBackgroundColorPalette)
@@ -73,8 +79,8 @@ extension SettingViewController  {
                  .blockBarIndent, .blockBarWidth,
                  .blockPaddingLeft, .blockPaddingRight,
                  .blockVerticalOffset: .stepper
-            case .blockUseDefaultBarColor, .blockUseDefaultBackgroundColor: .button
-            case .blockBarColor, .blockBackgroundColor: .colorpalettewell
+            case .blockUseDefaultTextColor, .blockUseDefaultBarColor, .blockUseDefaultBackgroundColor: .button
+            case .blockTextColor, .blockBarColor, .blockBackgroundColor: .colorpalettewell
             }
         }
     }
@@ -106,6 +112,16 @@ extension SettingViewController  {
         items.append(.basic(Content.blockPaddingLeft .line(setting, .rw, labelWidth: w).leadingMargin(10)))
         items.append(.basic(Content.blockPaddingRight.line(setting, .rw, labelWidth: w).leadingMargin(10)))
         
+        let textText = "Text".markdown(size: 17, weight: .semibold, textcolor: .textGray)
+        let linkText = BasicType.stdItem(textText, presentation: .outlineDisclosure)
+        items.append(.vDivider(6, color: .systemGray5, layoutMargins: layoutMargins))
+        items.append(linkText)
+        
+        let itemsText: [BasicType] = [
+            .basic([Content.blockUseDefaultTextColor.line(setting, .rw, contentWidth: 37, labelWidth: w),
+                    Content.blockTextColor          .line(setting, .rw, labelWidth: w), HSPACE]),
+        ]
+
         let textBalken = "Balken".markdown(size: 17, weight: .semibold, textcolor: .textGray)
         let linkBalken = BasicType.stdItem(textBalken, presentation: .outlineDisclosure)
         items.append(.vDivider(6, color: .systemGray5, layoutMargins: layoutMargins))
@@ -133,6 +149,7 @@ extension SettingViewController  {
         ///-----------------------------------------------------------------------------------
         /// Einen Section Snapshot zusammenstellen und der Data Source zuweisen
         dataSource.makeSection(SectionContent.BlockQuoteSetting, items: items.itemType) { snapshot in
+            snapshot.append(itemsText       .itemType, to: linkText       .itemType)
             snapshot.append(itemsBalken     .itemType, to: linkBalken     .itemType)
             snapshot.append(itemsHintergrund.itemType, to: linkHintergrund.itemType)
         }

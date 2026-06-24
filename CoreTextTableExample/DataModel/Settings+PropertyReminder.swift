@@ -78,6 +78,7 @@ extension Settings {
     private static let headerFillColorDefinitions = makeDerivedColorDefinitions(\.derivedHeaderFillColor)
     
     static let textColorPalette                   = makeColorPalette(textColorDefinitions)
+    static let blockTextColorPalette              = textColorPalette
     static let blockBarColorPalette               = makeColorPalette(strokeColorDefinitions)
     static let blockBackgroundColorPalette        = makeColorPalette(fillColorDefinitions)
     static let rulerColorPalette                  = makeColorPalette(strokeColorDefinitions)
@@ -112,6 +113,12 @@ extension Settings {
     @objc dynamic public var viewTextColor: UIColor {
         get { viewRawTextColor as? UIColor ?? .black }
         set { viewRawTextColor = newValue }
+    }
+
+    /// Eigene Textfarbe im BlockQuote.
+    @objc dynamic public var blockTextColor: UIColor? {
+        get { Self.defaultedColor(blockRawTextColor as? UIColor, default: .black) }
+        set { blockRawTextColor = Self.defaultedColor(newValue, default: .black) }
     }
 
     /// Eigene Farbe für die Balken im BlockQuote.

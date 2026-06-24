@@ -278,6 +278,10 @@ extension SettingsController {
                  getMarkdown: { Markdown.useJustification },
                  setMarkdown: { Markdown.useJustification = $0 }),
 
+        FieldMap(settingsKey: \Settings.blockUseDefaultTextColor,
+                 getMarkdown: { Markdown.BlockQuote.useDefaultTextColor },
+                 setMarkdown: { Markdown.BlockQuote.useDefaultTextColor = $0 }),
+
         FieldMap(settingsKey: \Settings.blockUseDefaultBarColor,
                  getMarkdown: { Markdown.BlockQuote.useDefaultBarColor },
                  setMarkdown: { Markdown.BlockQuote.useDefaultBarColor = $0 }),
@@ -319,6 +323,10 @@ extension SettingsController {
     ]
 
     private static let optionalColorMaps: [FieldMap<UIColor?>] = [
+        FieldMap(settingsKey: \Settings.blockTextColor,
+                 getMarkdown: { Markdown.BlockQuote.textColor },
+                 setMarkdown: { if let color = $0 { Markdown.BlockQuote.textColor = color } }),
+
         FieldMap(settingsKey: \Settings.blockBarColor,
                  getMarkdown: { Markdown.BlockQuote.barColor },
                  setMarkdown: { if let color = $0 { Markdown.BlockQuote.barColor = color } }),

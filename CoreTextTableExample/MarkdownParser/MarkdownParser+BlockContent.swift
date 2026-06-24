@@ -772,6 +772,18 @@ struct BlockContent {
                                        NSTextTab(textAlignment: .left,  location: headIndent) ]
             }
             
+            if block.hasBlockQuote, !MB.useDefaultTextColor {
+                let fullRange = NSRange(location: 0, length: attrText.length)
+                attrText.enumerateAttribute(.foregroundColor, in: fullRange) { value, range, _ in
+                    guard let color = value as? UIColor else {
+                        attrText.addAttribute(.foregroundColor, value: MB.textColor, range: range)
+                        return
+                    }
+                    guard color.isEqual(M.textColor) else { return }
+                    attrText.addAttribute(.foregroundColor, value: MB.textColor, range: range)
+                }
+            }
+            
             ///-------------------------------------------------------------------------------
             /// Style einfügen
             ///
