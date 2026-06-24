@@ -147,17 +147,105 @@ public class MarkdownParser {
     /// Test-/Dokumentationsbeispiele: einfache Container werden entfernt, starke/kursive
     /// Auszeichnung wird zu Markdown, farbige Spans werden in die vorhandene `^[...](color:)`
     /// Syntax übertragen.
+    ///
+    /// Alle Transformationen laufen über `transformOutsideCode`, sodass Inhalte von Inline-
+    /// Code (`` `…` ``) und Fenced Code Blocks (` ``` … ``` ` bzw. ` ~~~ … ~~~ `) unverändert
+    /// bleiben – Markdown-Regel: in Code wird nichts interpretiert.
     private static func rewriteHTMLFragments(in source: String) -> String {
-        var result = source
-        result = replaceHTMLSpansWithColor(in: result)
-        result = replaceHTMLTagPair(in: result, tag: "strong", marker: "**")
-        result = replaceHTMLTagPair(in: result, tag: "b", marker: "**")
-        result = replaceHTMLTagPair(in: result, tag: "em", marker: "*")
-        result = replaceHTMLTagPair(in: result, tag: "i", marker: "*")
-        result = replaceHTMLLineBreaks(in: result)
-        result = stripHTMLTag(in: result, tag: "div")
-        result = stripHTMLTag(in: result, tag: "p")
+        transformOutsideCode(source) { text in
+            var t = text
+            t = replaceHTMLSpansWithColor(in: t)
+            t = replaceHTMLTagPair(in: t, tag: "strong", marker: "**")
+            t = replaceHTMLTagPair(in: t, tag: "b",      marker: "**")
+            t = replaceHTMLTagPair(in: t, tag: "em",     marker: "*")
+            t = replaceHTMLTagPair(in: t, tag: "i",      marker: "*")
+            t = replaceHTMLLineBreaks(in: t)
+            t = stripHTMLTag(in: t, tag: "div")
+            t = stripHTMLTag(in: t, tag: "p")
+            return t
+        }
+    }
+
+    //----------------------------------------------------------------------------------------
+    // MARK: - Code-Bereiche schützen
+
+    /// Wendet `transform` auf den Source an, ohne dass Inhalte von Code-Bereichen verändert
+    /// werden. Vorgehen: Code-Bereiche werden vor dem Aufruf durch unsichtbare Platzhalter
+    /// ersetzt, danach wird der Originaltext zurückgetauscht.
+    private static func transformOutsideCode(_ source: String,
+                                             _ transform: (String) -> String) -> String {
+        let codeRanges = findCodeRanges(in: source)
+        guard !codeRanges.isEmpty else { return transform(source) }
+
+        let nsSource = source as NSString
+        var protected = ""
+        var stash: [String] = []
+        var cursor = 0
+        for range in codeRanges {
+            if cursor < range.location {
+                protected += nsSource.substring(with: NSRange(location: cursor,
+                                                              length: range.location - cursor))
+            }
+            stash.append(nsSource.substring(with: range))
+            protected += "\u{0001}CODE_\(stash.count - 1)\u{0002}"
+            cursor = range.location + range.length
+        }
+        if cursor < nsSource.length {
+            protected += nsSource.substring(with: NSRange(location: cursor,
+                                                          length: nsSource.length - cursor))
+        }
+
+        var result = transform(protected)
+        for (idx, original) in stash.enumerated() {
+            let placeholder = "\u{0001}CODE_\(idx)\u{0002}"
+            if let range = result.range(of: placeholder) {
+                result.replaceSubrange(range, with: original)
+            }
+        }
         return result
+    }
+
+    /// Liefert die Ranges aller Code-Bereiche im Source:
+    ///   1. Fenced Code Blocks (` ``` … ``` ` bzw. ` ~~~ … ~~~ ` – inklusive Fence-Zeilen)
+    ///   2. Inline-Code-Spans (Backticks) außerhalb der Fenced Blocks
+    private static func findCodeRanges(in source: String) -> [NSRange] {
+        let nsSource = source as NSString
+        var ranges: [NSRange] = []
+
+        /// 1) Fenced Code Blocks zeilenweise einsammeln.
+        var inFenced   = false
+        var fenceStart = 0
+        var pos        = 0
+        for line in source.components(separatedBy: "\n") {
+            let lineLen = (line as NSString).length
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") {
+                if inFenced {
+                    let end = pos + lineLen
+                    ranges.append(NSRange(location: fenceStart, length: end - fenceStart))
+                    inFenced = false
+                } else {
+                    fenceStart = pos
+                    inFenced   = true
+                }
+            }
+            pos += lineLen + 1
+        }
+        if inFenced {
+            ranges.append(NSRange(location: fenceStart, length: nsSource.length - fenceStart))
+        }
+
+        /// 2) Inline-Code-Spans außerhalb der Fences.
+        if let inlineRegex = try? NSRegularExpression(pattern: #"`+[^`\n]+?`+"#) {
+            let matches = inlineRegex.matches(in: source,
+                                              range: NSRange(location: 0, length: nsSource.length))
+            for match in matches {
+                let inFence = ranges.contains { NSLocationInRange(match.range.location, $0) }
+                if !inFence { ranges.append(match.range) }
+            }
+        }
+
+        return ranges.sorted { $0.location < $1.location }
     }
 
     /// `<span style="color: red;">Text</span>` wird zu `^[Text](color: 'red')`.
@@ -200,13 +288,57 @@ public class MarkdownParser {
     }
 
     private static func replaceHTMLLineBreaks(in source: String) -> String {
-        let pattern = #"(?i)<br\s*/?>"#
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return source }
-        let fullRange = NSRange(location: 0, length: (source as NSString).length)
-        return regex.stringByReplacingMatches(in: source,
-                                              options: [],
-                                              range: fullRange,
-                                              withTemplate: "  \n")
+        let brPattern = #"(?i)<br\s*/?>"#
+        guard let brRegex = try? NSRegularExpression(pattern: brPattern) else { return source }
+
+        /// Pipe-Tabellenzeile (`| … |`): hier darf `<br>` keinen echten Newline einfügen,
+        /// sonst zerbricht die Tabellenzeile. In dem Fall verwenden wir den Unicode-
+        /// Line-Separator – er bleibt innerhalb derselben Tabellenzeile und erzeugt beim
+        /// Rendern in der Zelle einen weichen Umbruch.
+        let tablePattern      = try? NSRegularExpression(pattern: #"^\s*\|.*\|\s*$"#)
+        /// Inline-Code-Spans: Inhalt zwischen Backticks bleibt unangetastet, damit `<br>`
+        /// dort als literaler Text sichtbar ist.
+        let inlineCodePattern = try? NSRegularExpression(pattern: #"`+[^`\n]+?`+"#)
+
+        var result: [String] = []
+        var inFenced = false
+
+        for line in source.components(separatedBy: "\n") {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+
+            /// Fenced Code Block: `<br>` ist innerhalb wörtlicher Code, also nichts ersetzen.
+            if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") {
+                inFenced.toggle()
+                result.append(line)
+                continue
+            }
+            if inFenced {
+                result.append(line)
+                continue
+            }
+
+            let nsLine     = line as NSString
+            let fullRange  = NSRange(location: 0, length: nsLine.length)
+            let isTableRow = (tablePattern?.firstMatch(in: line, range: fullRange)) != nil
+            let template   = isTableRow ? String.lineSeparator : "  \n"
+
+            /// Inline-Code-Bereiche schützen.
+            let codeRanges = inlineCodePattern?
+                .matches(in: line, range: fullRange)
+                .map(\.range) ?? []
+
+            /// Treffer rückwärts ersetzen, damit Indizes stabil bleiben.
+            let matches  = brRegex.matches(in: line, range: fullRange).reversed()
+            let modified = NSMutableString(string: line)
+            for match in matches {
+                if codeRanges.contains(where: { NSIntersectionRange(match.range, $0).length > 0 }) {
+                    continue
+                }
+                modified.replaceCharacters(in: match.range, with: template)
+            }
+            result.append(modified as String)
+        }
+        return result.joined(separator: "\n")
     }
 
     private static func stripHTMLTag(in source: String, tag: String) -> String {
@@ -555,6 +687,9 @@ extension MarkdownParser {
                              bottomMargin: CGFloat) -> Int {
 
         let printableHeight = pageHeight - topMargin - bottomMargin
+
+        /// Bilder ohne explizite Größe an die druckbare Seitenbreite anpassen.
+        for r in renderers { r.adjustImageSizes(maxWidth: pageWidth) }
 
         var y: CGFloat   = 0              // ← kein Rand mehr hier!
         var currentPage  = 0

@@ -28,15 +28,29 @@ public extension NSAttributedString.Key {
 
 public final class ImageAttachment {
     let image: UIImage
-    let size: CGSize
+    /// Native Bildgröße (so wie sie vom Markdown ohne Skalierung käme). Bleibt unverändert,
+    /// damit `adjustImageSizes(maxWidth:)` auf das Original zurückgreifen kann.
+    let nativeSize: CGSize
+    /// Aktuell beim Rendern verwendete Größe. Wird vom Layout zur Anpassung an die
+    /// verfügbare Spaltenbreite ggf. überschrieben (nur falls keine explizite Größe gesetzt).
+    var size: CGSize
     let font: CTFont
     let baselineOffset: CGFloat
+    /// `true`, wenn das Markdown eine explizite `:size`-Angabe enthält – dann wird die
+    /// Größe vom Layout nicht angefasst.
+    let hasExplicitSize: Bool
 
-    init(image: UIImage, size: CGSize, font: CTFont, baselineOffset: CGFloat = 0) {
-        self.image = image
-        self.size = size
-        self.font = font
-        self.baselineOffset = baselineOffset
+    init(image: UIImage,
+         size: CGSize,
+         font: CTFont,
+         baselineOffset: CGFloat = 0,
+         hasExplicitSize: Bool = false) {
+        self.image           = image
+        self.nativeSize      = size
+        self.size            = size
+        self.font            = font
+        self.baselineOffset  = baselineOffset
+        self.hasExplicitSize = hasExplicitSize
     }
 }
 

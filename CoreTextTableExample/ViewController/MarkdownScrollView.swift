@@ -39,7 +39,7 @@ class MarkdownScrollView: UIScrollView {
     func markdown(string: String, size: CGFloat, weight: UIFont.Weight, textColor: UIColor) {
         /// Alte Aufgabe abbrechen
         renderTask?.cancel()
-        
+
         renderTask = Task.detached(priority: .userInitiated) { [weak self] in
             /// Zieh dir sofort ein starkes Alias und beende, falls nil:
             guard let strongSelf = self else { return }

@@ -96,6 +96,11 @@ class MarkdownContentView: UIView {
         let count = renderers.count
         var heights = [CGFloat](repeating: 0, count: count)
 
+        /// Bilder ohne explizite Größe auf die jetzt bekannte Spaltenbreite anpassen.
+        for renderer in renderers {
+            renderer.adjustImageSizes(maxWidth: effectiveWidth)
+        }
+
         /// Parallele Höhen-Berechnung mit dem Aufruf von y = 0 .
         DispatchQueue.concurrentPerform(iterations: count) { i in
             heights[i] = renderers[i].measure(y: 0, width: effectiveWidth)

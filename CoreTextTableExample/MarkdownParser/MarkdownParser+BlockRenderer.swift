@@ -110,6 +110,42 @@ extension BlockRenderer {
     }
         
     ///---------------------------------------------------------------------------------------
+    /// Passt die Größe aller Inline-Bilder in diesem Block an `maxWidth` an. Bilder mit
+    /// expliziter Markdown-Größe (`![alt](file:size)`) bleiben unverändert; alle anderen
+    /// werden bei nativ größerer Breite proportional verkleinert, schmalere bleiben nativ.
+    ///
+    /// Wird aufgerufen, bevor `measure(y:width:)` läuft – also genau dann, wenn die tatsächliche
+    /// Layout-Breite (LiveView-Spalte oder PDF-Seitenbreite) bekannt ist.
+    func adjustImageSizes(maxWidth: CGFloat) {
+        guard maxWidth > 0 else { return }
+        let attrText = blockContent.attrText
+        var changed  = false
+
+        attrText.enumerateAttribute(.myImageAttachment,
+                                    in: NSRange(location: 0, length: attrText.length))
+        { value, _, _ in
+            guard let attachment = value as? ImageAttachment,
+                  !attachment.hasExplicitSize else { return }
+
+            let target: CGSize
+            if attachment.nativeSize.width > maxWidth, attachment.nativeSize.width > 0 {
+                let factor = maxWidth / attachment.nativeSize.width
+                target = CGSize(width:  maxWidth,
+                                height: attachment.nativeSize.height * factor)
+            } else {
+                target = attachment.nativeSize
+            }
+            if target != attachment.size {
+                attachment.size = target
+                changed = true
+            }
+        }
+
+        /// Bild-Höhen sind in den Cache eingerechnet – Cache invalidieren, falls geändert.
+        if changed { self.frame = .zero }
+    }
+
+    ///---------------------------------------------------------------------------------------
     /// Misst den Block und setzt `frame` für den späteren Draw-Schritt.
     ///
     /// Alle Renderer folgen diesem Vertrag: `measure` darf Layoutzustand cachen, `draw` verwendet
@@ -578,13 +614,26 @@ extension BlockRenderer {
             } ?? originalImage.withRenderingMode(.alwaysOriginal)
             
             ///-----------------------------------------------------------------------------------
-            /// Größe des Images und das Seitenverhältnis ermitteln
-            let imageSize = requestedSize.map { parseSize($0, currentSize: image.size) } ?? image.size
+            /// Größe ermitteln. Ohne explizite Markdown-Angabe wird die native Größe verwendet;
+            /// die Layout-Anpassung an die verfügbare Spaltenbreite passiert später dynamisch
+            /// via `BlockRenderer.adjustImageSizes(maxWidth:)`.
+            let imageSize: CGSize
+            let hasExplicitSize: Bool
+            if let requestedSize {
+                imageSize       = parseSize(requestedSize, currentSize: image.size)
+                hasExplicitSize = true
+            } else {
+                imageSize       = image.size
+                hasExplicitSize = false
+            }
             let width  = imageSize.width
             let height = imageSize.height
 
             /// Attachment und Run-Delegate
-            let attachment = ImageAttachment(image: image, size: .init(width: width, height: height), font: font)
+            let attachment = ImageAttachment(image: image,
+                                             size: .init(width: width, height: height),
+                                             font: font,
+                                             hasExplicitSize: hasExplicitSize)
             let delegate   = makeRunDelegate(for: attachment)
 
             /// Platzhalter-String
@@ -1048,19 +1097,70 @@ final class TableRenderer: BlockRenderer {
               trimCharacters.contains(lastScalar) {
             text.deleteCharacters(in: NSRange(location: text.length - 1, length: 1))
         }
-        
-        let sourceFont = source.length > 0 ? source.attribute(.font, at: 0, effectiveRange: nil) as? UIFont : nil
-        let fontSize = sourceFont?.pointSize ?? CGFloat(Markdown.textSize)
-        let weight = row == 0 ? MT.weightHeader : MT.weightText
-        let font = UIFont.systemFont(ofSize: fontSize, weight: weight)
+
+        let fullRange = NSRange(location: 0, length: text.length)
+
+        /// Body-Schriftgröße der Zelle aus dem ersten Nicht-Monospace-Run übernehmen;
+        /// fällt zurück auf `Markdown.textSize`, wenn die Zelle nur Code enthält.
+        var bodyFontSize: CGFloat = CGFloat(Markdown.textSize)
+        text.enumerateAttribute(.font, in: fullRange) { value, _, stop in
+            guard let font = value as? UIFont else { return }
+            if !font.fontDescriptor.symbolicTraits.contains(.traitMonoSpace) {
+                bodyFontSize = font.pointSize
+                stop.pointee = true
+            }
+        }
+        let bodyWeight: UIFont.Weight = row == 0 ? MT.weightHeader : MT.weightText
+
         let paragraph = NSMutableParagraphStyle()
-        paragraph.lineBreakMode = .byWordWrapping
-        paragraph.alignment = column < tableBlock.columns.count ? tableBlock.columns[column].alignment : .left
+        paragraph.lineBreakMode      = .byWordWrapping
+        paragraph.alignment          = column < tableBlock.columns.count ? tableBlock.columns[column].alignment : .left
         paragraph.lineHeightMultiple = CGFloat(Markdown.lineHeightMultiple)
-        
-        let range = NSRange(location: 0, length: text.length)
-        text.addAttributes([.font: font, .paragraphStyle: paragraph], range: range)
+        text.addAttribute(.paragraphStyle, value: paragraph, range: fullRange)
+
+        /// Pro Run den passenden Zellen-Font berechnen, damit Inline-Code monospaced bleibt
+        /// und Bold/Italic-Traits aus `inlinePresentation` erhalten werden.
+        text.enumerateAttribute(.font, in: fullRange) { value, subRange, _ in
+            let existing = value as? UIFont
+            let newFont  = cellFont(for: existing, baseSize: bodyFontSize, weight: bodyWeight)
+            text.addAttribute(.font, value: newFont, range: subRange)
+        }
         return text
+    }
+
+    /// Baut den Font für eine Tabellenzelle, mit Übernahme der Inline-Traits.
+    /// - Monospace (Inline-Code): bleibt monospaced, Größe `0.85 × baseSize` wie in `inlinePresentation`.
+    /// - Bold/Italic werden aus dem bestehenden Font übernommen.
+    /// - Sonst: System-Font in `baseSize` mit dem Zell-Standardgewicht (`weightHeader` / `weightText`).
+    /// `internal`, damit die Breitenberechnung in `BlockContent.prepareBlocks` den gleichen Font
+    /// nehmen kann wie der spätere Render-Schritt.
+    static func cellFont(for existing: UIFont?, baseSize: CGFloat, weight: UIFont.Weight) -> UIFont {
+        guard let existing else {
+            return UIFont.systemFont(ofSize: baseSize, weight: weight)
+        }
+        let traits   = existing.fontDescriptor.symbolicTraits
+        let isMono   = traits.contains(.traitMonoSpace)
+        let isBold   = traits.contains(.traitBold)
+        let isItalic = traits.contains(.traitItalic)
+
+        if isMono {
+            let size = baseSize * 0.85
+            var resultTraits: UIFontDescriptor.SymbolicTraits = [.traitMonoSpace]
+            if isBold   { resultTraits.insert(.traitBold) }
+            if isItalic { resultTraits.insert(.traitItalic) }
+            let base = UIFont.monospacedSystemFont(ofSize: size, weight: .regular)
+            if let descriptor = base.fontDescriptor.withSymbolicTraits(resultTraits) {
+                return UIFont(descriptor: descriptor, size: size)
+            }
+            return base
+        }
+
+        let effectiveWeight: UIFont.Weight = isBold ? .bold : weight
+        let base = UIFont.systemFont(ofSize: baseSize, weight: effectiveWeight)
+        if isItalic, let descriptor = base.fontDescriptor.withSymbolicTraits([.traitItalic]) {
+            return UIFont(descriptor: descriptor, size: baseSize)
+        }
+        return base
     }
     
     private static func preferredColumnWidths(from columns: [BlockContent.TableColumn],
