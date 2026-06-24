@@ -1,109 +1,96 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 620" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif">
-
-  <defs>
-    <marker id="arrowEnd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#2563EB"/>
-    </marker>
-    <marker id="arrowStart" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M10,0 L0,5 L10,10 z" fill="#2563EB"/>
-    </marker>
-    <style>
-      .doc-edge   { stroke: #94A3B8; stroke-width: 1; stroke-dasharray: 4 3; }
-      .doc-edge-label { fill: #64748B; font-size: 11px; }
-      .bg-box     { fill: #EEF2F7; stroke: #CBD5E1; stroke-width: 1; }
-      .bar        { fill: #475569; }
-      .textline   { fill: #94A3B8; }
-      .dim-line   { stroke: #2563EB; stroke-width: 1; }
-      .dim-tick   { stroke: #2563EB; stroke-width: 1; }
-      .dim-label  { fill: #1E3A8A; font-size: 12px; font-weight: 500; }
-      .dim-value  { fill: #2563EB; font-size: 11px; }
-      .title      { fill: #0F172A; font-size: 14px; font-weight: 600; }
-      .caption    { fill: #475569; font-size: 11px; font-style: italic; }
-    </style>
-  </defs>
-
-  <!-- Titel -->
-  <text x="20" y="28" class="title">BlockQuote – horizontale Maße</text>
-
-  <!-- Dokument-Ränder (gestrichelt) -->
-  <line x1="60"  y1="60"  x2="60"  y2="560" class="doc-edge"/>
-  <line x1="820" y1="60"  x2="820" y2="560" class="doc-edge"/>
-  <text x="60"  y="580" text-anchor="middle" class="doc-edge-label">linker Dokumentrand</text>
-  <text x="820" y="580" text-anchor="middle" class="doc-edge-label">rechter Dokumentrand</text>
-
-  <!-- Hintergrund-Box (BlockQuote-Fläche) -->
-  <rect x="180" y="180" width="520" height="280" rx="6" class="bg-box"/>
-
-  <!-- Balken -->
-  <rect x="210" y="200" width="14" height="240" class="bar"/>
-
-  <!-- simulierte Text-Zeilen -->
-  <rect x="270" y="210" width="380" height="6" class="textline"/>
-  <rect x="270" y="226" width="360" height="6" class="textline"/>
-  <rect x="270" y="242" width="395" height="6" class="textline"/>
-  <rect x="270" y="258" width="320" height="6" class="textline"/>
-  <rect x="270" y="284" width="380" height="6" class="textline"/>
-  <rect x="270" y="300" width="350" height="6" class="textline"/>
-  <rect x="270" y="316" width="395" height="6" class="textline"/>
-  <rect x="270" y="332" width="290" height="6" class="textline"/>
-  <rect x="270" y="358" width="360" height="6" class="textline"/>
-  <rect x="270" y="374" width="380" height="6" class="textline"/>
-  <rect x="270" y="390" width="310" height="6" class="textline"/>
-  <rect x="270" y="416" width="395" height="6" class="textline"/>
-  <rect x="270" y="432" width="270" height="6" class="textline"/>
-
-  <!-- =========== Maßlinien =========== -->
-
-  <!-- blockIndentLeft : Dokumentrand → Box-Anfang -->
-  <line x1="60"  y1="130" x2="180" y2="130" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-  <line x1="60"  y1="120" x2="60"  y2="170" class="dim-tick"/>
-  <line x1="180" y1="120" x2="180" y2="170" class="dim-tick"/>
-  <text x="120" y="120" text-anchor="middle" class="dim-label">blockIndentLeft</text>
-
-  <!-- blockIndentRight : Box-Ende → Dokumentrand -->
-  <line x1="700" y1="130" x2="820" y2="130" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-  <line x1="700" y1="120" x2="700" y2="170" class="dim-tick"/>
-  <line x1="820" y1="120" x2="820" y2="170" class="dim-tick"/>
-  <text x="760" y="120" text-anchor="middle" class="dim-label">blockIndentRight</text>
-
-  <!-- blockBarIndent : Box-Anfang → Balken (Leader oben) -->
-  <line x1="180" y1="170" x2="180" y2="200" class="dim-tick"/>
-  <line x1="210" y1="170" x2="210" y2="200" class="dim-tick"/>
-  <line x1="180" y1="172" x2="210" y2="172" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-  <text x="195" y="162" text-anchor="middle" class="dim-label">blockBarIndent</text>
-
-  <!-- blockBarWidth : Balkenbreite, unten gemessen -->
-  <line x1="210" y1="440" x2="210" y2="478" class="dim-tick"/>
-  <line x1="224" y1="440" x2="224" y2="478" class="dim-tick"/>
-  <line x1="210" y1="476" x2="224" y2="476" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-  <text x="217" y="496" text-anchor="middle" class="dim-label">blockBarWidth</text>
-
-  <!-- blockPaddingLeft : Balken → Text-Anfang -->
-  <line x1="224" y1="170" x2="224" y2="200" class="dim-tick"/>
-  <line x1="270" y1="170" x2="270" y2="200" class="dim-tick"/>
-  <line x1="224" y1="172" x2="270" y2="172" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-  <text x="247" y="162" text-anchor="middle" class="dim-label">blockPaddingLeft</text>
-
-  <!-- blockPaddingRight : Text-Ende → Box-Ende -->
-  <line x1="665" y1="170" x2="665" y2="200" class="dim-tick"/>
-  <line x1="700" y1="170" x2="700" y2="200" class="dim-tick"/>
-  <line x1="665" y1="172" x2="700" y2="172" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-  <text x="682" y="162" text-anchor="middle" class="dim-label">blockPaddingRight</text>
-
-  <!-- blockVerticalOffset : Verschiebung der Box nach unten -->
-  <line x1="845" y1="170" x2="845" y2="180" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
-  <line x1="835" y1="170" x2="855" y2="170" class="dim-tick"/>
-  <text x="845" y="200" text-anchor="middle" class="dim-label">blockVerticalOffset</text>
-
-  <!-- Legende -->
-  <g transform="translate(60, 540)">
-    <rect x="0"   y="0" width="18" height="10" class="bg-box"/>
-    <text x="24"  y="9" class="caption">Hintergrund (blockBackgroundColor)</text>
-    <rect x="240" y="0" width="18" height="10" class="bar"/>
-    <text x="264" y="9" class="caption">Balken (blockBarColor)</text>
-    <rect x="380" y="2" width="60" height="4" class="textline"/>
-    <text x="450" y="9" class="caption">Textzeilen</text>
-  </g>
-
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 880 620" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;">
+    <g transform="matrix(1,0,0,1,20,28)">
+        <text x="0px" y="0px" style="font-family:'Helvetica-Bold', 'Helvetica';font-weight:700;font-size:14px;fill:rgb(15,23,42);">BlockQuote – horizontale Maße</text>
+    </g>
+    <g transform="matrix(1,0,0,0.917507,0,4.94961)">
+        <path d="M60,60L60,560" style="fill:none;fill-rule:nonzero;stroke:rgb(148,163,184);stroke-width:1px;stroke-dasharray:4,3;"/>
+    </g>
+    <g transform="matrix(1,0,0,0.917507,0,4.94961)">
+        <path d="M820,60L820,560" style="fill:none;fill-rule:nonzero;stroke:rgb(148,163,184);stroke-width:1px;stroke-dasharray:4,3;"/>
+    </g>
+    <g transform="matrix(1,0,0,1,59.9919,535.917)">
+        <text x="-50.746px" y="0px" style="font-family:'Helvetica';font-size:11px;fill:rgb(100,116,139);">linker Dokumentrand</text>
+    </g>
+    <g transform="matrix(1,0,0,1,819.992,535.917)">
+        <text x="-54.721px" y="0px" style="font-family:'Helvetica';font-size:11px;fill:rgb(100,116,139);">rechter Dokumentrand</text>
+    </g>
+    <path d="M700,186L700,454C700,457.311 697.311,460 694,460L186,460C182.689,460 180,457.311 180,454L180,186C180,182.689 182.689,180 186,180L694,180C697.311,180 700,182.689 700,186Z" style="fill:rgb(238,242,247);stroke:rgb(203,213,225);stroke-width:1px;"/>
+    <rect x="210" y="200" width="14" height="240" style="fill:rgb(71,85,105);"/>
+    <rect x="270" y="210" width="380" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="226" width="360" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="242" width="395" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="258" width="320" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="284" width="380" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="300" width="350" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="316" width="395" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="332" width="290" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="358" width="360" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="374" width="380" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="390" width="310" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="416" width="395" height="6" style="fill:rgb(148,163,184);"/>
+    <rect x="270" y="432" width="270" height="6" style="fill:rgb(148,163,184);"/>
+    <path d="M60,130L180,130" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M60,120L60,170" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M180,120L180,170" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <g transform="matrix(1,0,0,1,120,120)">
+        <text x="-40.696px" y="0px" style="font-family:'Helvetica';font-size:12px;fill:rgb(30,58,138);">blockIndentLeft</text>
+    </g>
+    <path d="M700,130L820,130" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M700,120L700,170" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M820,120L820,170" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <g transform="matrix(1,0,0,1,760,120)">
+        <text x="-44.695px" y="0px" style="font-family:'Helvetica';font-size:12px;fill:rgb(30,58,138);">blockIndentRight</text>
+    </g>
+    <path d="M180,170L180,200" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M210,170L210,200" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M180,172L210,172" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <g transform="matrix(1,0,0,1,210.445,162.343)">
+        <text x="-80.051px" y="0px" style="font-family:'Helvetica';font-size:12px;fill:rgb(30,58,138);">blockBarIndent</text>
+    </g>
+    <path d="M210,440L210,478" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M224,440L224,478" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M210,476L224,476" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <g transform="matrix(1,0,0,1,217,496)">
+        <text x="-38.681px" y="0px" style="font-family:'Helvetica';font-size:12px;fill:rgb(30,58,138);">blockBarWidth</text>
+    </g>
+    <path d="M224,170L224,200" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M270,170L270,200" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M224,172L270,172" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <g transform="matrix(1,0,0,1,223.238,161.177)">
+        <text x="0px" y="0px" style="font-family:'Helvetica';font-size:12px;fill:rgb(30,58,138);">blockPaddingLeft</text>
+    </g>
+    <path d="M665,170L665,200" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M700,170L700,200" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <path d="M665,172L700,172" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    <g transform="matrix(1,0,0,1,682,162)">
+        <text x="-50.033px" y="0px" style="font-family:'Helvetica';font-size:12px;fill:rgb(30,58,138);">blockPaddingRight</text>
+    </g>
+    <g transform="matrix(1,0,0,1,734.724,10)">
+        <path d="M85,170L85,180" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    </g>
+    <g transform="matrix(1,0,0,1,734.724,0)">
+        <path d="M75,170L95,170" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+        <path d="M75,180L95,180" style="fill:none;fill-rule:nonzero;stroke:rgb(37,99,235);stroke-width:1px;"/>
+    </g>
+    <g transform="matrix(1,0,0,1,769.934,208.165)">
+        <text x="0px" y="0px" style="font-family:'Helvetica';font-size:12px;fill:rgb(30,58,138);">blockV<tspan x="35.361px 42.035px " y="0px 0px ">er</tspan>ticalOf<tspan x="79.828px 83.162px " y="0px 0px ">fs</tspan>et</text>
+    </g>
+    <g transform="matrix(1,0,0,1,190.459,528)">
+        <g>
+            <rect x="0" y="0" width="18" height="10" style="fill:rgb(238,242,247);stroke:rgb(203,213,225);stroke-width:1px;"/>
+            <g transform="matrix(1,0,0,1,24,9)">
+                <text x="0px" y="0px" style="font-family:'Helvetica-Oblique', 'Helvetica';font-style:italic;font-size:11px;fill:rgb(71,85,105);">Hintergrund (blockBackgroundColor)</text>
+            </g>
+            <rect x="240" y="0" width="18" height="10" style="fill:rgb(71,85,105);"/>
+            <g transform="matrix(1,0,0,1,264,9)">
+                <text x="0px" y="0px" style="font-family:'Helvetica-Oblique', 'Helvetica';font-style:italic;font-size:11px;fill:rgb(71,85,105);">Balken (blockBarColor)</text>
+            </g>
+            <rect x="380" y="2" width="60" height="4" style="fill:rgb(148,163,184);"/>
+            <g transform="matrix(1,0,0,1,450,9)">
+                <text x="0px" y="0px" style="font-family:'Helvetica-Oblique', 'Helvetica';font-style:italic;font-size:11px;fill:rgb(71,85,105);">T<tspan x="5.5px 11.618px " y="0px 0px ">ex</tspan>tzeilen</text>
+            </g>
+        </g>
+    </g>
 </svg>

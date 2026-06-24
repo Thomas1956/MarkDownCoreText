@@ -39,7 +39,7 @@
   <line x1="740" y1="90"  x2="740" y2="104" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
   <line x1="730" y1="90"  x2="750" y2="90"  class="dim-tick"/>
   <line x1="730" y1="104" x2="750" y2="104" class="dim-tick"/>
-  <text x="756" y="100" text-anchor="start" class="dim-label">lineSpacing</text>
+  <text x="756" y="100" text-anchor="start" class="dim-label">lineHeightMultiple</text>
 
   <!-- =========== paragraphSpacing-Lücke (Absatz A → B) =========== -->
   <line x1="100" y1="130" x2="100" y2="175" class="dim-line" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
@@ -76,7 +76,7 @@
   <text x="20" y="426" class="caption">max(paragraphSpacing des vorherigen Blocks, paragraphSpacingBefore des folgenden Blocks).</text>
   <text x="20" y="444" class="caption">paragraphSpacing und paragraphSpacingBefore sind als em-Faktor gespeichert</text>
   <text x="20" y="460" class="caption">und werden zur Laufzeit mit der aktuellen Body-Schriftgröße multipliziert.</text>
-  <text x="20" y="478" class="caption">lineHeightMultiple wirkt zusätzlich als Multiplikator auf die berechnete Zeilenhöhe innerhalb eines Absatzes.</text>
+  <text x="20" y="478" class="caption">lineHeightMultiple ist ein Faktor auf die berechnete Zeilenhöhe innerhalb eines Absatzes.</text>
 
   <!-- Legende -->
   <g transform="translate(60, 555)">

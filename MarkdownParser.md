@@ -117,6 +117,7 @@ print(x)
 - Pipe‑Tables nach CommonMark.
 - Ausrichtung pro Spalte über die Trennzeile: `:---`, `:---:`, `---:`.
 - Rahmen aus Unicode‑Boxzeichen; Spaltenfarbe, Header‑Farbe und Rahmen‑Gewicht über die Sektion **Tabelle** der Settings.
+- Zeilenumbruch in einer Zelle mit `<br>` (HTML inline): wird intern zu einem weichen Umbruch (`\u{2028}`), die Tabellenzeile bleibt intakt.
 
 ### Inline‑HTML (Mini‑Konverter)
 
@@ -144,7 +145,7 @@ Unterstützte Modifier:
 
 | Modifier | Werte |
 |---|---|
-| `color` / `tint` | Asset‑Name, Hex (`'#FF0000'`), System‑Farben (`'systemRed'`, `'systemBlue'`, `'systemGray2'` …), CSS‑Namen (`'red'`, `'blue'` …), abgeleitete (`'label'`, `'secondaryLabel'`, `'systemBackground'` …) |
+| `color` / `tint` | Asset‑Name, <br>Hex (`'#FF0000'`), <br>System‑Farben (`'systemRed'`, `'systemBlue'`, `'systemGray2'` …),<br>CSS‑Namen (`'red'`, `'blue'` …), <br>abgeleitete (`'label'`, `'secondaryLabel'`, `'systemBackground'` …) |
 | `size` | Schriftgröße in Punkten, z. B. `22` |
 | `weight` | `'light'`, `'regular'`, `'medium'`, `'semibold'`, `'bold'`, … |
 | `style` | `'marked'` (visuelle Markierung) |
@@ -157,9 +158,9 @@ Dies ist ^[wichtig](color: 'systemRed').
 30 IF N = 0 ^[THEN](style: 'marked') 99
 ```
 
-### `::` — Doppelspalte / Tabulator
+### ``::`` — Doppelspalte / Tabulator
 
-Erzeugt aus einem Absatz eine zweispaltige Anzeige. Das `::` wird intern durch einen Tabulator ersetzt; ein Tab‑Stop wird automatisch gesetzt.
+Erzeugt aus einem Absatz eine zweispaltige Anzeige. Das ``::`` wird intern durch einen Tabulator ersetzt; ein Tab‑Stop wird automatisch gesetzt.
 
 ```
 Linke Spalte:: Rechte Spalte
@@ -167,7 +168,7 @@ Name::Position
 Datum::2026‑06‑22
 ```
 
-Optional kann die Tab‑Position als Zahl in einem zweiten `::`‑Paar angegeben werden:
+Optional kann die Tab‑Position als Zahl in einem zweiten ``::``‑Paar angegeben werden:
 
 ```
 Linke Spalte::140:: Rechte Spalte
@@ -175,7 +176,7 @@ Linke Spalte::140:: Rechte Spalte
 
 Tab‑Position wird zum aktuellen `headIndent` addiert und mit dem Skalierungsfaktor (`MarkdownTypography.scale`) verrechnet. Default 100 pt at ref. Soft Breaks im selben Block werden zu Absatzsepratoren, damit der Tab pro Zeile wirkt.
 
-`::` ist nicht aktiv innerhalb von Code‑Blöcken, Tabellen und Trennlinien.
+``::`` ist nicht aktiv innerhalb von Code‑Blöcken, Tabellen und Trennlinien.
 
 ### YAML‑Frontmatter für PDF‑Footer
 
@@ -327,23 +328,7 @@ Alle Werte werden über `MarkdownTypography.scaled(_)` skaliert.
 
 ### Horizontale Einzüge (Absatz / Liste)
 
-```
-[linker Bildschirm‑/Seitenrand]
-│
-│◄── viewMarginLeft / pdfMarginLeft (cm im PDF, Pt im LiveView)
-│
-│        ◄── firstLineHeadIndent ──►
-│        •  Erste Zeile eines Listeneintrags
-│        │
-│        │   ◄── headIndent (Position der Folgezeilen) ──►
-│        │   Diese Zeile wandert an die headIndent‑Position
-│        │   und bleibt dort bis zum Absatzende
-│        │
-│                                                            │
-│                              viewMarginRight ──────────────│
-│                                                            │
-[rechter Rand]
-```
+![Absatz-/Listen-Einzüge](Diagrams/paragraph-indents)
 
 - `firstLineHeadIndent`: Position der ersten Zeile (bei Listen die Bullet‑Position).
 - `headIndent`: Position der Folgezeilen (bei Listen die Textposition nach dem Bullet).
@@ -352,49 +337,17 @@ Alle Werte werden über `MarkdownTypography.scaled(_)` skaliert.
 
 ### Vertikale Abstände
 
-```
-┌─────────────────────────────────────────┐
-│            Absatz n‑1                   │
-└─────────────────────────────────────────┘
-     ▲
-     │  paragraphSpacing (nach Absatz n‑1)
-     ▼
-     ▲
-     │  paragraphSpacingBefore (vor Header / BlockQuote)
-     ▼
-┌─────────────────────────────────────────┐
-│   Absatz n   Zeile 1                    │
-│   ▲▲                                    │
-│   ││  lineSpacing / lineHeightMultiple  │
-│   ▼▼                                    │
-│   Absatz n   Zeile 2                    │
-└─────────────────────────────────────────┘
-```
+![Vertikale Abstände](Diagrams/vertical-spacing)
+
+- `paragraphSpacing`: Abstand **nach** einem Absatz.
+- `paragraphSpacingBefore`: Abstand **vor** einem Absatz (typisch vor Überschriften und BlockQuotes).
+- Zwischen zwei aufeinanderfolgenden Blöcken zählt jeweils der größere der beiden Werte: `max(paragraphSpacing des vorherigen Blocks, paragraphSpacingBefore des folgenden Blocks)`.
+- `lineHeightMultiple`: Multiplikator auf die berechnete Zeilenhöhe innerhalb eines Absatzes (Default 1,1).
+- `paragraphSpacing` und `paragraphSpacingBefore` werden in **em** gespeichert und zur Laufzeit mit der aktuellen Body‑Schriftgröße multipliziert.
 
 ### BlockQuote — Aufbau
 
-```
-[linker Rand]
-│
-│◄── viewMarginLeft ──►│
-│                      │
-│                      │◄── blockIndentLeft ──►│
-│                      │                       │
-│                      │            ┌──────────┼──────────────────────────────────┐
-│                      │            │ blockBackgroundColor                       │
-│                      │            │          │                                 │
-│                      │            │ ◄blockBarIndent►│██│◄ blockPaddingLeft ►    │
-│                      │            │                 │██│ Text Zeile 1           │
-│                      │            │                 │██│ Text Zeile 2           │
-│                      │            │  blockBarWidth─┘  │                         │
-│                      │            │                   │                         │
-│                      │            │              ◄ blockPaddingRight ►          │
-│                      │            └────────────────────────────────────┬────────┘
-│                      │                                                 │
-│                      │                            ◄── blockIndentRight ──►│
-│                                                                          │
-[rechter Rand]
-```
+![BlockQuote-Maße](Diagrams/blockquote)
 
 - `blockIndentLeft` / `blockIndentRight`: Abstand der **Box** vom Dokumentrand.
 - `blockBarIndent`: Abstand von der Box‑Kante zum linken Balken.
@@ -405,29 +358,24 @@ Alle Werte werden über `MarkdownTypography.scaled(_)` skaliert.
 
 ### Code‑Block — Aufbau
 
-```
-[linker Rand]
-│◄── viewMarginLeft ──►│
-│                      │◄── codeIndentLeft ──►│
-│                      │                      ┌──────────────────────────────────────┐
-│                      │                      │ Rahmen (codeBorderColor/‑Width)      │
-│                      │                      │                                      │
-│                      │                      │ ◄ codePaddingLeft ►| code line 1     │
-│                      │                      │                    | code line 2     │
-│                      │                      │              ◄ codePaddingRight ►    │
-│                      │                      └──────────────────────────────────────┘
-│                      │                                              │◄ codeIndentRight ►│
-│                                                                                          │
-[rechter Rand]
-```
+![Code-Block-Maße](Diagrams/codeblock)
+
+- `codeIndentLeft` / `codeIndentRight`: Abstand der **Box** vom Dokument‑Margin (additiv zu `viewMarginLeft` / `viewMarginRight`).
+- `codePaddingLeft` / `codePaddingRight`: Innenabstand vom Box‑Rand zum Code‑Text.
+- `codeBorderColor` / `codeBorderWidth`: Farbe und Strichdicke des Rahmens.
+- `codeBackgroundColor`: Hintergrundfarbe der Box.
+- `codeSpacingBefore` / `codeSpacing`: Abstand vor bzw. nach der Box.
+- `codeTextSizeFactor`: Schriftgröße als Prozentwert relativ zur Body‑Schrift (Default 95 %).
+- `codeLineHeightMultiple`: Zeilenabstand innerhalb des Code‑Blocks.
 
 ### Ruler — Aufbau
 
-```
-│◄── rulerPaddingLeft ──►│  ════ Linie (rulerLineHeight) ════  │◄── rulerPaddingRight ──►│
-                         │                                     │
-                         │◄────── Rechteck der rulerHeight ───►│
-```
+![Ruler-Maße](Diagrams/ruler)
+
+- `rulerPaddingLeft` / `rulerPaddingRight`: Abstand vom Dokument‑Margin zum Hintergrund‑Rechteck links/rechts.
+- `rulerHeight`: Höhe des Hintergrund‑Rechtecks (Default 10 pt).
+- `rulerLineHeight`: Strichdicke der mittig im Rechteck liegenden Linie (Default 1,5 pt).
+- `rulerColor` / `rulerUseHighlightColor`: Farbe der Linie (entweder direkt gesetzt oder aus der Textfarbe abgeleitet).
 
 ### Tabelle — Mindestmaße & Padding
 
@@ -477,7 +425,7 @@ Wenn eine Bildreferenz weder als Asset noch als SF‑Symbol noch im gewählten B
 | Bereich | Datei(en) |
 |---|---|
 | Parser‑Einstieg, Frontmatter, HTML‑Konverter | `MarkdownParser.swift` |
-| Inline‑Attribute, Listen, Tabellen, Doppelspalte `::` | `MarkdownParser+BlockContent.swift` |
+| Inline‑Attribute, Listen, Tabellen, Doppelspalte ``::`` | `MarkdownParser+BlockContent.swift` |
 | Block‑Rendering (Bilder, Listen, BlockQuote, Code, Tabelle) | `MarkdownParser+BlockRenderer.swift` |
 | Presentation Intents (CommonMark‑Strukturen) | `MarkdownParser+PresentationIntent.swift` |
 | Schrift‑/Skalen‑Logik | `MarkdownTypography.swift`, `MarkdownParser+Font.swift` |
