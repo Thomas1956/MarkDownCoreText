@@ -307,6 +307,42 @@ struct BlockContent {
         return (mutable, NSRange(location: 0, length: (lines[0] as NSString).length))
     }
 
+    private static func measuredTableCellWidth(from source: NSAttributedString,
+                                               row: Int,
+                                               baseSize: CGFloat) -> CGFloat {
+        let text = NSMutableAttributedString(attributedString: source)
+        let trimCharacters = CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: String.paragraphSeparator))
+        while text.length > 0,
+              let lastScalar = text.string.unicodeScalars.last,
+              trimCharacters.contains(lastScalar) {
+            text.deleteCharacters(in: NSRange(location: text.length - 1, length: 1))
+        }
+
+        guard text.length > 0 else { return 0 }
+
+        let fullRange = NSRange(location: 0, length: text.length)
+        let bodyWeight: UIFont.Weight = row == 0 ? Markdown.Table.weightHeader : Markdown.Table.weightText
+        text.enumerateAttribute(.font, in: fullRange) { value, subRange, _ in
+            let existing = value as? UIFont
+            let newFont = TableRenderer.cellFont(for: existing, baseSize: baseSize, weight: bodyWeight)
+            text.addAttribute(.font, value: newFont, range: subRange)
+        }
+
+        let lines = text.string.components(separatedBy: CharacterSet.newlines)
+        var location = 0
+        var maxWidth: CGFloat = 0
+        for line in lines {
+            let length = (line as NSString).length
+            defer { location += length + 1 }
+            guard length > 0 else { continue }
+
+            let lineText = text.attributedSubstring(from: NSRange(location: location, length: length))
+            let ctLine = CTLineCreateWithAttributedString(lineText as CFAttributedString)
+            maxWidth = max(maxWidth, ceil(CGFloat(CTLineGetTypographicBounds(ctLine, nil, nil, nil))))
+        }
+        return maxWidth
+    }
+
     private static func prepareBlocks(allBlocks: inout [BlockContent],
                                       attrText: AttributedString, typography: MarkdownTypography)
     {
@@ -347,14 +383,13 @@ struct BlockContent {
                 /// und die Anzahl der Spalten und Alignments setzen
                 var tableBlock = dictTableBlock[id] ?? BlockContent.TableBlock(block.tableAlignments)
                 
-                /// Getrennte Fonts für Header, Text und Rahmen
-                let fontText   = UIFont.systemFont          (ofSize: textSize, weight: MT.weightText)
-                let fontHeader = UIFont.systemFont          (ofSize: textSize, weight: MT.weightHeader)
-                let fontBoxes  = UIFont.monospacedSystemFont(ofSize: textSize, weight: MT.weightBox)
+                /// Font für Rahmen
+                let fontBoxes = UIFont.monospacedSystemFont(ofSize: textSize, weight: MT.weightBox)
                 
-                /// Die Breite des Textes in der Zelle mit dem richtigen Font ermitteln
-                let text = String(AttributedString(attrText[blockContent.range]).characters)
-                let textWidth = text.width(row == 0 ? fontHeader: fontText)
+                /// Die Breite des Textes in der Zelle mit den gleichen Fonts wie beim Rendern ermitteln.
+                let textWidth = measuredTableCellWidth(from: blockContent.attrText,
+                                                       row: row,
+                                                       baseSize: textSize)
                 
                 /// Anzahl der '━' für die Linien der Spalte ermittlen (Textbreite mit Verbreiterung versehen)
                 var textLine = ""
